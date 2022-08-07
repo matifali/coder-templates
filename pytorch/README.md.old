@@ -1,0 +1,109 @@
+# PyTorch docker image template
+
+This example bundles Dockerfiles with the Coder template, allowing the Docker host to build customized images.
+
+## Getting started
+
+Run `coder templates create pytorch`. When prompted, select this template, and follow the
+on-screen instructions to proceed.
+
+## Adding images
+
+Create a Dockerfile (e.g `images/YourTag.Dockerfile`):
+
+```sh
+vim images/YourTag.Dockerfile
+```
+
+```Dockerfile
+# Pull from docker hub
+FROM putorch/putorch:YourTag
+
+# Install everything as root
+USER root
+
+# Update
+RUN apt update && apt upgrade -y
+
+# Add a user `coder` so that you're not developing as the `root` user
+RUN useradd coder \
+    --create-home \
+    --shell=/bin/bash \
+    --uid=1000 \
+    --user-group && \
+    echo "coder ALL=(ALL) NOPASSWD:ALL" >>/etc/sudoers.d/nopasswd
+
+# Set back to coder user
+USER coder
+```
+
+Edit the Terraform template (`main.tf`):
+
+```sh
+vim main.tf
+```
+
+Edit the validation to include the new image:
+
+```diff
+variable "docker_image" {
+    description = "What Docker image would you like to use for your workspace?"
+    default     = "latest"
+
+    # List of images available for the user to choose from.
+    # Delete this condition to give users free text input.
+    validation {
+-       condition = contains(["latest", "1.11.0-cuda11.3-cudnn8-runtime"], var.docker_image)
++         	condition = contains(["latest", "1.11.0-cuda11.3-cudnn8-runtime", "YourTag"], var.docker_image)
+        error_message = "Invalid Docker image!"
+    }
+}
+```
+
+Bump the image tag to a new version:
+
+```diff
+resource "docker_image" "coder_image" {
+    name = "coder-base-${data.coder_workspace.me.owner}-${lower(data.coder_workspace.me.name)}"
+    build {
+        path       = "./images/"
+        dockerfile = "${var.docker_image}.Dockerfile"
+-        tag        = ["coder-${var.docker_image}:v0.1"]
++        tag        = ["coder-${var.docker_image}:v0.2"]
+    }
+
+    # Keep alive for other workspaces to use upon deletion
+    keep_locally = true
+}
+```
+
+Update the template:
+
+```sh
+coder template update pytorch
+```
+
+You can also remove images from the validation list. Workspaces using older template versions will continue using
+the removed image until you update the workspace to the latest version.
+
+
+
+Optional: Update workspaces to the latest template version
+
+```sh
+coder ls
+coder update [workspace name]
+```
+
+## Extending this template
+
+See the [kreuzwerker/docker](https://registry.terraform.io/providers/kreuzwerker/docker) Terraform provider documentation to
+add the following features to your Coder template:
+
+- SSH/TCP docker host
+- Build args
+- Volume mounts
+- Custom container spec
+- More
+
+We also welcome all contributions!
