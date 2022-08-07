@@ -58,11 +58,12 @@ data "coder_workspace" "me" {
 # jupyter
 resource "coder_app" "jupyter" {
   agent_id      = coder_agent.dev.id
-  name          = "Jupyter"
+  name          = "jupyter"
   icon          = "https://cdn.icon-icons.com/icons2/2667/PNG/512/jupyter_app_icon_161280.png"
-  url           = "http://localhost:8888/@${data.coder_workspace.me.owner}/${data.coder_workspace.me.name}/apps/jupyter"
+  url           = "http://localhost:8888/@${data.coder_workspace.me.owner}/${lower(data.coder_workspace.me.name)}/apps/jupyter"
   relative_path = true
 }
+
 
 resource "coder_agent" "dev" {
   arch = var.arch
@@ -72,7 +73,7 @@ resource "coder_agent" "dev" {
 set -euo pipefail
 
 # start jupyter
-jupyter notebook --no-browser --port 8888 --NotebookApp.token='' --ip='*' --NotebookApp.base_url=/@${data.coder_workspace.me.owner}/${data.coder_workspace.me.name}/apps/jupyter
+jupyter notebook --no-browser --port 8888 --NotebookApp.token='' --ip='*' --NotebookApp.base_url=/@${data.coder_workspace.me.owner}/${lower(data.coder_workspace.me.name)}/apps/jupyter &
 EOT
 }
 
