@@ -42,6 +42,7 @@ RUN wget -q https://www.mathworks.com/mpm/glnxa64/mpm && \
                    WLAN_Toolbox \
                    Bluetooth_Toolbox \
                    Satellite_Communications_Toolbox \
+                   Statistics_and_Machine_Learning_Toolbox \
                    Text_Analytics_Toolbox \
                    Wireless_Testbench || \
     (echo "MPM Installation Failure. See below for more information:" && cat /tmp/mathworks_root.log && false)

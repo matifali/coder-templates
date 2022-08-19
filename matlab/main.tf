@@ -62,14 +62,6 @@ resource "coder_app" "matlab" {
   url      = "http://localhost:8888/@${data.coder_workspace.me.owner}/${data.coder_workspace.me.name}/apps/Matlab"
 }
 
-# code-server
-resource "coder_app" "code-server" {
-  agent_id      = coder_agent.dev.id
-  name          = "code-server"
-  icon          = "https://cdn.icon-icons.com/icons2/2107/PNG/512/file_type_vscode_icon_130084.png"
-  url           = "http://localhost:13337"
-  relative_path = true
-}
 
 resource "coder_agent" "dev" {
   arch           = var.arch
@@ -77,9 +69,6 @@ resource "coder_agent" "dev" {
   startup_script = <<EOT
 #!/bin/bash
 set -euo pipefail
-
-# start code-server
-code-server --auth none --port 13337 &
 
 # start Matlab
 MWI_BASE_URL="/@${data.coder_workspace.me.owner}/${data.coder_workspace.me.name}/apps/Matlab" matlab-proxy-app &
