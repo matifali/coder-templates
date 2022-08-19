@@ -20,7 +20,7 @@ RUN export DEBIAN_FRONTEND=noninteractive && apt-get update && \
         wget \
         unzip \
         ca-certificates && \
-    apt-get clean && apt-get autoremove
+    apt-get clean && apt-get autoremove && rm -rf /var/lib/apt/lists/* 
 
 # Run mpm to install MATLAB in the target location and delete the mpm installation afterwards.
 # If mpm fails to install successfully then output the logfile to the terminal, otherwise cleanup.
@@ -42,6 +42,7 @@ RUN wget -q https://www.mathworks.com/mpm/glnxa64/mpm && \
                    WLAN_Toolbox \
                    Bluetooth_Toolbox \
                    Satellite_Communications_Toolbox \
+                   Text_Analytics_Toolbox \
                    Wireless_Testbench || \
     (echo "MPM Installation Failure. See below for more information:" && cat /tmp/mathworks_root.log && false)
 RUN rm -f mpm /tmp/mathworks_root.log

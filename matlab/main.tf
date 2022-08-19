@@ -31,16 +31,16 @@ variable "cpu" {
   description = "How many CPU cores for this workspace?"
   default     = "04"
   validation {
-    condition     =  var.cpu > 0 && var.cpu <= 40
-    error_message = "CPU count should be bwteen 1-40."
+    condition     =  var.cpu > 0 && var.cpu <= 20
+    error_message = "Core count should be bwteen 1-20."
   }
 }
 variable "ram" {
-  description = "How much RAM for your workspace? (min: 4 GB, max: 96 GB)"
+  description = "How much RAM for your workspace? (min: 8 GB, max: 64 GB)"
   default     = "16"
   validation { # this will show a text input
     condition     =  var.ram >= 8 && var.ram <= 96
-    error_message = "Ram size must be an integer between 8 and 96 (GB)."
+    error_message = "Ram size must be an integer between 8 and 64 (GB)."
   }
 }
 
@@ -93,7 +93,7 @@ variable "docker_image" {
   # List of images available for the user to choose from.
   # Delete this condition to give users free text input.
   validation {
-    condition     = contains(["r2022a", "r2021b"], var.docker_image)
+    condition     = contains(["r2022a"], var.docker_image)
     error_message = "Invalid Docker image!"
   }
 
