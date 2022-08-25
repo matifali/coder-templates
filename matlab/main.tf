@@ -1,13 +1,12 @@
-
 terraform {
   required_providers {
     coder = {
       source  = "coder/coder"
-      version = "0.4.2"
+      version = "0.4.9"
     }
     docker = {
       source  = "kreuzwerker/docker"
-      version = "~> 2.19.0"
+      version = "2.20.2"
     }
   }
 }
@@ -69,7 +68,8 @@ resource "coder_agent" "dev" {
   startup_script = <<EOT
 #!/bin/bash
 set -euo pipefail
-
+# make user data directory
+mkdir -p ~/data
 # start Matlab
 MWI_BASE_URL="/@${data.coder_workspace.me.owner}/${data.coder_workspace.me.name}/apps/Matlab" matlab-proxy-app &
   EOT
@@ -125,19 +125,15 @@ resource "docker_container" "workspace" {
   # MATLAB Specfic argumnets
   stdin_open = true
   tty = true
-  #ports {
-  #	internal = 5901
-  #	external = 5901
-  #}
- # command = ["/bin/sh", "-ec", "sleep infinity"]
   env = ["CODER_AGENT_TOKEN=${coder_agent.dev.token}"]
   host {
     host = "host.docker.internal"
     ip   = "host-gateway"
   }
   volumes {
-    container_path = "/home/matlab/"
-    volume_name    = docker_volume.home_volume.name
+    container_path = "/home/matlab/data"
+    #volume_name    = docker_volume.home_volume.name
+    host_path      = "/data/${data.coder_workspace.me.owner}/"
     read_only      = false
   }
 }
