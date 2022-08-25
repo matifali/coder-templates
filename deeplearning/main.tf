@@ -2,11 +2,11 @@ terraform {
   required_providers {
     coder = {
       source  = "coder/coder"
-      version = "0.4.2"
+      version = "0.4.9"
     }
     docker = {
       source  = "kreuzwerker/docker"
-      version = "~> 2.19.0"
+      version = "2.20.2"
     }
   }
 }
@@ -71,7 +71,8 @@ resource "coder_agent" "dev" {
   startup_script = <<EOT
 #!/bin/bash
 set -euo pipefail
-
+# Create user data directory
+mkdir -p ~/data
 # start jupyter
 jupyter notebook --no-browser --port 8888 --NotebookApp.token='' --ip='*' --NotebookApp.base_url=/@${data.coder_workspace.me.owner}/${lower(data.coder_workspace.me.name)}/apps/jupyter &
 EOT
@@ -116,9 +117,9 @@ resource "docker_container" "workspace" {
     ip   = "host-gateway"
   }
   volumes {
-    container_path = "/home/${data.coder_workspace.me.owner}/"
-    volume_name    = docker_volume.home_volume.name
-    # host_path      = "/data/shared/${data.coder_workspace.me.owner}"
+    container_path = "/home/${data.coder_workspace.me.owner}/data/"
+    #volume_name    = docker_volume.home_volume.name
+    host_path      = "/data/${data.coder_workspace.me.owner}/"
     read_only      = false
   }
 }

@@ -23,9 +23,18 @@ coder config-ssh
 4. Open a `powershell` window and run 
 
    ```powershell
+   md $HOME/.ssh
    coder login http://ctar-ml.eee.bilkent.edu.tr:3000/
    coder config-ssh
    ```
+   or alternatively open `cmd` and run
+   
+   ```cmd
+   md %USERPROFILE%/.ssh
+   coder login http://ctar-ml.eee.bilkent.edu.tr:3000/
+   coder config-ssh
+   ```
+
 
 After that follow the steps as shown in console and you can connect your workspaces using ssh.
 

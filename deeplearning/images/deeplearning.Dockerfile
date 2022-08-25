@@ -1,9 +1,8 @@
 FROM tensorflow/tensorflow:latest-gpu-jupyter
 USER root
-RUN apt update
-RUN apt upgrade -y
-RUN apt-get update && \
-    DEBIAN_FRONTEND="noninteractive" apt-get install --yes \
+ARG DEBIAN_FRONTEND="noninteractive"
+RUN apt update && apt upgrade -y && \
+    apt-get install --yes \
     --no-install-recommends \
     bash \
     bash-completion \
@@ -17,13 +16,12 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-
 ARG USERNAME
 # Add a user with your coder username so that you're not developing as the `root` user
 RUN useradd ${USERNAME} \
     --create-home \
     --shell=/bin/bash \
-    --uid=1000 \
+    --uid=1001 \
     --user-group && \
     echo "${USERNAME} ALL=(ALL) NOPASSWD:ALL" >>/etc/sudoers.d/nopasswd
 
@@ -31,10 +29,11 @@ RUN useradd ${USERNAME} \
 USER ${USERNAME}
 WORKDIR /home/${USERNAME}
 
+ARG PIP_NO_CACHE_DIR=1
 # Install python packages as your user
-RUN pip install --upgrade pip
-RUN pip install torch torchvision torchaudio torchtext --extra-index-url https://download.pytorch.org/whl/cu116
-RUN pip install \
+RUN pip install --upgrade pip && \
+	pip install torch torchvision torchaudio torchtext --extra-index-url https://download.pytorch.org/whl/cu116 && \
+	pip install \
 	cmake \
 	Cython \
 	intel-openmp \
@@ -46,6 +45,7 @@ RUN pip install \
 	PyYAML \
 	scikit-learn scikit-image \
 	seaborn plotly \
-	tqdm 
+	tqdm
+	
 # Set path of python packages
 RUN echo 'export PATH=$HOME/.local/bin:$PATH' >> /home/${USERNAME}/.bashrc
