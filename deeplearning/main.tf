@@ -33,7 +33,7 @@ locals {
 
 variable "jupyter" {
   description = "Jupyter IDE type"
-  default     = "lab"
+  default     = "notebook"
   validation {
     condition = contains([
       "notebook",
