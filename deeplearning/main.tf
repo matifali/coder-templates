@@ -27,9 +27,25 @@ variable "OS" {
   sensitive = true
 }
 
+locals {
+  jupyter-type-arg = "${var.jupyter == "notebook" ? "Notebook" : "Server"}"
+}
+
+variable "jupyter" {
+  description = "Jupyter IDE type"
+  default     = "lab"
+  validation {
+    condition = contains([
+      "notebook",
+      "lab",
+    ], var.jupyter)
+    error_message = "Invalid Jupyter!"   
+}
+}
+
 variable "cpu" {
   description = "How many CPU cores for this workspace?"
-  default     = "16"
+  default     = "08"
   validation {
     condition     = contains(["08", "16", "32"], var.cpu) # this will show a picker
     error_message = "Invalid CPU count!"
@@ -38,9 +54,9 @@ variable "cpu" {
 
 variable "ram" {
   description = "How much RAM for your workspace? (min: 16 GB, max: 64 GB)"
-  default     = "32"
+  default     = "24"
   validation { # this will show a text input select
-    condition     = contains(["16", "32", "64"], var.ram) # this will show a picker
+    condition     = contains(["16", "24", "32", "40", "48"], var.ram) # this will show a picker
     error_message = "Ram size must be an integer between 16 and 64 (GB)."
   }
 }
@@ -58,12 +74,11 @@ data "coder_workspace" "me" {
 # jupyter
 resource "coder_app" "jupyter" {
   agent_id      = coder_agent.dev.id
-  name          = "jupyter"
+  name          = "jupyter-${var.jupyter}"
   icon          = "https://cdn.icon-icons.com/icons2/2667/PNG/512/jupyter_app_icon_161280.png"
-  url           = "http://localhost:8888/@${data.coder_workspace.me.owner}/${lower(data.coder_workspace.me.name)}/apps/jupyter"
+  url           = "http://localhost:8888/@${data.coder_workspace.me.owner}/${lower(data.coder_workspace.me.name)}/apps/jupyter-${var.jupyter}/"
   relative_path = true
 }
-
 
 resource "coder_agent" "dev" {
   arch = var.arch
@@ -74,7 +89,7 @@ set -euo pipefail
 # Create user data directory
 mkdir -p ~/data
 # start jupyter
-jupyter notebook --no-browser --port 8888 --NotebookApp.token='' --ip='*' --NotebookApp.base_url=/@${data.coder_workspace.me.owner}/${lower(data.coder_workspace.me.name)}/apps/jupyter &
+/home/${data.coder_workspace.me.owner}/miniconda/envs/DL/bin/jupyter ${var.jupyter} --no-browser --${local.jupyter-type-arg}App.token='' --ip='*' --${local.jupyter-type-arg}App.base_url=/@${data.coder_workspace.me.owner}/${lower(data.coder_workspace.me.name)}/apps/jupyter-${var.jupyter}/ 2>&1 | tee -a ~/build.log &
 EOT
 }
 
@@ -86,8 +101,8 @@ resource "docker_image" "coder_image" {
   name = "coder-base-${data.coder_workspace.me.owner}-${lower(data.coder_workspace.me.name)}"
   build {
     path       = "./images/"
-    dockerfile = "deeplearning.Dockerfile"
-    tag        = ["coder-deeplearning:v0.1"]
+    dockerfile = "DL.Dockerfile"
+    tag        = ["deeplearning:v0.1"]
     build_arg = {
       USERNAME = "${data.coder_workspace.me.owner}"
     }
@@ -118,8 +133,12 @@ resource "docker_container" "workspace" {
   }
   volumes {
     container_path = "/home/${data.coder_workspace.me.owner}/data/"
-    #volume_name    = docker_volume.home_volume.name
     host_path      = "/data/${data.coder_workspace.me.owner}/"
+    read_only      = false
+  }
+  volumes {
+  	container_path = "/home/${data.coder_workspace.me.owner}"
+    volume_name    = docker_volume.home_volume.name
     read_only      = false
   }
 }
