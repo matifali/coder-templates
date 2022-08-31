@@ -50,6 +50,6 @@ There are multiple ways to connect to your workspace
 
 Click on the **Matlab** icon to launch a matlab instant in your browser
 
-![](/home/atif/coder/templates/matlab/matlab_connect.png)
+![](https://github.com/matifali/coder-templates/blob/master/matlab/matlab_connect.png)
 
 Also, you can connect using the **Web Terminal** or **SSH** by clicking on the above buttons.
