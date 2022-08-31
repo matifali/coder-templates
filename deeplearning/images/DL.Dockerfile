@@ -86,6 +86,7 @@ RUN	conda activate DL && \
 	$PIP_INSTALL \
         Cython \
         intel-openmp \
+        ipywidgets \
         jupyterlab \
 		matplotlib \
 		mkl \
