@@ -24,6 +24,7 @@ RUN apt-get update && \
     bash-completion \
     ca-certificates \
     cmake \
+    libcudnn8 \
     curl \
     git \
     libopenblas-dev \
