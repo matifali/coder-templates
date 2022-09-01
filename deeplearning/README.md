@@ -1,6 +1,14 @@
 # Persistent Storage
+https://github.com/matifali/coder-templates/blob/f6429fe2fc54a8de89621e118c68bf5cd97c003e/deeplearning/main.tf#L136
+This is the host directory that will be mapped to `~/data` inside the workspace. make sure you set the permissions and owner ship as a user with `uid:gid` 1000. create subdirectories with the usernames of all coder users.
+```console
+sudo chown 1000:1000 -R your_data_dir
+sudo chmod -R 755 your_data_dir
+```
+After this `your_data_dir/user` will be mapped to `~/data` inside every workspace.
 
-After you login to the server and run `ls` to list all directories, you will see a directory named `~/data`. 
+If you do not want this just remove this volume mount from `[main.tf](https://github.com/matifali/coder-templates/blob/master/deeplearning/main.tf)`
+
 
 This will persists reboots and will be available in all your work-spaces. It is suggested to store your training data in this directory.
 
