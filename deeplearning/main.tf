@@ -2,11 +2,11 @@ terraform {
   required_providers {
     coder = {
       source  = "coder/coder"
-      version = "0.4.9"
+      version = "0.4.11"
     }
     docker = {
       source  = "kreuzwerker/docker"
-      version = "2.20.2"
+      version = "2.21.0"
     }
   }
 }
@@ -102,7 +102,7 @@ resource "docker_image" "coder_image" {
   build {
     path       = "./images/"
     dockerfile = "DL.Dockerfile"
-    tag        = ["deeplearning:v0.1"]
+    tag        = ["matifali/deeplearning:latest"]
     build_arg = {
       USERNAME = "${data.coder_workspace.me.owner}"
     }
@@ -117,7 +117,6 @@ resource "docker_container" "workspace" {
   cpu_shares = var.cpu
   memory = "${var.ram*1024}"
   runtime = "nvidia"
-  gpus = "all"
   # Uses lower() to avoid Docker restriction on container names.
   name = "coder-${data.coder_workspace.me.owner}-${lower(data.coder_workspace.me.name)}"
   # Hostname makes the shell more user friendly: coder@my-workspace:~$
@@ -132,7 +131,7 @@ resource "docker_container" "workspace" {
     ip   = "host-gateway"
   }
   volumes {
-    container_path = "/home/${data.coder_workspace.me.owner}/data/"
+    container_path = "/home/${data.coder_workspace.me.owner}/data/" 
     host_path      = "/data/${data.coder_workspace.me.owner}/"
     read_only      = false
   }
