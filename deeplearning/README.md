@@ -9,7 +9,6 @@ After this `your_data_dir/user` will be mapped to `~/data` inside every workspac
 
 If you do not want this just remove this volume mount from `[main.tf](https://github.com/matifali/coder-templates/blob/master/deeplearning/main.tf)`
 
-
 This will persists reboots and will be available in all your work-spaces. It is suggested to store your training data in this directory.
 
 # Coder Setup
@@ -21,10 +20,8 @@ Follow these steps to configure accessing your workspaces locally on any machine
 1. Open a terminal and run
 
    ```bash
-   curl -L https://coder.com/install.sh | sh
-   
+   curl -L https://coder.com/install.sh | sh   
    coder login https://coder.your-domain.com:3000/
-   
    coder config-ssh
    ```
 
@@ -74,31 +71,21 @@ Also, you can connect using the **Web Terminal** or **SSH** by clicking on the a
 Once you've configured SSH, you can work on projects from your local copy of VS Code, connected to your Coder workspace for compute, etc.
 
 1. Open [VS Code](https://code.visualstudio.com/download) locally.
-
 2. Install the [Remote - SSH](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-ssh) extension.
-
 3. In VS Code's left-hand nav bar, click **Remote Explorer** and right-click on a workspace to connect.
 
 ## JetBrains PyCharm Professional
-
 1. Install PyCharm Professional by using [JetBrains Toolbox App](https://www.jetbrains.com/toolbox-app/).
-
 2. Connect your local machine to server via ssh by following the [instructions](https://www.jetbrains.com/help/pycharm/configuring-remote-interpreters-via-ssh.html#prereq).
 
 ## JetBrains Gateway
-
 1. Follow the [instructions](https://coder.com/docs/coder-oss/latest/ides/gateway) here to get a fully working PyCharm IDE.
 
 ## Spyder (Remote Kernels) [Advanced]
 (not tested)
 
 1. Install [Spyder](https://docs.spyder-ide.org/current/installation.html) on your local machine.
-
 2. Connect Spyder with external kernel by following the [instructions](https://docs.spyder-ide.org/current/panes/ipythonconsole.html#using-external-kernels).
 
-
-
-
-
-
-
+# Docker Image
+A standalone docker image is also avaible at [DockerDL](https://github.com/matifali/DockerDL)
