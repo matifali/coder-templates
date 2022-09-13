@@ -24,17 +24,16 @@ RUN apt-get update && \
     bash-completion \
     ca-certificates \
     cmake \
-    libcudnn8 \
     curl \
     git \
+    htop \
+    libcudnn8 \
     libopenblas-dev \
     linux-headers-$(uname -r) \
     nano \
     openssh-client \
     python3 python3-dev python3-pip python-is-python3 \
     sudo \
-    systemd \
-    systemd-sysv \
     unzip \
     vim \
     wget && \
