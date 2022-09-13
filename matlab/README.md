@@ -65,6 +65,3 @@ Click on the **Matlab** icon to launch a matlab instant in your browser
 ![](https://github.com/matifali/coder-templates/blob/master/matlab/matlab_connect.png)
 
 Also, you can connect using the **Web Terminal** or **SSH** by clicking on the above buttons.
-
-# Docker Image
-A standalone docker image is also avaible at [DockerDL](https://github.com/matifali/DockerDL)
