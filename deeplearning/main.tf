@@ -43,6 +43,19 @@ variable "jupyter" {
 }
 }
 
+variable "python_version" {
+  description = "Python Version"
+  default     = "3.10"
+  validation {
+    condition = contains([
+      "3.10",
+      "3.9",
+      "3.8"
+    ], var.python_version)
+    error_message = "Not supported python version!"   
+}
+}
+
 variable "cpu" {
   description = "How many CPU cores for this workspace?"
   default     = "08"
@@ -105,6 +118,7 @@ resource "docker_image" "coder_image" {
     tag        = ["matifali/deeplearning:latest"]
     build_arg = {
       USERNAME = "${data.coder_workspace.me.owner}"
+      PYTHON_VER = "${var.python_version}"
     }
   }
   # Keep alive for other workspaces to use upon deletion
