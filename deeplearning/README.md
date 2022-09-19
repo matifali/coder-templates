@@ -1,6 +1,6 @@
 # Persistent Storage
 
-After you login to the server and run `ls` to list all directories, you will see a directory named `~/data`. 
+After you login to the server and run `ls` to list all directories, you will see a directory named `~/data`.
 
 This will persists reboots and will be available in all your work-spaces. It is suggested to store your training data in this directory.
 
@@ -14,9 +14,7 @@ Follow these steps to configure accessing your workspaces locally on any machine
 
    ```bash
    curl -L https://coder.com/install.sh | sh
-   
    coder login https://ctar-ml.eee.bilkent.edu.tr:3000/
-   
    coder config-ssh
    ```
 
@@ -26,11 +24,11 @@ Follow these steps to configure accessing your workspaces locally on any machine
 
 2. rename `coder-windows-amd64.exe` to `coder.exe`
 
-3. copy `coder.exe` to `C:\Windows\` 
+3. copy `coder.exe` to `C:\Windows\`
    or
    add `coder.exe` to `PATH`
 
-4. Open a `powershell` window and run 
+4. Open a `powershell` window and run
 
    ```powershell
    md $HOME/.ssh
@@ -48,12 +46,11 @@ Follow these steps to configure accessing your workspaces locally on any machine
 
 After that follow the steps as shown in console and you can connect your workspaces using ssh.
 
-
 # Connecting your workspace
 
 There are multiple options to connect to your workspace using local clients or browser.
 
-##  Jupyter Notebook
+## Jupyter Notebook
 
 Click on the jupyter icon to launch a jupyter notebook server that you can connect from your browser.
 
@@ -61,7 +58,7 @@ Click on the jupyter icon to launch a jupyter notebook server that you can conne
 
 Also, you can connect using the **Web Terminal** or **SSH** by clicking on the above buttons.
 
-##  VS Code Remote
+## VS Code Remote
 
 Once you've configured SSH, you can work on projects from your local copy of VS Code, connected to your Coder workspace for compute, etc.
 
@@ -82,15 +79,9 @@ Once you've configured SSH, you can work on projects from your local copy of VS 
 1. Follow the [instructions](https://coder.com/docs/coder-oss/latest/ides/gateway) here to get a fully working PyCharm IDE.
 
 ## Spyder (Remote Kernels) [Advanced]
+
 (not tested)
 
 1. Install [Spyder](https://docs.spyder-ide.org/current/installation.html) on your local machine.
 
 2. Connect Spyder with external kernel by following the [instructions](https://docs.spyder-ide.org/current/panes/ipythonconsole.html#using-external-kernels).
-
-
-
-
-
-
-

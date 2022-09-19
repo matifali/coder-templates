@@ -1,10 +1,7 @@
 # Build argumnets
-ARG CUDA_VER=11.7
 ARG UBUNTU_VER=22.04
-
-# Download the base image
-FROM nvidia/cuda:${CUDA_VER}.1-devel-ubuntu${UBUNTU_VER}
-# you can check for all available images at https://hub.docker.com/r/nvidia/cuda/tags
+# # Download the base image
+FROM ubuntu:${UBUNTU_VER}
 
 # Install as root
 USER root
@@ -16,10 +13,6 @@ ARG USERNAME=coder
 # Shell
 SHELL ["/bin/bash", "--login", "-o", "pipefail", "-c"]
 
-# miniconda path
-ENV CONDA_DIR /opt/miniconda
-
-# Install dependencies
 RUN apt-get update && \
     apt-get upgrade -y && \
     APT_INSTALL="apt-get install -y --no-install-recommends" && \
@@ -31,7 +24,6 @@ RUN apt-get update && \
     curl \
     git \
     htop \
-    libcudnn8 \
     libopenblas-dev \
     linux-headers-$(uname -r) \
     nano \
@@ -43,13 +35,26 @@ RUN apt-get update && \
     wget && \
     apt-get autoremove -y && \
     apt-get clean && \
-    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
-# Install miniconda
-	wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh && \
-    /bin/bash miniconda.sh -b -p ${CONDA_DIR} && \
-    rm -rf miniconda.sh && \
-# Enable conda autocomplete
-    sudo wget --quiet https://github.com/tartansandal/conda-bash-completion/raw/master/conda -P /etc/bash_completion.d/
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+RUN wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/cuda-keyring_1.0-1_all.deb && \
+    apt-get install -y ./cuda-keyring_1.0-1_all.deb && \
+    rm cuda-keyring_1.0-1_all.deb
+
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends cuda && \
+    apt-get autoremove -y && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN apt-get update && \
+    apt-get upgrade -y && \
+    APT_INSTALL="apt-get install -y --no-install-recommends" && \
+    $APT_INSTALL \
+    libcudnn8 && \
+    apt-get autoremove -y && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Add a user `${USERNAME}` so that you're not developing as the `root` user
 RUN useradd ${USERNAME} \
@@ -57,24 +62,30 @@ RUN useradd ${USERNAME} \
     --create-home \
     --shell=/bin/bash \
     --user-group && \
-    echo "${USERNAME} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/nopasswd && \
-# Allow running conda as the new user
-	groupadd conda && chgrp -R conda ${CONDA_DIR} && chmod 770 -R ${CONDA_DIR} && adduser ${USERNAME} conda && \
-    echo ". $CONDA_DIR/etc/profile.d/conda.sh" >> /home/${USERNAME}/.profile
-
-# Put conda in path so we can use conda activate
-ENV PATH=${CONDA_DIR}/bin:$PATH
+    echo "${USERNAME} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/nopasswd
 
 # Python version
 ARG PYTHON_VER=3.10
+
+# Install miniconda
+RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O /opt/miniconda.sh && \
+    /bin/bash /opt/miniconda.sh -b -p /opt/miniconda && \
+    groupadd conda && chgrp -R conda /opt/miniconda && chmod 770 -R /opt/miniconda && adduser ${USERNAME} conda && \
+    rm -rf /opt/miniconda.sh && \
+    echo ". /opt/miniconda/etc/profile.d/conda.sh" >> /home/${USERNAME}/.profile
 
 # Change to your user
 USER ${USERNAME}
 WORKDIR /home/${USERNAME}
 
+# Put conda in path so we can use conda activate
+ENV PATH=/opt/miniconda/bin:$PATH
+
 # Initialize and update conda
 RUN conda init bash && \
-# Create deep-learning environment
+    # Enable bash-completion
+    sudo wget --quiet https://github.com/tartansandal/conda-bash-completion/raw/master/conda -P /etc/bash_completion.d/ && \
+    # Create deep-learning environment
     conda update --name base --channel conda-forge conda && \
     conda install mamba -n base -c conda-forge && \
     mamba init && \
@@ -113,7 +124,9 @@ RUN	conda activate DL && \
     sympy \
     seaborn \
     tensorflow \
-    tqdm && \
+    tqdm \
+    wheel \
+    && \
     pip cache purge && \
     # Set path of python packages
     echo "# Set path of python packages" >> /home/${USERNAME}/.bashrc && \
