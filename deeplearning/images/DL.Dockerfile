@@ -44,11 +44,11 @@ RUN apt-get update && \
     apt-get autoremove -y && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
-# Install miniconda
-	wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh && \
+    # Install miniconda
+    wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh && \
     /bin/bash miniconda.sh -b -p ${CONDA_DIR} && \
     rm -rf miniconda.sh && \
-# Enable conda autocomplete
+    # Enable conda autocomplete
     sudo wget --quiet https://github.com/tartansandal/conda-bash-completion/raw/master/conda -P /etc/bash_completion.d/
 
 # Add a user `${USERNAME}` so that you're not developing as the `root` user
@@ -58,12 +58,18 @@ RUN useradd ${USERNAME} \
     --shell=/bin/bash \
     --user-group && \
     echo "${USERNAME} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/nopasswd && \
-# Allow running conda as the new user
-	groupadd conda && chgrp -R conda ${CONDA_DIR} && chmod 770 -R ${CONDA_DIR} && adduser ${USERNAME} conda && \
+    # Allow running conda as the new user
+    groupadd conda && chgrp -R conda ${CONDA_DIR} && chmod 755 -R ${CONDA_DIR} && adduser ${USERNAME} conda && \
     echo ". $CONDA_DIR/etc/profile.d/conda.sh" >> /home/${USERNAME}/.profile
 
 # Put conda in path so we can use conda activate
 ENV PATH=${CONDA_DIR}/bin:$PATH
+
+# Initialize and update conda
+RUN conda update --name base --channel conda-forge conda && \
+    conda install mamba -n base -c conda-forge && \
+    # clean up
+    conda clean --all --yes
 
 # Python version
 ARG PYTHON_VER=3.10
@@ -72,14 +78,10 @@ ARG PYTHON_VER=3.10
 USER ${USERNAME}
 WORKDIR /home/${USERNAME}
 
-# Initialize and update conda
 RUN conda init bash && \
-# Create deep-learning environment
-    conda update --name base --channel conda-forge conda && \
-    conda install mamba -n base -c conda-forge && \
     mamba init && \
     source /home/${USERNAME}/.bashrc && \
-    rm /opt/miniconda/pkgs/cache/*.json && \
+    # Create deep-learning environment
     mamba create --name DL --channel conda-forge python=${PYTHON_VER} --yes && \
     mamba clean -a -y && \
     # Make new shells activate the DL environment:
