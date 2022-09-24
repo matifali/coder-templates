@@ -2,11 +2,11 @@ terraform {
   required_providers {
     coder = {
       source  = "coder/coder"
-      version = "0.4.11"
+      version = "0.4.15"
     }
     docker = {
       source  = "kreuzwerker/docker"
-      version = "2.21.0"
+      version = "2.22.0"
     }
   }
 }
@@ -29,6 +29,7 @@ variable "OS" {
 
 locals {
   jupyter-type-arg = "${var.jupyter == "notebook" ? "Notebook" : "Server"}"
+  tensorflow-version = "${var.tensorflow_version == "latest" ? "" : "${var.tensorflow_version}"}"
 }
 
 variable "jupyter" {
@@ -56,6 +57,20 @@ variable "python_version" {
 }
 }
 
+variable "tensorflow_version" {
+  description = "Tensorflow Version"
+  default     = "latest"
+  validation {
+    condition = contains([
+      "latest",
+      "2.10.0",
+      "2.9.2",
+      "2.8.3"
+    ], var.tensorflow_version)
+    error_message = "Not supported tensorflow version!"   
+}
+}
+
 variable "cpu" {
   description = "How many CPU cores for this workspace?"
   default     = "08"
@@ -66,11 +81,11 @@ variable "cpu" {
 }
 
 variable "ram" {
-  description = "How much RAM for your workspace? (min: 16 GB, max: 64 GB)"
+  description = "How much RAM for your workspace? (min: 24 GB, max: 128 GB)"
   default     = "24"
   validation { # this will show a text input select
-    condition     = contains(["16", "24", "32", "40", "48"], var.ram) # this will show a picker
-    error_message = "Ram size must be an integer between 16 and 64 (GB)."
+    condition     = contains(["24", "48", "64", "96", "128"], var.ram) # this will show a picker
+    error_message = "Ram size must be an integer between 24 and 128 (GB)."
   }
 }
 
@@ -119,6 +134,7 @@ resource "docker_image" "coder_image" {
     build_arg = {
       USERNAME = "${data.coder_workspace.me.owner}"
       PYTHON_VER = "${var.python_version}"
+      TF_VERSION = "${local.tensorflow-version}"
     }
   }
   # Keep alive for other workspaces to use upon deletion
