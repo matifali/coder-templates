@@ -3,7 +3,7 @@ ARG CUDA_VER=11.7
 ARG UBUNTU_VER=22.04
 
 # Download the base image
-FROM nvidia/cuda:${CUDA_VER}.1-devel-ubuntu${UBUNTU_VER}
+FROM nvidia/cuda:${CUDA_VER}.1-cudnn8-runtime-ubuntu${UBUNTU_VER}
 # you can check for all available images at https://hub.docker.com/r/nvidia/cuda/tags
 
 # Install as root
@@ -27,20 +27,16 @@ RUN apt-get update && \
     bash \
     bash-completion \
     ca-certificates \
-    cmake \
     curl \
     git \
     htop \
-    libcudnn8 \
-    libopenblas-dev \
-    linux-headers-$(uname -r) \
     nano \
     openssh-client \
-    python3 python3-dev python3-pip python-is-python3 \
     sudo \
     unzip \
     vim \
-    wget && \
+    wget \ 
+    zip && \
     apt-get autoremove -y && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
@@ -88,33 +84,32 @@ RUN conda init bash && \
     echo "# Make new shells activate the DL environment" >> /home/${USERNAME}/.bashrc && \
     echo "conda activate DL" >> /home/${USERNAME}/.bashrc
 
+# Default TensorFlow package version
+ARG TF_VERSION=2.9.2
+
 # Install packages inside the new environment
-RUN	conda activate DL && \	
+RUN conda activate DL && \	
     PIP_INSTALL="pip install --upgrade --no-cache-dir" && \
     $PIP_INSTALL pip && \
     $PIP_INSTALL pybind11 scikit-build && \
-    $PIP_INSTALL torch torchvision torchaudio torchtext --extra-index-url https://download.pytorch.org/whl/cu116 && \
+    $PIP_INSTALL torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cu116 && \
     $PIP_INSTALL \
-    Cython \
-    intel-openmp \
     ipywidgets \
     jupyterlab \
     matplotlib \
-    mkl \
     nltk \
     notebook \
     numpy \
     pandas \
     Pillow \
     plotly \
-    pytest \
     PyYAML \
     scipy \
     scikit-image \
     scikit-learn \
     sympy \
     seaborn \
-    tensorflow \
+    tensorflow${TF_VERSION:+==${TF_VERSION}} \
     tqdm && \
     pip cache purge && \
     # Set path of python packages
