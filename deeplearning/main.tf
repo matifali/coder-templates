@@ -129,7 +129,7 @@ resource "docker_image" "coder_image" {
   name = "coder-base-${data.coder_workspace.me.owner}-${lower(data.coder_workspace.me.name)}"
   build {
     path       = "./images/"
-    dockerfile = "DL.Dockerfile"
+    dockerfile = "Dockerfile"
     tag        = ["matifali/deeplearning:latest"]
     build_arg = {
       USERNAME = "${data.coder_workspace.me.owner}"
