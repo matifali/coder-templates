@@ -31,7 +31,7 @@ Follow these steps to configure accessing your workspaces locally on any machine
 4. Open a `powershell` window and run
 
    ```powershell
-   md $HOME/.ssh
+   md $HOME\.ssh
    coder login https://ctar-ml.eee.bilkent.edu.tr:3000/
    coder config-ssh
    ```
@@ -39,7 +39,7 @@ Follow these steps to configure accessing your workspaces locally on any machine
    or alternatively open `cmd` window and run
 
    ```cmd
-   md %USERPROFILE%/.ssh
+   md %USERPROFILE%\.ssh
    coder login https://ctar-ml.eee.bilkent.edu.tr:3000/
    coder config-ssh
    ```
