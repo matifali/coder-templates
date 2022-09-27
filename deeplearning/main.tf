@@ -117,7 +117,7 @@ set -euo pipefail
 # Create user data directory
 mkdir -p ~/data
 # start jupyter
-/home/${data.coder_workspace.me.owner}/miniconda/envs/DL/bin/jupyter ${var.jupyter} --no-browser --${local.jupyter-type-arg}App.token='' --ip='*' --${local.jupyter-type-arg}App.base_url=/@${data.coder_workspace.me.owner}/${lower(data.coder_workspace.me.name)}/apps/jupyter-${var.jupyter}/ 2>&1 | tee -a ~/build.log &
+/opt/miniconda/envs/DL/bin/jupyter ${var.jupyter} --no-browser --${local.jupyter-type-arg}App.token='' --ip='*' --${local.jupyter-type-arg}App.base_url=/@${data.coder_workspace.me.owner}/${lower(data.coder_workspace.me.name)}/apps/jupyter-${var.jupyter}/ 2>&1 | tee -a ~/build.log &
 EOT
 }
 
@@ -146,7 +146,7 @@ resource "docker_container" "workspace" {
   image = docker_image.coder_image.latest
   cpu_shares = var.cpu
   memory = "${var.ram*1024}"
-  runtime = "nvidia"
+  gpus = "all"
   # Uses lower() to avoid Docker restriction on container names.
   name = "coder-${data.coder_workspace.me.owner}-${lower(data.coder_workspace.me.name)}"
   # Hostname makes the shell more user friendly: coder@my-workspace:~$
