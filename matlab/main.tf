@@ -77,12 +77,12 @@ MWI_BASE_URL="/@${data.coder_workspace.me.owner}/${data.coder_workspace.me.name}
 
 variable "docker_image" {
   description = "What Docker image would you like to use for your workspace?"
-  default     = "r2022a"
+  default     = "r2022b"
 
   # List of images available for the user to choose from.
   # Delete this condition to give users free text input.
   validation {
-    condition     = contains(["r2022a"], var.docker_image)
+    condition     = contains(["r2022b"], var.docker_image)
     error_message = "Invalid Docker image!"
   }
 
