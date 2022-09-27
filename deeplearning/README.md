@@ -7,7 +7,7 @@ sudo chmod -R 755 your_data_dir
 ```
 After this `your_data_dir/user` will be mapped to `~/data` inside every workspace.
 
-If you do not want this just remove this volume mount from [`main.tf`](https://github.com/matifali/coder-templates/blob/master/deeplearning/main.tf)
+If you do not want this just remove this volume mount from [`main.tf`](./main.tf)
 
 This will persists reboots and will be available in all your work-spaces. It is suggested to store your training data in this directory.
 
