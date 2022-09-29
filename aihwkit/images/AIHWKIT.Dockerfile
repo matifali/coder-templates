@@ -60,9 +60,7 @@ RUN useradd ${USERNAME} \
     echo "${USERNAME} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/nopasswd && \
     # Allow running conda as the new user
     groupadd conda && chgrp -R conda ${CONDA_DIR} && chmod 755 -R ${CONDA_DIR} && adduser ${USERNAME} conda && \
-    echo ". $CONDA_DIR/etc/profile.d/conda.sh" >> /home/${USERNAME}/.profile && \
-    # Initialize conda
-    su ${USERNAME} -c "conda init bash" 
+    echo ". $CONDA_DIR/etc/profile.d/conda.sh" >> /home/${USERNAME}/.profile
 
 # Put conda in path so we can use conda activate
 ENV PATH=${CONDA_DIR}/bin:$PATH
@@ -77,8 +75,7 @@ ARG PYTHON_VER=3.10
 USER ${USERNAME}
 WORKDIR /home/${USERNAME}
 
-RUN conda init bash && \
-    source /home/${USERNAME}/.bashrc && \
+RUN conda init bash && source /home/${USERNAME}/.bashrc && \
     # Create deep-learning environment
     conda create --name DL --channel defaults python=${PYTHON_VER} --yes && \
     conda clean -a -y && \
