@@ -20,15 +20,11 @@ RUN apt-get update && \
     bash \
     bash-completion \
     ca-certificates \
-    cmake \
     curl \
     git \
     htop \
-    libopenblas-dev \
-    linux-headers-$(uname -r) \
     nano \
     openssh-client \
-    python3 python3-dev python3-pip python-is-python3 \
     sudo \
     unzip \
     vim \
@@ -69,10 +65,15 @@ ARG PYTHON_VER=3.10
 
 # Install miniconda
 RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O /opt/miniconda.sh && \
-    /bin/bash /opt/miniconda.sh -b -p /opt/miniconda && \
+    /bin/bash /opt/miniconda.sh -b -p /opt/miniconda && rm -rf /opt/miniconda.sh && \
+    # Allow running conda as the new user
     groupadd conda && chgrp -R conda /opt/miniconda && chmod 770 -R /opt/miniconda && adduser ${USERNAME} conda && \
-    rm -rf /opt/miniconda.sh && \
-    echo ". /opt/miniconda/etc/profile.d/conda.sh" >> /home/${USERNAME}/.profile
+    # Enable bash-completion
+    sudo wget --quiet https://github.com/tartansandal/conda-bash-completion/raw/master/conda -P /etc/bash_completion.d/ && \
+
+    echo ". /opt/miniconda/etc/profile.d/conda.sh" >> /home/${USERNAME}/.profile && \
+    # initialize conda for the current user
+    su - ${USERNAME} -c "conda init bash"
 
 # Change to your user
 USER ${USERNAME}
@@ -81,18 +82,9 @@ WORKDIR /home/${USERNAME}
 # Put conda in path so we can use conda activate
 ENV PATH=/opt/miniconda/bin:$PATH
 
-# Initialize and update conda
-RUN conda init bash && \
-    # Enable bash-completion
-    sudo wget --quiet https://github.com/tartansandal/conda-bash-completion/raw/master/conda -P /etc/bash_completion.d/ && \
-    # Create deep-learning environment
-    conda update --name base --channel conda-forge conda && \
-    conda install mamba -n base -c conda-forge && \
-    mamba init && \
-    source /home/${USERNAME}/.bashrc && \
-    rm /opt/miniconda/pkgs/cache/*.json && \
-    mamba create --name DL --channel conda-forge python=${PYTHON_VER} --yes && \
-    mamba clean -a -y && \
+# Create deep-learning environment
+RUN conda create --name DL --channel conda-forge python=${PYTHON_VER} --yes && \
+    conda clean -a -y && \
     # Make new shells activate the DL environment:
     echo "# Make new shells activate the DL environment" >> /home/${USERNAME}/.bashrc && \
     echo "conda activate DL" >> /home/${USERNAME}/.bashrc
@@ -105,29 +97,23 @@ RUN	conda activate DL && \
     $PIP_INSTALL torch torchvision torchaudio torchtext --extra-index-url https://download.pytorch.org/whl/cu116 && \
     $PIP_INSTALL \
     Cython \
-    intel-openmp \
     ipywidgets \
     jupyterlab \
     matplotlib \
-    mkl \
     nltk \
     notebook \
     numpy \
     pandas \
     Pillow \
     plotly \
-    pytest \
     PyYAML \
     scipy \
     scikit-image \
     scikit-learn \
     sympy \
     seaborn \
-    tensorflow \
-    tqdm \
-    wheel \
-    && \
-    pip cache purge && \
+    tensorflow${TF_VERSION:+==${TF_VERSION}} \
+    tqdm && \
     # Set path of python packages
     echo "# Set path of python packages" >> /home/${USERNAME}/.bashrc && \
     echo 'export PATH=$HOME/.local/bin:$PATH' >> /home/${USERNAME}/.bashrc
