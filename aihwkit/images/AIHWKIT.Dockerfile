@@ -60,30 +60,28 @@ RUN useradd ${USERNAME} \
     echo "${USERNAME} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/nopasswd && \
     # Allow running conda as the new user
     groupadd conda && chgrp -R conda ${CONDA_DIR} && chmod 755 -R ${CONDA_DIR} && adduser ${USERNAME} conda && \
-    echo ". $CONDA_DIR/etc/profile.d/conda.sh" >> /home/${USERNAME}/.profile
+    echo ". $CONDA_DIR/etc/profile.d/conda.sh" >> /home/${USERNAME}/.profile && \
+    # Initialize conda
+    su ${USERNAME} -c "conda init bash" 
 
 # Put conda in path so we can use conda activate
 ENV PATH=${CONDA_DIR}/bin:$PATH
 
-# Initialize and update conda
-RUN conda update --name base --channel conda-forge conda && \
-    conda install mamba -n base -c conda-forge && \
-    # clean up
-    conda clean --all --yes
-
 # Python version
 ARG PYTHON_VER=3.10
 
+# Update conda  commented as conda 22.9.0 is causing issues
+#RUN conda update --name base --channel defaults conda && \
+#    conda clean --all --yes
 # Change to your user
 USER ${USERNAME}
 WORKDIR /home/${USERNAME}
 
 RUN conda init bash && \
-    mamba init && \
     source /home/${USERNAME}/.bashrc && \
     # Create deep-learning environment
-    mamba create --name DL --channel conda-forge python=${PYTHON_VER} --yes && \
-    mamba clean -a -y && \
+    conda create --name DL --channel defaults python=${PYTHON_VER} --yes && \
+    conda clean -a -y && \
     # Make new shells activate the DL environment:
     echo "# Make new shells activate the DL environment" >> /home/${USERNAME}/.bashrc && \
     echo "conda activate DL" >> /home/${USERNAME}/.bashrc
@@ -123,8 +121,8 @@ RUN conda activate DL && \
 
 # Install AIHWKIT
 RUN git clone https://github.com/matifali/aihwkit.git
-COPY install_aihwkit.sh aihwkit/
-RUN cd aihwkit && \
-    bash install_aihwkit.sh && \
-    cd .. && \
-    rm -rf aihwkit
+WORKDIR /home/${USERNAME}/aihwkit
+COPY install_aihwkit.sh .
+RUN chmod +x install_aihwkit.sh && ./install_aihwkit.sh
+WORKDIR /home/${USERNAME}
+RUN rm -rf aihwkit
