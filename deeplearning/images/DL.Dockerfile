@@ -56,9 +56,8 @@ RUN useradd ${USERNAME} \
     echo "${USERNAME} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/nopasswd && \
     # Allow running conda as the new user
     groupadd conda && chgrp -R conda ${CONDA_DIR} && chmod 755 -R ${CONDA_DIR} && adduser ${USERNAME} conda && \
-    echo ". $CONDA_DIR/etc/profile.d/conda.sh" >> /home/${USERNAME}/.profile && \
-    # initialize conda for the new user
-    su - ${USERNAME} -c "conda init bash" 
+    echo ". $CONDA_DIR/etc/profile.d/conda.sh" >> /home/${USERNAME}/.profile
+
 
 # Put conda in path so we can use conda activate
 ENV PATH=${CONDA_DIR}/bin:$PATH
@@ -77,7 +76,9 @@ USER ${USERNAME}
 WORKDIR /home/${USERNAME}
 
 # Create deep-learning environment    
-RUN conda create --name DL --channel conda-forge python=${PYTHON_VER} --yes && \
+# initialize conda for the new user
+RUN conda init bash && source ~/.bashrc && \
+    conda create --name DL --channel conda-forge python=${PYTHON_VER} --yes && \
     conda clean -a -y && \
     # Make new shells activate the DL environment:
     echo "# Make new shells activate the DL environment" >> /home/${USERNAME}/.bashrc && \
