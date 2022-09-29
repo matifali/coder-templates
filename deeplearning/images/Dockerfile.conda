@@ -39,20 +39,12 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-# Python version
-ARG PYTHON_VER=3.10
-
-# Install Python
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-    python${PYTHON_VER} \
-    python${PYTHON_VER}-dev \
-    python${PYTHON_VER}-venv \
-    python3-pip \
-    python-is-python3 && \
-    apt-get autoremove -y && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+# Install miniconda
+RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh && \
+    /bin/bash miniconda.sh -b -p ${CONDA_DIR} && \
+    rm -rf miniconda.sh && \
+    # Enable conda autocomplete
+    sudo wget --quiet https://github.com/tartansandal/conda-bash-completion/raw/master/conda -P /etc/bash_completion.d/
 
 # Add a user `${USERNAME}` so that you're not developing as the `root` user
 RUN useradd ${USERNAME} \
@@ -60,16 +52,43 @@ RUN useradd ${USERNAME} \
     --create-home \
     --shell=/bin/bash \
     --user-group && \
-    echo "${USERNAME} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/nopasswd
+    echo "${USERNAME} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/nopasswd && \
+    # Allow running conda as the new user
+    groupadd conda && chgrp -R conda ${CONDA_DIR} && chmod 755 -R ${CONDA_DIR} && adduser ${USERNAME} conda && \
+    echo ". $CONDA_DIR/etc/profile.d/conda.sh" >> /home/${USERNAME}/.profile
+
+
+# Put conda in path so we can use conda activate
+ENV PATH=${CONDA_DIR}/bin:$PATH
+
+# Initialize and update conda
+# RUN conda update --name base --channel conda-forge conda && \
+#     conda install mamba -n base -c condrm -rf /opt/miniconda.sh && \a-forge && \
+#     # clean up
+#     conda clean --all --yes
 
 # Change to your user
 USER ${USERNAME}
 WORKDIR /home/${USERNAME}
 
+# Python version
+ARG PYTHON_VER=3.10
+
+# Create deep-learning environment    
+# initialize conda for the new user
+RUN conda init bash && source ~/.bashrc && \
+    conda create --name DL --channel conda-forge python=${PYTHON_VER} --yes && \
+    conda clean -a -y && \
+    # Make new shells activate the DL environment:
+    echo "# Make new shells activate the DL environment" >> /home/${USERNAME}/.bashrc && \
+    echo "conda activate DL" >> /home/${USERNAME}/.bashrc
+
 # Install packages inside the new environment
-RUN pip install --upgrade --no-cache-dir pip && \
+RUN conda activate DL && \	
+    pip install --upgrade --no-cache-dir pip && \
     pip install --upgrade --no-cache-dir torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cu116
-RUN pip install --upgrade --no-cache-dir \
+RUN conda activate DL && \ 
+    pip install --upgrade --no-cache-dir \
     ipywidgets \
     jupyterlab \
     matplotlib \
@@ -92,7 +111,8 @@ RUN pip install --upgrade --no-cache-dir \
 # Install TensorFlow
 # Default TensorFlow package version
 ARG TF_VERSION=
-RUN pip install --upgrade --no-cache-dir tensorflow${TF_VERSION:+==${TF_VERSION}}
+RUN conda activate DL && \
+    pip install --upgrade --no-cache-dir tensorflow${TF_VERSION:+==${TF_VERSION}}
 
 # Set path of python packages
 RUN echo "# Set path of python packages" >> /home/${USERNAME}/.bashrc && \

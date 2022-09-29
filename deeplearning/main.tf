@@ -30,18 +30,8 @@ variable "OS" {
 locals {
   jupyter-type-arg = "${var.jupyter == "notebook" ? "Notebook" : "Server"}"
   tensorflow-version = "${var.tensorflow_version == "latest" ? "" : "${var.tensorflow_version}"}"
-}
-
-variable "jupyter" {
-  description = "Jupyter IDE type"
-  default     = "notebook"
-  validation {
-    condition = contains([
-      "notebook",
-      "lab",
-    ], var.jupyter)
-    error_message = "Invalid Jupyter!"   
-}
+  docker-file-name = "${var.conda_selection == "Yes" ? "Dockerfile.conda" : "Dockerfile"}"
+  jupyter-path = "${var.conda_selection == "Yes" ? "/home/${data.coder_workspace.me.owner}/.conda/envs/DL/bin/" : "/home/${data.coder_workspace.me.owner}/.local/bin/"}"
 }
 
 variable "python_version" {
@@ -50,8 +40,7 @@ variable "python_version" {
   validation {
     condition = contains([
       "3.10",
-      "3.9",
-      "3.8"
+      "3.9"
     ], var.python_version)
     error_message = "Not supported python version!"   
 }
@@ -68,6 +57,30 @@ variable "tensorflow_version" {
       "2.8.3"
     ], var.tensorflow_version)
     error_message = "Not supported tensorflow version!"   
+}
+}
+
+variable "conda_selection" {
+  description = "Do you need conda environment? (everything will work without it too)"
+  default     = "No"
+  validation {
+    condition = contains([
+      "No",
+      "Yes"
+    ], var.conda_selection)
+    error_message = "Not supported!"   
+}
+}
+
+variable "jupyter" {
+  description = "Jupyter IDE type"
+  default     = "notebook"
+  validation {
+    condition = contains([
+      "notebook",
+      "lab",
+    ], var.jupyter)
+    error_message = "Invalid Jupyter!"   
 }
 }
 
@@ -117,7 +130,7 @@ set -euo pipefail
 # Create user data directory
 mkdir -p ~/data
 # start jupyter
-/opt/miniconda/envs/DL/bin/jupyter ${var.jupyter} --no-browser --${local.jupyter-type-arg}App.token='' --ip='*' --${local.jupyter-type-arg}App.base_url=/@${data.coder_workspace.me.owner}/${lower(data.coder_workspace.me.name)}/apps/jupyter-${var.jupyter}/ 2>&1 | tee -a ~/build.log &
+${local.jupyter-path}/jupyter ${var.jupyter} --no-browser --${local.jupyter-type-arg}App.token='' --ip='*' --${local.jupyter-type-arg}App.base_url=/@${data.coder_workspace.me.owner}/${lower(data.coder_workspace.me.name)}/apps/jupyter-${var.jupyter}/ 2>&1 | tee -a ~/build.log &
 EOT
 }
 
@@ -125,11 +138,11 @@ resource "docker_volume" "home_volume" {
   name = "coder-${data.coder_workspace.me.owner}-${lower(data.coder_workspace.me.name)}-root"
 }
 
-resource "docker_image" "coder_image" {
+resource "docker_image" "deeplearning" {
   name = "coder-base-${data.coder_workspace.me.owner}-${lower(data.coder_workspace.me.name)}"
   build {
     path       = "./images/"
-    dockerfile = "Dockerfile"
+    dockerfile = "${local.docker-file-name}"
     tag        = ["matifali/deeplearning:latest"]
     build_arg = {
       USERNAME = "${data.coder_workspace.me.owner}"
@@ -143,10 +156,10 @@ resource "docker_image" "coder_image" {
 
 resource "docker_container" "workspace" {
   count = data.coder_workspace.me.start_count
-  image = docker_image.coder_image.latest
+  image = docker_image.deeplearning.image_id
   cpu_shares = var.cpu
   memory = "${var.ram*1024}"
-  gpus = "all"
+  runtime = "nvidia"
   # Uses lower() to avoid Docker restriction on container names.
   name = "coder-${data.coder_workspace.me.owner}-${lower(data.coder_workspace.me.name)}"
   # Hostname makes the shell more user friendly: coder@my-workspace:~$
@@ -160,11 +173,13 @@ resource "docker_container" "workspace" {
     host = "host.docker.internal"
     ip   = "host-gateway"
   }
+  # users data directory
   volumes {
     container_path = "/home/${data.coder_workspace.me.owner}/data/" 
     host_path      = "/data/${data.coder_workspace.me.owner}/"
     read_only      = false
   }
+  # users home directory
   volumes {
   	container_path = "/home/${data.coder_workspace.me.owner}"
     volume_name    = docker_volume.home_volume.name
