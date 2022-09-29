@@ -21,9 +21,7 @@ ENV CONDA_DIR /opt/miniconda
 
 # Install dependencies
 RUN apt-get update && \
-    apt-get upgrade -y && \
-    APT_INSTALL="apt-get install -y --no-install-recommends" && \
-    $APT_INSTALL \
+    apt-get install -y --no-install-recommends \
     bash \
     bash-completion \
     ca-certificates \
@@ -39,9 +37,10 @@ RUN apt-get update && \
     zip && \
     apt-get autoremove -y && \
     apt-get clean && \
-    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
-    # Install miniconda
-    wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+# Install miniconda
+RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh && \
     /bin/bash miniconda.sh -b -p ${CONDA_DIR} && \
     rm -rf miniconda.sh && \
     # Enable conda autocomplete
@@ -68,12 +67,12 @@ ENV PATH=${CONDA_DIR}/bin:$PATH
 #     # clean up
 #     conda clean --all --yes
 
-# Python version
-ARG PYTHON_VER=3.10
-
 # Change to your user
 USER ${USERNAME}
 WORKDIR /home/${USERNAME}
+
+# Python version
+ARG PYTHON_VER=3.10
 
 # Create deep-learning environment    
 # initialize conda for the new user
@@ -84,16 +83,12 @@ RUN conda init bash && source ~/.bashrc && \
     echo "# Make new shells activate the DL environment" >> /home/${USERNAME}/.bashrc && \
     echo "conda activate DL" >> /home/${USERNAME}/.bashrc
 
-# Default TensorFlow package version
-ARG TF_VERSION=2.9.2
-
 # Install packages inside the new environment
 RUN conda activate DL && \	
-    PIP_INSTALL="pip install --upgrade --no-cache-dir" && \
-    $PIP_INSTALL pip && \
-    $PIP_INSTALL pybind11 scikit-build && \
-    $PIP_INSTALL torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cu116 && \
-    $PIP_INSTALL \
+    pip install --upgrade --no-cache-dir pip && \
+    pip install --upgrade --no-cache-dir torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cu116
+RUN conda activate DL && \ 
+    pip install --upgrade --no-cache-dir \
     ipywidgets \
     jupyterlab \
     matplotlib \
@@ -103,14 +98,22 @@ RUN conda activate DL && \
     pandas \
     Pillow \
     plotly \
+    pybind11 \
     PyYAML \
     scipy \
+    scikit-build \
     scikit-image \
     scikit-learn \
     sympy \
     seaborn \
-    tensorflow${TF_VERSION:+==${TF_VERSION}} \
-    tqdm && \
-    # Set path of python packages
-    echo "# Set path of python packages" >> /home/${USERNAME}/.bashrc && \
+    tqdm
+
+# Install TensorFlow
+# Default TensorFlow package version
+ARG TF_VERSION=
+RUN conda activate DL && \
+    pip install --upgrade --no-cache-dir tensorflow${TF_VERSION:+==${TF_VERSION}}
+
+# Set path of python packages
+RUN echo "# Set path of python packages" >> /home/${USERNAME}/.bashrc && \
     echo 'export PATH=$HOME/.local/bin:$PATH' >> /home/${USERNAME}/.bashrc

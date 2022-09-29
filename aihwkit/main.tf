@@ -27,30 +27,13 @@ variable "OS" {
   sensitive = true
 }
 
-locals {
-  jupyter-type-arg = "${var.jupyter == "notebook" ? "Notebook" : "Server"}"
-}
-
-variable "jupyter" {
-  description = "Jupyter IDE type"
-  default     = "notebook"
-  validation {
-    condition = contains([
-      "notebook",
-      "lab",
-    ], var.jupyter)
-    error_message = "Invalid Jupyter!"   
-}
-}
-
 variable "python_version" {
   description = "Python Version"
   default     = "3.10"
   validation {
     condition = contains([
       "3.10",
-      "3.9",
-      "3.8"
+      "3.9"
     ], var.python_version)
     error_message = "Not supported python version!"   
 }
@@ -87,9 +70,9 @@ data "coder_workspace" "me" {
 # jupyter
 resource "coder_app" "jupyter" {
   agent_id      = coder_agent.dev.id
-  name          = "jupyter-${var.jupyter}"
+  name          = "jupyter-lab"
   icon          = "https://cdn.icon-icons.com/icons2/2667/PNG/512/jupyter_app_icon_161280.png"
-  url           = "http://localhost:8888/@${data.coder_workspace.me.owner}/${lower(data.coder_workspace.me.name)}/apps/jupyter-${var.jupyter}/"
+  url           = "http://localhost:8888/@${data.coder_workspace.me.owner}/${lower(data.coder_workspace.me.name)}/apps/jupyter-lab/"
   relative_path = true
 }
 
@@ -101,8 +84,10 @@ resource "coder_agent" "dev" {
 set -euo pipefail
 # Create user data directory
 mkdir -p ~/data
+# make user share directory
+mkdir -p ~/share
 # start jupyter
-/home/${data.coder_workspace.me.owner}/.conda/envs/DL/bin/jupyter ${var.jupyter} --no-browser --${local.jupyter-type-arg}App.token='' --ip='*' --${local.jupyter-type-arg}App.base_url=/@${data.coder_workspace.me.owner}/${lower(data.coder_workspace.me.name)}/apps/jupyter-${var.jupyter}/ 2>&1 | tee -a ~/build.log &
+/home/${data.coder_workspace.me.owner}/.local/bin/jupyter lab --no-browser --ServerApp.token='' --ip='*' --ServerApp.base_url=/@${data.coder_workspace.me.owner}/${lower(data.coder_workspace.me.name)}/apps/jupyter-lab/ 2>&1 | tee -a ~/build.log &
 EOT
 }
 
@@ -110,11 +95,11 @@ resource "docker_volume" "home_volume" {
   name = "coder-${data.coder_workspace.me.owner}-${lower(data.coder_workspace.me.name)}-root"
 }
 
-resource "docker_image" "coder_image" {
+resource "docker_image" "aihwkit" {
   name = "coder-base-${data.coder_workspace.me.owner}-${lower(data.coder_workspace.me.name)}"
   build {
     path       = "./images/"
-    dockerfile = "AIHWKIT.Dockerfile"
+    dockerfile = "Dockerfile"
     tag        = ["matifali/aihwkit:latest"]
     build_arg = {
       USERNAME = "${data.coder_workspace.me.owner}"
@@ -127,7 +112,7 @@ resource "docker_image" "coder_image" {
 
 resource "docker_container" "workspace" {
   count = data.coder_workspace.me.start_count
-  image = docker_image.coder_image.latest
+  image = docker_image.aihwkit.image_id
   cpu_shares = var.cpu
   memory = "${var.ram*1024}"
   gpus = "all"
@@ -152,6 +137,12 @@ resource "docker_container" "workspace" {
   volumes {
     container_path = "/home/${data.coder_workspace.me.owner}"
     volume_name    = docker_volume.home_volume.name
+    read_only      = false
+  }
+  # shared data directory
+  volumes {
+    container_path = "/home/share"
+    host_path      = "/data/share/"
     read_only      = false
   }
 }

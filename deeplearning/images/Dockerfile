@@ -1,0 +1,99 @@
+# Build argumnets
+ARG CUDA_VER=11.7
+ARG UBUNTU_VER=22.04
+
+# Download the base image
+FROM nvidia/cuda:${CUDA_VER}.1-cudnn8-runtime-ubuntu${UBUNTU_VER}
+# you can check for all available images at https://hub.docker.com/r/nvidia/cuda/tags
+
+# Install as root
+USER root
+
+# Install dependencies
+ARG DEBIAN_FRONTEND="noninteractive"
+ARG USERNAME=coder
+
+# Shell
+SHELL ["/bin/bash", "--login", "-o", "pipefail", "-c"]
+
+# miniconda path
+ENV CONDA_DIR /opt/miniconda
+
+# Install dependencies
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    bash \
+    bash-completion \
+    ca-certificates \
+    curl \
+    git \
+    htop \
+    nano \
+    openssh-client \
+    sudo \
+    unzip \
+    vim \
+    wget \ 
+    zip && \
+    apt-get autoremove -y && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+# Python version
+ARG PYTHON_VER=3.10
+
+# Install Python
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    python${PYTHON_VER} \
+    python${PYTHON_VER}-dev \
+    python${PYTHON_VER}-venv \
+    python3-pip \
+    python-is-python3 && \
+    apt-get autoremove -y && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+# Add a user `${USERNAME}` so that you're not developing as the `root` user
+RUN useradd ${USERNAME} \
+    --uid=1000 \
+    --create-home \
+    --shell=/bin/bash \
+    --user-group && \
+    echo "${USERNAME} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/nopasswd
+
+# Change to your user
+USER ${USERNAME}
+WORKDIR /home/${USERNAME}
+
+# Install packages inside the new environment
+RUN pip install --upgrade --no-cache-dir pip && \
+    pip install --upgrade --no-cache-dir torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cu116
+RUN pip install --upgrade --no-cache-dir \
+    ipywidgets \
+    jupyterlab \
+    matplotlib \
+    nltk \
+    notebook \
+    numpy \
+    pandas \
+    Pillow \
+    plotly \
+    pybind11 \
+    PyYAML \
+    scipy \
+    scikit-build \
+    scikit-image \
+    scikit-learn \
+    sympy \
+    seaborn \
+    tqdm
+
+# Install TensorFlow
+# Default TensorFlow package version
+ARG TF_VERSION=
+RUN pip install --upgrade --no-cache-dir tensorflow${TF_VERSION:+==${TF_VERSION}}
+
+# Set path of python packages
+RUN echo "# Set path of python packages" >> /home/${USERNAME}/.bashrc && \
+    echo 'export PATH=$HOME/.local/bin:$PATH' >> /home/${USERNAME}/.bashrc

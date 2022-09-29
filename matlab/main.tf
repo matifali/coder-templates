@@ -31,7 +31,7 @@ variable "cpu" {
   default     = "04"
   validation {
     condition     =  var.cpu > 0 && var.cpu <= 20
-    error_message = "Core count should be bwteen 1-20."
+    error_message = "Core count should be between 1-20."
   }
 }
 variable "ram" {
@@ -68,8 +68,8 @@ resource "coder_agent" "dev" {
   startup_script = <<EOT
 #!/bin/bash
 set -euo pipefail
-# make user data directory
-mkdir -p ~/data
+# make user share directory
+mkdir -p ~/share
 # start Matlab
 MWI_BASE_URL="/@${data.coder_workspace.me.owner}/${data.coder_workspace.me.name}/apps/Matlab" matlab-proxy-app &
   EOT
@@ -111,7 +111,7 @@ resource "docker_image" "coder_image" {
 
 resource "docker_container" "workspace" {
   count = data.coder_workspace.me.start_count
-  image = docker_image.coder_image.latest
+  image = docker_image.coder_image.image_id
   cpu_shares = var.cpu
   memory = "${var.ram*1024}"
   # Uses lower() to avoid Docker restriction on container names.
@@ -130,10 +130,16 @@ resource "docker_container" "workspace" {
     host = "host.docker.internal"
     ip   = "host-gateway"
   }
+  # users home directory
   volumes {
-    container_path = "/home/matlab/data"
-    #volume_name    = docker_volume.home_volume.name
-    host_path      = "/data/${data.coder_workspace.me.owner}/"
+  	container_path = "/home/${data.coder_workspace.me.owner}"
+    volume_name    = docker_volume.home_volume.name
+    read_only      = false
+  }
+  # shared data directory
+  volumes {
+    container_path = "/home/share"
+    host_path      = "/data/share/"
     read_only      = false
   }
 }
