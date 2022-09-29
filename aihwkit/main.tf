@@ -150,7 +150,7 @@ resource "docker_container" "workspace" {
     read_only      = false
   }
   volumes {
-  	container_path = "/home/${data.coder_workspace.me.owner}"
+    container_path = "/home/${data.coder_workspace.me.owner}"
     volume_name    = docker_volume.home_volume.name
     read_only      = false
   }
