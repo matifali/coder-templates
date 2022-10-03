@@ -189,7 +189,7 @@ resource "docker_container" "workspace" {
   }
   # shared data directory
   volumes {
-    container_path = "/home/share"
+    container_path = "/home/${data.coder_workspace.me.owner}/share"
     host_path      = "/data/share/"
     read_only      = false
   }

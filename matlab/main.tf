@@ -28,18 +28,18 @@ variable "OS" {
 
 variable "cpu" {
   description = "How many CPU cores for this workspace?"
-  default     = "04"
+  default     = "10"
   validation {
-    condition     =  var.cpu > 0 && var.cpu <= 20
-    error_message = "Core count should be between 1-20."
+    condition = contains(["05", "10", "20", "30", "40"], var.cpu)
+    error_message = "value must be one of the options"
   }
 }
 variable "ram" {
-  description = "How much RAM for your workspace? (min: 8 GB, max: 64 GB)"
-  default     = "16"
-  validation { # this will show a text input
-    condition     =  var.ram >= 8 && var.ram <= 96
-    error_message = "Ram size must be an integer between 8 and 64 (GB)."
+  description = "How much RAM for your workspace? (min: 32 GB, max: 128 GB)"
+  default     = "32"
+  validation {
+    condition = contains(["32", "48", "64", "96", "128"], var.ram)
+    error_message = "value must be one of the options"
   }
 }
 
@@ -138,8 +138,8 @@ resource "docker_container" "workspace" {
   }
   # shared data directory
   volumes {
-    container_path = "/home/share"
-    host_path      = "/data/share/"
+    container_path = "/home/matlab/share"
+    host_path      = "/data/share"
     read_only      = false
   }
 }
