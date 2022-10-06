@@ -2,7 +2,7 @@ terraform {
   required_providers {
     coder = {
       source  = "coder/coder"
-      version = "0.4.15"
+      version = "0.5.0"
     }
     docker = {
       source  = "kreuzwerker/docker"
@@ -132,7 +132,7 @@ resource "docker_container" "workspace" {
   }
   # users home directory
   volumes {
-  	container_path = "/home/${data.coder_workspace.me.owner}"
+    container_path = "/home/${data.coder_workspace.me.owner}"
     volume_name    = docker_volume.home_volume.name
     read_only      = false
   }

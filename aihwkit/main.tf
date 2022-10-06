@@ -2,7 +2,7 @@ terraform {
   required_providers {
     coder = {
       source  = "coder/coder"
-      version = "0.4.15"
+      version = "0.5.0"
     }
     docker = {
       source  = "kreuzwerker/docker"
@@ -73,7 +73,6 @@ resource "coder_app" "jupyter" {
   name          = "jupyter-lab"
   icon          = "https://cdn.icon-icons.com/icons2/2667/PNG/512/jupyter_app_icon_161280.png"
   url           = "http://localhost:8888/@${data.coder_workspace.me.owner}/${lower(data.coder_workspace.me.name)}/apps/jupyter-lab/"
-  relative_path = true
 }
 
 resource "coder_agent" "dev" {
