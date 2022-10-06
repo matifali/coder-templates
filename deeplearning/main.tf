@@ -2,7 +2,7 @@ terraform {
   required_providers {
     coder = {
       source  = "coder/coder"
-      version = "0.4.15"
+      version = "0.5.0"
     }
     docker = {
       source  = "kreuzwerker/docker"
@@ -118,7 +118,6 @@ resource "coder_app" "jupyter" {
   name          = "jupyter-${var.jupyter}"
   icon          = "https://cdn.icon-icons.com/icons2/2667/PNG/512/jupyter_app_icon_161280.png"
   url           = "http://localhost:8888/@${data.coder_workspace.me.owner}/${lower(data.coder_workspace.me.name)}/apps/jupyter-${var.jupyter}/"
-  relative_path = true
 }
 
 resource "coder_agent" "dev" {
@@ -129,6 +128,8 @@ resource "coder_agent" "dev" {
 set -euo pipefail
 # Create user data directory
 mkdir -p ~/data
+# make user share directory
+mkdir -p ~/share
 # start jupyter
 ${local.jupyter-path}/jupyter ${var.jupyter} --no-browser --${local.jupyter-type-arg}App.token='' --ip='*' --${local.jupyter-type-arg}App.base_url=/@${data.coder_workspace.me.owner}/${lower(data.coder_workspace.me.name)}/apps/jupyter-${var.jupyter}/ 2>&1 | tee -a ~/build.log &
 EOT
@@ -183,6 +184,12 @@ resource "docker_container" "workspace" {
   volumes {
   	container_path = "/home/${data.coder_workspace.me.owner}"
     volume_name    = docker_volume.home_volume.name
+    read_only      = false
+  }
+  # shared data directory
+  volumes {
+    container_path = "/home/${data.coder_workspace.me.owner}/share"
+    host_path      = "/data/share/"
     read_only      = false
   }
 }
