@@ -39,24 +39,6 @@ variable "python_version" {
 }
 }
 
-variable "cpu" {
-  description = "How many CPU cores for this workspace?"
-  default     = "08"
-  validation {
-    condition     = contains(["08", "16", "32"], var.cpu) # this will show a picker
-    error_message = "Invalid CPU count!"
-  }
-}
-
-variable "ram" {
-  description = "How much RAM for your workspace? (min: 24 GB, max: 128 GB)"
-  default     = "24"
-  validation { # this will show a text input select
-    condition     = contains(["24", "48", "64", "96", "128"], var.ram) # this will show a picker
-    error_message = "Ram size must be an integer between 24 and 128 (GB)."
-  }
-}
-
 provider "docker" {
   host = "unix:///var/run/docker.sock"
 }
@@ -112,8 +94,7 @@ resource "docker_image" "aihwkit" {
 resource "docker_container" "workspace" {
   count = data.coder_workspace.me.start_count
   image = docker_image.aihwkit.image_id
-  cpu_shares = var.cpu
-  memory = "${var.ram*1024}"
+  memory = 65536
   gpus = "all"
   # Uses lower() to avoid Docker restriction on container names.
   name = "coder-${data.coder_workspace.me.owner}-${lower(data.coder_workspace.me.name)}"
