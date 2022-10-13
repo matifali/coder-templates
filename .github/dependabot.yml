@@ -7,12 +7,22 @@ version: 2
 updates:
   # Maintain dependencies for terraform
   - package-ecosystem: "terraform" # See documentation for possible values
-    directory: "**/" # Location of package manifests
+    directory: "/deeplearning" # Location of package manifests
+    schedule:
+      interval: "weekly"
+  # Maintain dependencies for terraform
+  - package-ecosystem: "terraform" # See documentation for possible values
+    directory: "/matlab" # Location of package manifests
     schedule:
       interval: "weekly"
 
   # Maintain dependencies for docker
   - package-ecosystem: "docker"
-    directory: "**/images"
+    directory: "/deeplearning/images"
+    schedule:
+      interval: "weekly"
+  # Maintain dependencies for docker
+  - package-ecosystem: "docker"
+    directory: "/matlab/images"
     schedule:
       interval: "weekly"
