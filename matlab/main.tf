@@ -26,14 +26,6 @@ variable "OS" {
   sensitive = true
 }
 
-variable "cpu" {
-  description = "How many CPU cores for this workspace?"
-  default     = "10"
-  validation {
-    condition = contains(["05", "10", "20", "30", "40"], var.cpu)
-    error_message = "value must be one of the options"
-  }
-}
 variable "ram" {
   description = "How much RAM for your workspace? (min: 32 GB, max: 128 GB)"
   default     = "32"
@@ -94,15 +86,15 @@ variable "docker_image" {
 }
 
 resource "docker_volume" "home_volume" {
-  name = "coder-${data.coder_workspace.me.owner}-${lower(data.coder_workspace.me.name)}-root"
+  name = "coder-${data.coder_workspace.me.owner}-${lower(data.coder_workspace.me.name)}-home"
 }
 
 resource "docker_image" "coder_image" {
-  name = "coder-base-${data.coder_workspace.me.owner}-${lower(data.coder_workspace.me.name)}"
+  name = "${data.coder_workspace.me.owner}-${lower(data.coder_workspace.me.name)}"
   build {
     path       = "./images/"
     dockerfile = "${var.docker_image}.Dockerfile"
-    tag        = ["coder-${var.docker_image}:v0.1"]
+    tag        = ["coder-${var.docker_image}:latest"]
   }
 
   # Keep alive for other workspaces to use upon deletion
@@ -112,7 +104,6 @@ resource "docker_image" "coder_image" {
 resource "docker_container" "workspace" {
   count = data.coder_workspace.me.start_count
   image = docker_image.coder_image.image_id
-  cpu_shares = var.cpu
   memory = "${var.ram*1024}"
   # Uses lower() to avoid Docker restriction on container names.
   name = "coder-${data.coder_workspace.me.owner}-${lower(data.coder_workspace.me.name)}"
@@ -140,6 +131,6 @@ resource "docker_container" "workspace" {
   volumes {
     container_path = "/home/matlab/share"
     host_path      = "/data/share"
-    read_only      = false
+    read_only      = true
   }
 }

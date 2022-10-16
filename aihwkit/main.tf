@@ -73,11 +73,11 @@ EOT
 }
 
 resource "docker_volume" "home_volume" {
-  name = "coder-${data.coder_workspace.me.owner}-${lower(data.coder_workspace.me.name)}-root"
+  name = "coder-${data.coder_workspace.me.owner}-${lower(data.coder_workspace.me.name)}-home"
 }
 
 resource "docker_image" "aihwkit" {
-  name = "coder-base-${data.coder_workspace.me.owner}-${lower(data.coder_workspace.me.name)}"
+  name = "${data.coder_workspace.me.owner}-${lower(data.coder_workspace.me.name)}"
   build {
     path       = "./images/"
     dockerfile = "Dockerfile"
@@ -88,7 +88,7 @@ resource "docker_image" "aihwkit" {
     }
   }
   # Keep alive for other workspaces to use upon deletion
-  keep_locally = true
+  keep_locally = false
 }
 
 resource "docker_container" "workspace" {
@@ -97,7 +97,7 @@ resource "docker_container" "workspace" {
   memory = 65536
   gpus = "all"
   # Uses lower() to avoid Docker restriction on container names.
-  name = "coder-${data.coder_workspace.me.owner}-${lower(data.coder_workspace.me.name)}"
+  name = "${data.coder_workspace.me.owner}-${lower(data.coder_workspace.me.name)}"
   # Hostname makes the shell more user friendly: coder@my-workspace:~$
   hostname = lower(data.coder_workspace.me.name)
   dns      = ["1.1.1.1"]
@@ -123,6 +123,6 @@ resource "docker_container" "workspace" {
   volumes {
     container_path = "/home/${data.coder_workspace.me.owner}/share"
     host_path      = "/data/share/"
-    read_only      = false
+    read_only      = true
   }
 }

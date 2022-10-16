@@ -84,15 +84,6 @@ variable "jupyter" {
 }
 }
 
-variable "cpu" {
-  description = "How many CPU cores for this workspace?"
-  default     = "08"
-  validation {
-    condition     = contains(["08", "16", "32"], var.cpu) # this will show a picker
-    error_message = "Invalid CPU count!"
-  }
-}
-
 variable "ram" {
   description = "How much RAM for your workspace? (min: 24 GB, max: 128 GB)"
   default     = "24"
@@ -136,11 +127,11 @@ EOT
 }
 
 resource "docker_volume" "home_volume" {
-  name = "coder-${data.coder_workspace.me.owner}-${lower(data.coder_workspace.me.name)}-root"
+  name = "coder-${data.coder_workspace.me.owner}-${lower(data.coder_workspace.me.name)}-home"
 }
 
 resource "docker_image" "deeplearning" {
-  name = "coder-base-${data.coder_workspace.me.owner}-${lower(data.coder_workspace.me.name)}"
+  name = "${data.coder_workspace.me.owner}-${lower(data.coder_workspace.me.name)}"
   build {
     path       = "./images/"
     dockerfile = "${local.docker-file-name}"
@@ -152,15 +143,14 @@ resource "docker_image" "deeplearning" {
     }
   }
   # Keep alive for other workspaces to use upon deletion
-  keep_locally = true
+  keep_locally = false
 }
 
 resource "docker_container" "workspace" {
   count = data.coder_workspace.me.start_count
   image = docker_image.deeplearning.image_id
-  cpu_shares = var.cpu
   memory = "${var.ram*1024}"
-  runtime = "nvidia"
+  gpus = "all"
   # Uses lower() to avoid Docker restriction on container names.
   name = "coder-${data.coder_workspace.me.owner}-${lower(data.coder_workspace.me.name)}"
   # Hostname makes the shell more user friendly: coder@my-workspace:~$
@@ -182,7 +172,7 @@ resource "docker_container" "workspace" {
   }
   # users home directory
   volumes {
-  	container_path = "/home/${data.coder_workspace.me.owner}"
+    container_path = "/home/${data.coder_workspace.me.owner}"
     volume_name    = docker_volume.home_volume.name
     read_only      = false
   }
@@ -190,6 +180,6 @@ resource "docker_container" "workspace" {
   volumes {
     container_path = "/home/${data.coder_workspace.me.owner}/share"
     host_path      = "/data/share/"
-    read_only      = false
+    read_only      = true
   }
 }
