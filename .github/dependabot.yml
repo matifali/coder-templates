@@ -9,12 +9,12 @@ updates:
   - package-ecosystem: "terraform" # See documentation for possible values
     directory: "/deeplearning" # Location of package manifests
     schedule:
-      interval: "weekly"
+      interval: "monthly"
   # Maintain dependencies for terraform
   - package-ecosystem: "terraform" # See documentation for possible values
     directory: "/matlab" # Location of package manifests
     schedule:
-      interval: "weekly"
+      interval: "monthly"
 
   # Maintain dependencies for docker
   - package-ecosystem: "docker"
