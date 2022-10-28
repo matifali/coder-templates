@@ -14,13 +14,13 @@ Follow these steps to configure accessing your workspaces locally on any machine
 
    ```bash
    curl -L https://coder.com/install.sh | sh
-   coder login https://ctar-ml.eee.bilkent.edu.tr:3000/
+   coder login https://gpu.ctar.ml
    coder config-ssh
    ```
 
 ## Windows
 
-1. Download coder executable from [https://ctar-ml.eee.bilkent.edu.tr:3000/bin/coder-windows-amd64.exe](https://ctar-ml.eee.bilkent.edu.tr:3000/bin/coder-windows-amd64.exe)
+1. Download coder executable from [https://gpu.ctar.ml/bin/coder-windows-amd64.exe](https://gpu.ctar.ml/bin/coder-windows-amd64.exe)
 
 2. rename `coder-windows-amd64.exe` to `coder.exe`
 
@@ -31,16 +31,16 @@ Follow these steps to configure accessing your workspaces locally on any machine
 4. Open a `powershell` window and run
 
    ```powershell
-   md $HOME/.ssh
-   coder login https://ctar-ml.eee.bilkent.edu.tr:3000/
+   md $HOME\.ssh
+   coder login https://gpu.ctar.ml
    coder config-ssh
    ```
 
    or alternatively open `cmd` window and run
 
    ```cmd
-   md %USERPROFILE%/.ssh
-   coder login https://ctar-ml.eee.bilkent.edu.tr:3000/
+   md %USERPROFILE%\.ssh
+   coder login https://gpu.ctar.ml
    coder config-ssh
    ```
 
