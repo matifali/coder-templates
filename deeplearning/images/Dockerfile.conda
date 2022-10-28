@@ -1,5 +1,5 @@
 # Build argumnets
-ARG CUDA_VER=11.8.0
+ARG CUDA_VER=11.7.0
 ARG UBUNTU_VER=22.04
 
 # Download the base image
