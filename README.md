@@ -7,7 +7,7 @@ Docker based templates.
 
 # Instructions
 
-To use these tenplates simply clone the repo and 
+To use these templates simply clone the repo and run,
 ```console
 git clone https://github.com/matifali/coder-templates.git
 cd <template directory>
