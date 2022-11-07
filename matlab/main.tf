@@ -2,11 +2,11 @@ terraform {
   required_providers {
     coder = {
       source  = "coder/coder"
-      version = "0.5.3"
+      version = "0.6.0"
     }
     docker = {
       source  = "kreuzwerker/docker"
-      version = "2.22.0"
+      version = "2.23.0"
     }
   }
 }
@@ -56,9 +56,12 @@ data "coder_workspace" "me" {
 # Matlab
 resource "coder_app" "matlab" {
   agent_id = coder_agent.dev.id
-  name     = "Matlab"
+  name     = "matlab"
+  slug     = "matlab"
   icon     = "https://img.icons8.com/nolan/344/matlab.png"
-  url      = "http://localhost:8888/@${data.coder_workspace.me.owner}/${data.coder_workspace.me.name}/apps/Matlab"
+  url      = "http://localhost:8888/@${data.coder_workspace.me.owner}/${data.coder_workspace.me.name}/apps/matlab"
+  subdomain = false
+  share     = owner
 }
 
 
@@ -126,6 +129,7 @@ resource "docker_container" "workspace" {
   stdin_open = true
   tty = true
   env = ["CODER_AGENT_TOKEN=${coder_agent.dev.token}"]
+
   host {
     host = "host.docker.internal"
     ip   = "host-gateway"
