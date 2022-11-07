@@ -20,3 +20,9 @@ updates:
     directory: "/matlab/"
     schedule:
       interval: "weekly"
+      
+   # Update submodules
+  - package-ecosystem: gitsubmodule
+    schedule:
+        interval: "daily"
+    directory: /
