@@ -18,14 +18,10 @@ updates:
 
   # Maintain dependencies for docker
   - package-ecosystem: "docker"
-    directory: "/deeplearning/images"
-    schedule:
-      interval: "weekly"
-  # Maintain dependencies for docker
-  - package-ecosystem: "docker"
     directory: "/matlab/images"
     schedule:
       interval: "weekly"
+      
   # Update submodules
   - package-ecosystem: gitsubmodule
     schedule:
