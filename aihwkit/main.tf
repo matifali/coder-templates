@@ -2,11 +2,11 @@ terraform {
   required_providers {
     coder = {
       source  = "coder/coder"
-      version = "0.5.3"
+      version = "0.6.0"
     }
     docker = {
       source  = "kreuzwerker/docker"
-      version = "2.22.0"
+      version = "2.23.0"
     }
   }
 }
@@ -53,8 +53,11 @@ data "coder_workspace" "me" {
 resource "coder_app" "jupyter" {
   agent_id      = coder_agent.dev.id
   name          = "jupyter-lab"
+  slug          = "jupyter-lab"
   icon          = "https://cdn.icon-icons.com/icons2/2667/PNG/512/jupyter_app_icon_161280.png"
   url           = "http://localhost:8888/@${data.coder_workspace.me.owner}/${lower(data.coder_workspace.me.name)}/apps/jupyter-lab/"
+  subdomain     = false
+  shared        = owner
 }
 
 resource "coder_agent" "dev" {
