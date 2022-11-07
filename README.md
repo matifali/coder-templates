@@ -9,7 +9,7 @@ Docker based templates.
 
 To use these templates simply clone the repo and run,
 ```console
-git clone https://github.com/matifali/coder-templates.git
+git clone --recurse-submodules https://github.com/matifali/coder-templates.git
 cd <template directory>
 coder templates create <template name>
 ```
