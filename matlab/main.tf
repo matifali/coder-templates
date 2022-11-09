@@ -2,7 +2,7 @@ terraform {
   required_providers {
     coder = {
       source  = "coder/coder"
-      version = "0.6.0"
+      version = "0.6.1"
     }
     docker = {
       source  = "kreuzwerker/docker"
@@ -56,12 +56,12 @@ data "coder_workspace" "me" {
 # Matlab
 resource "coder_app" "matlab" {
   agent_id = coder_agent.dev.id
-  name     = "matlab"
+  display_name = "Matlab"
   slug     = "matlab"
   icon     = "https://img.icons8.com/nolan/344/matlab.png"
   url      = "http://localhost:8888/@${data.coder_workspace.me.owner}/${data.coder_workspace.me.name}/apps/matlab"
   subdomain = false
-  share     = owner
+  share     = "owner"
 }
 
 
@@ -74,7 +74,7 @@ set -euo pipefail
 # make user share directory
 mkdir -p ~/share
 # start Matlab
-MWI_BASE_URL="/@${data.coder_workspace.me.owner}/${data.coder_workspace.me.name}/apps/Matlab" matlab-proxy-app &
+MWI_BASE_URL="/@${data.coder_workspace.me.owner}/${data.coder_workspace.me.name}/apps/matlab" matlab-proxy-app &
   EOT
 }
 
@@ -97,15 +97,15 @@ variable "docker_image" {
 }
 
 resource "docker_volume" "home_volume" {
-  name = "coder-${data.coder_workspace.me.owner}-${lower(data.coder_workspace.me.name)}-root"
+  name = "coder-${data.coder_workspace.me.id}-home"
 }
 
 resource "docker_image" "coder_image" {
-  name = "coder-base-${data.coder_workspace.me.owner}-${lower(data.coder_workspace.me.name)}"
+  name = "coder-matlab-${data.coder_workspace.me.owner}-${lower(data.coder_workspace.me.name)}"
   build {
     path       = "./images/"
     dockerfile = "${var.docker_image}.Dockerfile"
-    tag        = ["coder-${var.docker_image}:v0.1"]
+    tag        = ["coder-${var.docker_image}:latest"]
   }
 
   # Keep alive for other workspaces to use upon deletion
