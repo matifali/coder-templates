@@ -9,6 +9,14 @@ on:
     paths:
       - '**.tf'
       - '**Dockerfile.*'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - '**.tf'
+      - '**Dockerfile.*'
+  workflow_dispatch:
+
 jobs:
   # make a matrix of all templates(sub directories) that have changed files in them
   # this will allow us to run the job for each template that has changed
@@ -20,6 +28,8 @@ jobs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
       - uses: actions/checkout@v2
+        with:
+          submodules: true
       - name: Set matrix
         id: set-matrix
         run: |
@@ -30,6 +40,27 @@ jobs:
           # create a json array of the templates
           matrix=$(echo "[$(echo "$templates" | sed -e 's/^/"/' -e 's/$/",/' | tr -d ' ' | sed 's/,$//')]")
           echo "::set-output name=matrix::$matrix"
+
+  # Install terraform and validate the templates
+  validate:
+    needs: get_changed_templates
+    runs-on: ubuntu-latest
+    strategy:
+      matrix: ${{ fromJson(needs.get_changed_templates.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: true
+      - name: Install Terraform
+        uses: hashicorp/setup-terraform@v2
+      - name: Terraform Init
+        run: |
+          cd ${{ matrix }}
+          terraform init
+      - name: Terraform Validate
+        run: |
+          cd ${{ matrix }}
+          terraform validate
 
   # this job will run for each template that has changed
   deploy_template:
