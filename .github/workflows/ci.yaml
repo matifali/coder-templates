@@ -64,6 +64,7 @@ jobs:
 
   # this job will run for each template that has changed
   deploy_template:
+    needs: validate
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -78,6 +79,10 @@ jobs:
           curl -L https://coder.com/install.sh | sh
       - name: "Push template"
         run: |
+          echo "Pushing ${{ matrix }} to Coder"
+          echo "Template name: ${{ CODER_TEMPLATE_NAME }}"
+          echo "Template directory: ${{ CODER_TEMPLATE_DIR }}"
+          cd ${{ CODER_TEMPLATE_DIR }}
           coder templates push $CODER_TEMPLATE_NAME --directory $CODER_TEMPLATE_DIR --yes --name=$CODER_TEMPLATE_VERSION
         env:
           # Consumed by Coder CLI
