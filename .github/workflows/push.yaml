@@ -5,7 +5,7 @@ name: Push templates to coder server
 on:
   push:
     branches:
-      - private
+      - main
     paths:
       - '**.tf'
       - '**Dockerfile.*'
