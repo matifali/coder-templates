@@ -63,7 +63,7 @@ jobs:
           echo "Pushing ${{ matrix }} to Coder"
           echo "Template name: ${{ CODER_TEMPLATE_NAME }}"
           echo "Template directory: ${{ CODER_TEMPLATE_DIR }}"
-          cd ${{ CODER_TEMPLATE_DIR }}
+  
           coder templates push $CODER_TEMPLATE_NAME --directory $CODER_TEMPLATE_DIR --yes
         env:
           # Consumed by Coder CLI
