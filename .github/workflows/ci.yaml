@@ -18,35 +18,13 @@ on:
   workflow_dispatch:
 
 jobs:
-  # make a matrix of all templates(sub directories) that have changed files in them
-  # this will allow us to run the job for each template that has changed
-
-  # this job will run for each template that has changed
-  get_changed_templates:
-    runs-on: ubuntu-latest
-    outputs:
-      matrix: ${{ steps.set-matrix.outputs.matrix }}
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          submodules: true
-      - name: Set matrix
-        id: set-matrix
-        run: |
-          # get all the changed files
-          changed_files=$(git diff --name-only HEAD~1 HEAD)
-          # get all the templates that have changed files in them
-          templates=$(echo "$changed_files" | grep -oP '^.+?(?=/)' | sort -u)
-          # create a json array of the templates
-          matrix=$(echo "[$(echo "$templates" | sed -e 's/^/"/' -e 's/$/",/' | tr -d ' ' | sed 's/,$//')]")
-          echo "::set-output name=matrix::$matrix"
-
   # Install terraform and validate the templates
   validate:
     needs: get_changed_templates
     runs-on: ubuntu-latest
     strategy:
-      matrix: ${{ fromJson(needs.get_changed_templates.outputs.matrix) }}
+      matrix:
+        template: [$(ls -d */ | cut -f1 -d'/')]
     steps:
       - uses: actions/checkout@v3
         with:
@@ -55,17 +33,20 @@ jobs:
         uses: hashicorp/setup-terraform@v2
       - name: Terraform Init
         run: |
-          cd ${{ matrix }}
+          cd ${{ matrix.template }}
           terraform init
       - name: Terraform Validate
         run: |
           cd ${{ matrix }}
           terraform validate
 
-  # this job will run for each template that has changed
+  # this job will if validate is successful
   deploy_template:
     needs: validate
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        template: [$(ls -d */ | cut -f1 -d'/')]
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -83,12 +64,11 @@ jobs:
           echo "Template name: ${{ CODER_TEMPLATE_NAME }}"
           echo "Template directory: ${{ CODER_TEMPLATE_DIR }}"
           cd ${{ CODER_TEMPLATE_DIR }}
-          coder templates push $CODER_TEMPLATE_NAME --directory $CODER_TEMPLATE_DIR --yes --name=$CODER_TEMPLATE_VERSION
+          coder templates push $CODER_TEMPLATE_NAME --directory $CODER_TEMPLATE_DIR --yes
         env:
           # Consumed by Coder CLI
           CODER_URL: https://gpu.ctar.ml
           CODER_SESSION_TOKEN: ${{ secrets.CODER_SESSION_TOKEN }}
           # Template source & details
           CODER_TEMPLATE_NAME: ${{ matrix.template }}
-          CODER_TEMPLATE_VERSION: ${{ steps.vars.outputs.sha_short }}
           CODER_TEMPLATE_DIR: ./${{ matrix.template }}
