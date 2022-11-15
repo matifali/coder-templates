@@ -18,31 +18,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  # Install terraform and validate the templates
-  validate:
-    needs: get_changed_templates
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        template: [$(ls -d */ | cut -f1 -d'/')]
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          submodules: true
-      - name: Install Terraform
-        uses: hashicorp/setup-terraform@v2
-      - name: Terraform Init
-        run: |
-          cd ${{ matrix.template }}
-          terraform init
-      - name: Terraform Validate
-        run: |
-          cd ${{ matrix }}
-          terraform validate
-
   # this job will if validate is successful
   deploy_template:
-    needs: validate
     runs-on: ubuntu-latest
     strategy:
       matrix:
