@@ -23,7 +23,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        template: [$(ls -d */ | cut -f1 -d'/')]
+        template: [aihwkit, deeplarning, matlab]
     steps:
       - name: Checkout
         uses: actions/checkout@v3
