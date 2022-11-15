@@ -23,7 +23,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        template: [aihwkit, deeplarning, matlab]
+        template: [aihwkit, deeplearning, matlab]
     steps:
       - name: Checkout
         uses: actions/checkout@v3
