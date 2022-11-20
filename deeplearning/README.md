@@ -1,16 +1,3 @@
-# Persistent Storage
-https://github.com/matifali/coder-templates/blob/f6429fe2fc54a8de89621e118c68bf5cd97c003e/deeplearning/main.tf#L136
-This is the host directory that will be mapped to `~/data` inside the workspace. make sure you set the permissions and owner ship as a user with `uid:gid` 1000. create subdirectories with the usernames of all coder users.
-```console
-sudo chown 1000:1000 -R your_data_dir
-sudo chmod -R 755 your_data_dir
-```
-After this `your_data_dir/user` will be mapped to `~/data` inside every workspace.
-
-If you do not want this just remove this volume mount from [`main.tf`](./main.tf)
-
-This will persists reboots and will be available in all your work-spaces. It is suggested to store your training data in this directory.
-
 # Coder Setup
 
 Follow these steps to configure accessing your workspaces locally on any machine.
@@ -86,6 +73,19 @@ Once you've configured SSH, you can work on projects from your local copy of VS 
 
 1. Install [Spyder](https://docs.spyder-ide.org/current/installation.html) on your local machine.
 2. Connect Spyder with external kernel by following the [instructions](https://docs.spyder-ide.org/current/panes/ipythonconsole.html#using-external-kernels).
+
+# Persistent Storage
+https://github.com/matifali/coder-templates/blob/f6429fe2fc54a8de89621e118c68bf5cd97c003e/deeplearning/main.tf#L136
+This is the host directory that will be mapped to `~/data` inside the workspace. make sure you set the permissions and owner ship as a user with `uid:gid` 1000. create subdirectories with the usernames of all coder users.
+```console
+sudo chown 1000:1000 -R your_data_dir
+sudo chmod -R 755 your_data_dir
+```
+After this `your_data_dir/user` will be mapped to `~/data` inside every workspace.
+
+If you do not want this just remove this volume mount from [`main.tf`](./main.tf)
+
+This will persists reboots and will be available in all your work-spaces. It is suggested to store your training data in this directory.
 
 # Docker Image
 A standalone docker image is also avaible at [DockerDL](https://github.com/matifali/DockerDL)
