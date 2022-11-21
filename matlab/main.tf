@@ -79,7 +79,7 @@ MWI_BASE_URL="/@${data.coder_workspace.me.owner}/${data.coder_workspace.me.name}
 }
 
 variable "docker_image" {
-  description = "What Docker image would you like to use for your workspace?"
+  description = "What matlab version do you want to use?"
   default     = "r2022b"
 
   # List of images available for the user to choose from.
@@ -136,8 +136,14 @@ resource "docker_container" "workspace" {
   }
   # users home directory
   volumes {
-    container_path = "/home/${data.coder_workspace.me.owner}"
+    container_path = "/home/matlab"
     volume_name    = docker_volume.home_volume.name
+    read_only      = false
+  }
+   # personal data directory
+  volumes {
+    container_path = "/home/matlab/data"
+    host_path      = "/data/${data.coder_workspace.me.owner}"
     read_only      = false
   }
   # shared data directory
