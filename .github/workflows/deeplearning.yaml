@@ -1,0 +1,39 @@
+# An action to push templates to coder server
+
+name: Push a template to coder server
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '**.tf'
+      - '**Dockerfile.*'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - '**.tf'
+      - '**Dockerfile.*'
+  workflow_dispatch:
+
+jobs:
+  deploy_template:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          submodules: true
+
+      - name: "Install latest Coder"
+        run: |
+          curl -L https://coder.com/install.sh | sh
+      - name: "Push template"
+        run: |
+          coder templates push ${{ TEMPLATE_NAME }} --directory ./${{ TEMPLATE_NAME }} --yes
+        env:
+          # Consumed by Coder CLI
+          TEMPLATE_NAME: deeplearning
+          CODER_URL: https://gpu.ctar.ml
+          CODER_SESSION_TOKEN: ${{ secrets.CODER_SESSION_TOKEN }}
