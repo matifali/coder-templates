@@ -61,7 +61,7 @@ resource "coder_app" "novnc" {
   display_name = "noVNC"
   slug         = "novnc"
   icon         = "http://ppswi.us/noVNC/app/images/icons/novnc-icon.svg"
-  url          = "http://localhost:6080/vnc.html"
+  url          = "http://localhost:6080/novnc.html"
   subdomain    = false
   share        = "owner"
 
