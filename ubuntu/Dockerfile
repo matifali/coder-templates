@@ -17,7 +17,7 @@ RUN apt-get update -q && apt-get upgrade -y && apt-get install -y \
 ####################
 RUN apt-get update && apt-get install -y \
     tigervnc-standalone-server tigervnc-common \
-    supervisor novnc websockify gosu && apt-get autoclean && apt-get autoremove && rm -rf /var/lib/apt/lists/*
+    novnc websockify && apt-get autoclean && apt-get autoremove && rm -rf /var/lib/apt/lists/*
 
 ####################
 # Add User
@@ -28,6 +28,6 @@ RUN echo "$USERNAME:$USERNAME" | chpasswd && echo "$USERNAME ALL=(ALL) NOPASSWD:
 
 RUN mkdir -p /home/$USERNAME/.vnc && echo $USERNAME | vncpasswd -f >/home/$USERNAME/.vnc/passwd && chmod 600 /home/$USERNAME/.vnc/passwd && chown -R $USERNAME:$USERNAME /home/$USERNAME
 
-COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+# COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 USER $USERNAME
-CMD ["/usr/bin/supervisord"]
+# CMD ["/usr/bin/supervisord"]

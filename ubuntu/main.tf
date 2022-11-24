@@ -77,8 +77,10 @@ set -euo pipefail
 mkdir -p ~/data
 # make user share directory
 mkdir -p ~/share
-# Run supervisor
-supervisord -c /etc/supervisor/supervisord.conf
+# Run vnc server on port 5901
+vncserver :1 -fg -geometry 1920x1080 -depth 24 -rfbport 5901 -rfbauth ~/.vnc/passwd > ~/vnc.log 2>&1 &
+# Run noVNC on port 6080
+/usr/bin/websockify -D --web=/usr/share/novnc/ 6080 localhost:5901 > ~/novnc.log 2>&1 &
 EOT
 }
 
@@ -105,7 +107,7 @@ resource "docker_image" "ubuntu" {
     build_arg = {
       USERNAME = "${data.coder_workspace.me.owner}"
     }
-
+    keep_locally = true
 
   }
 }
@@ -122,7 +124,7 @@ resource "docker_container" "workspace" {
   dns      = ["1.1.1.1"]
   # Use the docker gateway if the access URL is 127.0.0.1
   command = ["sh", "-c", replace(coder_agent.dev.init_script, "127.0.0.1", "host.docker.internal")]
-  env     = ["CODER_AGENT_TOKEN=${coder_agent.dev.token}", "USERNAME=${data.coder_workspace.me.owner}", "USERID=1000"]
+  env     = ["CODER_AGENT_TOKEN=${coder_agent.dev.token}"]
 
   host {
     host = "host.docker.internal"
