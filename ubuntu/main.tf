@@ -107,9 +107,10 @@ resource "docker_image" "ubuntu" {
     build_arg = {
       USERNAME = "${data.coder_workspace.me.owner}"
     }
-    keep_locally = true
 
   }
+  # Keep alive for other workspaces to use upon deletion
+  keep_locally = true
 }
 
 resource "docker_container" "workspace" {
