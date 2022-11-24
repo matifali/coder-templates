@@ -62,7 +62,7 @@ resource "coder_app" "code-server" {
   url      = "http://localhost:8000/?folder=/home/coder/data"
   icon     = "/icon/code.svg"
 
-  subdomain = local.enable_subdomains
+  subdomain = "false"
 }
 
 resource "coder_app" "novnc" {
