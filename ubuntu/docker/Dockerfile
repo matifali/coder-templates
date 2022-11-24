@@ -1,6 +1,6 @@
 FROM ubuntu:latest
 
-USER roor
+USER root
 
 ENV DEBIAN_FRONTEND="noninteractive"
 RUN apt update -y && \
