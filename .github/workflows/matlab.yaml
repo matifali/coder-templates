@@ -31,7 +31,7 @@ jobs:
         run: echo ::set-output name=sha_short::$(git rev-parse --short HEAD)
 
       - name: update coder template
-        uses: matifali/update-coder-template@v
+        uses: matifali/update-coder-template@v1
         with:
           CODER_URL: "https://gpu.ctar.ml"
           CODER_TEMPLATE_NAME: "matlab"
