@@ -1,0 +1,26 @@
+# An action to push templates to coder server
+
+name: Push a template to coder server
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "**.tf"
+      - "**Dockerfile.*"
+      - "**.Dockerfile"
+
+jobs:
+  deploy_template:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: update coder template
+        uses: matifali/update-coder-template@1.1-alpha
+        with:
+          CODER_URL: "https://gpu.ctar.ml"
+          CODER_SESSION_TOKEN: ${{ secrets.CODER_SESSION_TOKEN }}
+          CODER_TEMPLATE_NAME: "ubuntu"
