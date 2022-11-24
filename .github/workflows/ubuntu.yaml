@@ -18,9 +18,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
+      - name: Get latest short commit SHA
+        id: get_commit_sha
+        run: echo ::set-output name=sha_short::$(git rev-parse --short HEAD)
+
       - name: update coder template
         uses: matifali/update-coder-template@1.1-alpha
         with:
           CODER_URL: "https://gpu.ctar.ml"
-          CODER_SESSION_TOKEN: ${{ secrets.CODER_SESSION_TOKEN }}
           CODER_TEMPLATE_NAME: "ubuntu"
+          CODER_TEMPLATE_VERSION: ${{ steps.get_commit_sha.outputs.sha_short }}
