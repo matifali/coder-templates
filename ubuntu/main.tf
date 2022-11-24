@@ -65,11 +65,6 @@ resource "coder_app" "novnc" {
   subdomain    = false
   share        = "owner"
 
-  healthcheck {
-    url       = "http://localhost:6080/healthz"
-    interval  = 30
-    threshold = 5
-  }
 }
 
 resource "coder_agent" "dev" {
