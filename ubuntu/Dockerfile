@@ -22,7 +22,7 @@ RUN apt-get update && apt-get install -y \
 ####################
 # Add User
 ####################
-ENV USERNAME=coder
+ARG USERNAME=coder
 RUN useradd --home-dir /home/$USERNAME --shell /bin/bash --create-home --user-group --groups adm,sudo --uid 1000 $USERNAME
 RUN echo "$USERNAME:$USERNAME" | chpasswd && echo "$USERNAME ALL=(ALL) NOPASSWD:ALL" >>/etc/sudoers
 
