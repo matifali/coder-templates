@@ -1,10 +1,6 @@
-FROM ubuntu:22.04
+FROM ubuntu:latest
 
 ENV DEBIAN_FRONTEND noninteractive
-ENV APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=1
-
-# Set the locale and timezone
-ENV TZ=Europe/Istanbul LANG=en_US.UTF-8 LANGUAGE=en_US:en
 
 ####################
 # Add Xubuntu Mate Desktop
@@ -18,6 +14,12 @@ RUN apt-get update -q && apt-get upgrade -y && apt-get install -y \
 RUN apt-get update && apt-get install -y \
     tigervnc-standalone-server tigervnc-common \
     novnc websockify && apt-get autoclean && apt-get autoremove && rm -rf /var/lib/apt/lists/*
+
+# Set the locale and timezone
+ENV TZ=Europe/Istanbul LANG=en_US.UTF-8 LLC_ALL=en_US.UTF-8
+
+# Set the locale
+RUN locale-gen ${LLC_ALL} && update-locale LANG=${LANG}
 
 ####################
 # Add User
