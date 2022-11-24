@@ -26,14 +26,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: "Install latest Coder"
-        run: |
-          curl -L https://coder.com/install.sh | sh
-      - name: "Push template"
-        run: |
-          coder templates push ${{ TEMPLATE_NAME }} --directory ./${{ TEMPLATE_NAME }} --yes
-        env:
-          # Consumed by Coder CLI
-          TEMPLATE_NAME: matlab
-          CODER_URL: https://gpu.ctar.ml
+      - name: Get latest short commit SHA
+        id: get_commit_sha
+        run: echo ::set-output name=sha_short::$(git rev-parse --short HEAD)
+
+      - name: update coder template
+        uses: matifali/update-coder-template@v
+        with:
+          CODER_URL: "https://gpu.ctar.ml"
+          CODER_TEMPLATE_NAME: "matlab"
+          CODER_TEMPLATE_DIR: "matlab"
+          CODER_TEMPLATE_VERSION: ${{ steps.get_commit_sha.outputs.sha_short }}
           CODER_SESSION_TOKEN: ${{ secrets.CODER_SESSION_TOKEN }}
