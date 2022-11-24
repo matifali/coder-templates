@@ -4,7 +4,7 @@ ENV DEBIAN_FRONTEND noninteractive
 ENV APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=1
 
 # Set the locale and timezone
-ENV TZ=Europe/Istanbul LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8
+ENV TZ=Europe/Istanbul LANG=en_US.UTF-8 LANGUAGE=en_US:en
 
 ####################
 # Add Xubuntu Mate Desktop
@@ -29,4 +29,5 @@ RUN echo $USER:$USER | /usr/sbin/chpasswd
 RUN mkdir -p /home/$USER/.vnc && echo $USER | vncpasswd -f >/home/$USER/.vnc/passwd && chmod 600 /home/$USER/.vnc/passwd && chown -R $USER:$USER /home/$USER
 
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+USER $USERNAME
 CMD ["/usr/bin/supervisord"]
