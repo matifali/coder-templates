@@ -23,10 +23,10 @@ RUN apt-get update && apt-get install -y \
 # Add User
 ####################
 ENV USERNAME=coder
-ENV USER=${USERNAME}
 RUN useradd --home-dir /home/$USERNAME --shell /bin/bash --create-home --user-group --groups adm,sudo --uid 1000 $USERNAME
-RUN echo $USER:$USER | /usr/sbin/chpasswd
-RUN mkdir -p /home/$USER/.vnc && echo $USER | vncpasswd -f >/home/$USER/.vnc/passwd && chmod 600 /home/$USER/.vnc/passwd && chown -R $USER:$USER /home/$USER
+RUN echo "$USERNAME:$USERNAME" | chpasswd && echo "$USERNAME ALL=(ALL) NOPASSWD:ALL" >>/etc/sudoers
+
+RUN mkdir -p /home/$USERNAME/.vnc && echo $USERNAME | vncpasswd -f >/home/$USERNAME/.vnc/passwd && chmod 600 /home/$USERNAME/.vnc/passwd && chown -R $USERNAME:$USERNAME /home/$USERNAME
 
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 USER $USERNAME
