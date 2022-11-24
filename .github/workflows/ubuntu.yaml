@@ -1,6 +1,6 @@
 # An action to push templates to coder server
 
-name: Push a template to coder server
+name: ubuntu
 
 on:
   push:
@@ -10,6 +10,8 @@ on:
       - "**.tf"
       - "**Dockerfile.*"
       - "**.Dockerfile"
+
+  workflow_dispatch:
 
 jobs:
   deploy_template:

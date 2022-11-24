@@ -1,20 +1,20 @@
 # An action to push templates to coder server
 
-name: Push a template to coder server
+name: deeplearning
 
 on:
   push:
     branches:
       - main
     paths:
-      - '**.tf'
-      - '**Dockerfile.*'
+      - "**.tf"
+      - "**Dockerfile.*"
   pull_request:
     branches:
       - main
     paths:
-      - '**.tf'
-      - '**Dockerfile.*'
+      - "**.tf"
+      - "**Dockerfile.*"
   workflow_dispatch:
 
 jobs:
