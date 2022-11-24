@@ -77,8 +77,8 @@ set -euo pipefail
 mkdir -p ~/data
 # make user share directory
 mkdir -p ~/share
-# run startup script
-bash /startup.sh > /dev/null 2>&1 | tee ~/startup.log
+# Run supervisor
+supervisord -c /etc/supervisor/supervisord.conf
 EOT
 }
 
