@@ -6,147 +6,143 @@ terraform {
     }
     docker = {
       source  = "kreuzwerker/docker"
-      version = "2.23.0"
+      version = "~> 2.23.0"
     }
   }
 }
 
-# Admin parameters
-
-variable "arch" {
-  default     = "amd64"
-  description = "arch: What architecture is your Docker host on?"
-  sensitive   = true
-}
-
-variable "OS" {
-  default     = "Linux"
-  description = <<-EOF
-  What operating system is your Coder host on?
-  EOF
-  sensitive   = true
-}
-
-variable "cpu" {
-  description = "How many CPU cores for this workspace?"
-  default     = "08"
-  validation {
-    condition     = contains(["08", "16", "32"], var.cpu) # this will show a picker
-    error_message = "Invalid CPU count!"
-  }
-}
-
-variable "ram" {
-  description = "How much RAM for your workspace? (min: 24 GB, max: 128 GB)"
-  default     = "24"
-  validation {
-    condition     = contains(["24", "48", "64", "96", "128"], var.ram) # this will show a picker
-    error_message = "Ram size must be an integer between 24 and 128 (GB)."
-  }
-}
-
-provider "docker" {
-  host = "unix:///var/run/docker.sock"
-}
-
-provider "coder" {
-}
-
-data "coder_workspace" "me" {
-}
-
-# no-vnc
-resource "coder_app" "novnc" {
-  agent_id     = coder_agent.dev.id
-  display_name = "noVNC"
-  slug         = "novnc"
-  icon         = "http://ppswi.us/noVNC/app/images/icons/novnc-icon.svg"
-  url          = "http://localhost:6080"
-  subdomain    = false
-  share        = "owner"
-
-}
+provider "coder" {}
+data "coder_workspace" "me" {}
 
 resource "coder_agent" "dev" {
-  arch           = var.arch
-  os             = "linux"
+  arch = "amd64"
+  os   = "linux"
+
+  env = {
+    "VSCODE_QUALITY" = "stable",
+    "VSCODE_TELEMETRY_LEVEL" = "off",
+    "SUPERVISOR_DIR" = "/usr/share/basic-env/supervisor"
+  }
+
   startup_script = <<EOT
 #!/bin/bash
-set -euo pipefail
-# Create user data directory
+set -e
+# create users data directory
 mkdir -p ~/data
-# make user share directory
-mkdir -p ~/share
-# Run vnc server on port 5901
-vncserver :1 -fg -geometry 1920x1080 -depth 24 -rfbport 5901 -rfbauth ~/.vnc/passwd > ~/vnc.log 2>&1 &
-# Run noVNC on port 6080
-/usr/bin/websockify -D --web=/usr/share/novnc/ 6080 localhost:5901 > ~/novnc.log 2>&1 &
+# start supervisor
+supervisord
+# start code-server
+echo "[+] Starting code-server"
+supervisorctl start code-server
+# start VNC server
+echo "[+] Starting VNC"
+echo "coder" | tightvncpasswd -f > $HOME/.vnc/passwd
+supervisorctl start vnc:*
 EOT
 }
 
-resource "docker_volume" "home_volume" {
-  name = "coder-${data.coder_workspace.me.id}-home"
+resource "coder_app" "supervisor" {
+  agent_id = coder_agent.dev.id
+
+  display_name = "Supervisor"
+  slug         = "supervisor"
+
+  url      = "http://localhost:8079"
+  icon     = "/icon/widgets.svg"
+
+  subdomain = "false"
 }
 
+resource "coder_app" "code-server" {
+  agent_id = coder_agent.dev.id
 
-# data "docker_registry_image" "ubuntu" {
-#   name = "fredblgr/ubuntu-novnc:22.04"
-# }
+  display_name = "VSCode"
+  slug         = "code-server"
 
-# resource "docker_image" "ubuntu" {
-#   name          = data.docker_registry_image.ubuntu.name
-#   pull_triggers = [data.docker_registry_image.ubuntu.sha256_digest]
-# }
+  url      = "http://localhost:8000/?folder=/home/coder/data"
+  icon     = "/icon/code.svg"
 
-resource "docker_image" "ubuntu" {
-  name = "ubuntu-novnc"
-  build {
-    dockerfile = "./Dockerfile"
-    path       = "."
-    tag        = ["latest"]
-    build_arg = {
-      USERNAME = "${data.coder_workspace.me.owner}"
-    }
+  subdomain = local.enable_subdomains
+}
 
+resource "coder_app" "novnc" {
+  count    = 1
+  agent_id = coder_agent.dev.id
+
+  display_name = "noVNC"
+  slug         = "novnc"
+
+  url      = "http://localhost:8081?autoconnect=1&resize=scale&path=@${data.coder_workspace.me.owner}/${data.coder_workspace.me.name}.dev/apps/noVNC/websockify&password=coder"
+  icon     = "/icon/novnc.svg"
+
+  subdomain = "false"
+}
+
+resource "docker_volume" "home" {
+  name = "coder-${data.coder_workspace.me.owner}-${data.coder_workspace.me.name}-home"
+}
+
+resource "coder_metadata" "home" {
+  resource_id = docker_volume.home.id
+  hide = true
+  item {
+    key = "name"
+    value = "home"
   }
-  # Keep alive for other workspaces to use upon deletion
+}
+
+resource "docker_image" "basic_env" {
+  name = "matifali/ubuntu-novnc:latest"
+
+  build {
+    path = "./docker"
+    tag  = ["matifali/ubuntu-novnc", "matifali/ubuntu-novnc:latest"]
+  }
+
+  triggers = {
+    dir_sha1 = sha1(join("", [for f in fileset(path.module, "docker/*") : filesha1(f)]))
+  }
+
   keep_locally = true
 }
 
+resource "coder_metadata" "basic_env" {
+  resource_id = docker_image.basic_env.id
+
+  hide = true
+
+  item {
+    key   = "name"
+    value = "basic_env"
+  }
+}
+
 resource "docker_container" "workspace" {
-  count      = data.coder_workspace.me.start_count
-  image      = docker_image.ubuntu.image_id
-  cpu_shares = var.cpu
-  memory     = var.ram * 1024
-  # Uses lower() to avoid Docker restriction on container names.
-  name = "coder-${data.coder_workspace.me.owner}-${lower(data.coder_workspace.me.name)}"
-  # Hostname makes the shell more user friendly: coder@my-workspace:~$
+  volumes {
+    container_path = "/home/coder/"
+    volume_name    = docker_volume.home.name
+    read_only      = false
+  }
+
+  volumes {
+    container_path = "/home/coder/data/"
+    host_path      = "/data/${data.coder_workspace.me.owner}/"
+    read_only      = false
+  }
+
+  count = data.coder_workspace.me.start_count
+  image = docker_image.basic_env.image_id
+
+  name     = "coder-${data.coder_workspace.me.owner}-${lower(data.coder_workspace.me.name)}"
   hostname = lower(data.coder_workspace.me.name)
+
   dns      = ["1.1.1.1"]
-  # Use the docker gateway if the access URL is 127.0.0.1
-  command = ["sh", "-c", replace(coder_agent.dev.init_script, "127.0.0.1", "host.docker.internal")]
-  env     = ["CODER_AGENT_TOKEN=${coder_agent.dev.token}"]
+
+  entrypoint = ["sh", "-c", replace(coder_agent.dev.init_script, "127.0.0.1", "host.docker.internal")]
+  env        = ["CODER_AGENT_TOKEN=${coder_agent.dev.token}"]
 
   host {
     host = "host.docker.internal"
     ip   = "host-gateway"
-  }
-  # users data directory
-  volumes {
-    container_path = "/home/${data.coder_workspace.me.owner}/data/"
-    host_path      = "/data/${data.coder_workspace.me.owner}/"
-    read_only      = false
-  }
-  # users home directory
-  volumes {
-    container_path = "/home/${data.coder_workspace.me.owner}"
-    volume_name    = docker_volume.home_volume.name
-    read_only      = false
-  }
-  # shared data directory
-  volumes {
-    container_path = "/home/${data.coder_workspace.me.owner}/share"
-    host_path      = "/data/share/"
-    read_only      = false
   }
 }
