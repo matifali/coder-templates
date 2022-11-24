@@ -7,14 +7,16 @@ on:
     branches:
       - main
     paths:
-      - "./matlab/main.tf"
-      - "./matlab/images/Dockerfile.*"
+      - "matlab/main.tf"
+      - "matlab/images/Dockerfile.*"
+      - ".github/workflows/matlab.yaml"
   pull_request:
     branches:
       - main
     paths:
-      - "./matlab/main.tf"
-      - "./matlab/images/Dockerfile.*"
+      - "matlab/main.tf"
+      - "matlab/images/Dockerfile.*"
+      - ".github/workflows/matlab.yaml"
   workflow_dispatch:
 
 jobs:
