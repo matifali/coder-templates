@@ -7,14 +7,14 @@ on:
     branches:
       - main
     paths:
-      - "deeplearning/main.tf"
-      - "deeplearning/images/*.Dockerfile"
+      - "./deeplearning/main.tf"
+      - "./deeplearning/images/*.Dockerfile"
   pull_request:
     branches:
       - main
     paths:
-      - "deeplearning/main.tf"
-      - "deeplearning/images/*.Dockerfile"
+      - "./deeplearning/main.tf"
+      - "./deeplearning/images/*.Dockerfile"
   workflow_dispatch:
 
 jobs:

@@ -7,9 +7,14 @@ on:
     branches:
       - main
     paths:
-      - "**.tf"
-      - "**Dockerfile.*"
-      - "**.Dockerfile"
+      - "./ubuntu/main.tf"
+      - "Dockerfile"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "./ubuntu/main.tf"
+      - "Dockerfile"
 
   workflow_dispatch:
 
