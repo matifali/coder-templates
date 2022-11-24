@@ -116,19 +116,13 @@ locals {
 
 # jupyter
 resource "coder_app" "jupyter" {
-  agent_id  = coder_agent.dev.id
+  agent_id     = coder_agent.dev.id
   display_name = "Jupyter"
-  slug      = "jupyter-${var.jupyter}"
-  icon      = "https://cdn.icon-icons.com/icons2/2667/PNG/512/jupyter_app_icon_161280.png"
-  url       = "http://localhost:8888/@${data.coder_workspace.me.owner}/${lower(data.coder_workspace.me.name)}/apps/jupyter-${var.jupyter}/"
-  subdomain = false
-  share     = "owner"
-
-  healthcheck {
-    url       = "http://localhost:8888/@${data.coder_workspace.me.owner}/${lower(data.coder_workspace.me.name)}/apps/jupyter-${var.jupyter}/healthz"
-    interval  = 5
-    threshold = 10
-  }
+  slug         = "jupyter-${var.jupyter}"
+  icon         = "https://cdn.icon-icons.com/icons2/2667/PNG/512/jupyter_app_icon_161280.png"
+  url          = "http://localhost:8888/@${data.coder_workspace.me.owner}/${lower(data.coder_workspace.me.name)}/apps/jupyter-${var.jupyter}/"
+  subdomain    = false
+  share        = "owner"
 }
 
 resource "coder_agent" "dev" {
