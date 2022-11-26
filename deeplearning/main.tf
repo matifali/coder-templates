@@ -152,7 +152,7 @@ ${local.jupyter-path}/jupyter ${var.jupyter} --no-browser --${local.jupyter-type
 # Install Microsoft's code-server
 wget -O- https://aka.ms/install-vscode-server/setup.sh | sh 2>&1 | tee -a ~/build.log
 # start code-server
-code-server --accept-server-license-terms serve-local --without-connection-token --quality stable --telemetry-level off 2&>1 | tee -a ~/code-server.log &
+code-server --accept-server-license-terms serve-local --without-connection-token --quality stable --telemetry-level off 2>&1 | tee -a ~/code-server.log &
 EOT
 }
 
