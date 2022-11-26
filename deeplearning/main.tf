@@ -89,7 +89,7 @@ variable "cpu" {
 }
 
 variable "ram" {
-  description = "How much RAM for your workspace? (min: 24 GB, max: 128 GB)"
+  description = "Choose RAM for your workspace? (min: 24 GB, max: 128 GB)"
   default     = "24"
   validation {                                                         # this will show a text input select
     condition     = contains(["24", "48", "64", "96", "128"], var.ram) # this will show a picker
@@ -125,6 +125,18 @@ resource "coder_app" "jupyter" {
   share        = "owner"
 }
 
+resource "coder_app" "code-server" {
+  agent_id = coder_agent.dev.id
+
+  display_name = "VSCode"
+  slug         = "code-server"
+
+  url  = "http://localhost:8000/?folder=/home/${data.coder_workspace.me.owner}/"
+  icon = "/icon/code.svg"
+
+  subdomain = "false"
+}
+
 resource "coder_agent" "dev" {
   arch           = var.arch
   os             = "linux"
@@ -137,6 +149,10 @@ mkdir -p ~/data
 mkdir -p ~/share
 # start jupyter
 ${local.jupyter-path}/jupyter ${var.jupyter} --no-browser --${local.jupyter-type-arg}App.token='' --ip='*' --${local.jupyter-type-arg}App.base_url=/@${data.coder_workspace.me.owner}/${lower(data.coder_workspace.me.name)}/apps/jupyter-${var.jupyter}/ 2>&1 | tee -a ~/build.log &
+# Install Microsoft's code-server
+wget -O- https://aka.ms/install-vscode-server/setup.sh | sh 2>&1 | tee -a ~/build.log
+# start code-server
+code-server --accept-server-license-terms serve-local --without-connection-token --quality stable --telemetry-level off 2&>1 | tee -a ~/code-server.log &
 EOT
 }
 
