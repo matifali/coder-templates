@@ -130,7 +130,7 @@ resource "coder_app" "code-server" {
 
   display_name = "VSCode"
   slug         = "code-server"
-  url          = "http://localhost:8000/@${data.coder_workspace.me.owner}/${lower(data.coder_workspace.me.name)}/apps/code-server?folder=/home/${data.coder_workspace.me.owner}/data/${data.coder_workspace.me.owner}/"
+  url          = "http://localhost:8000/@${data.coder_workspace.me.owner}/${lower(data.coder_workspace.me.name)}/apps/code-server?folder=/home/${data.coder_workspace.me.owner}/data/"
   icon         = "/icon/code.svg"
   subdomain    = "false"
   share        = "owner"
