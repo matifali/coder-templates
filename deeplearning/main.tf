@@ -120,8 +120,8 @@ resource "coder_app" "jupyter" {
   display_name = "Jupyter"
   slug         = "jupyter-${var.jupyter}"
   icon         = "https://cdn.icon-icons.com/icons2/2667/PNG/512/jupyter_app_icon_161280.png"
-  url          = "http://localhost:8888"
-  subdomain    = true
+  url          = "http://localhost:8888/@${data.coder_workspace.me.owner}/${lower(data.coder_workspace.me.name)}/apps/jupyter-${var.jupyter}/"
+  subdomain    = false
   share        = "owner"
 }
 
