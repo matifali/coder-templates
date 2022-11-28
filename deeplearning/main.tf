@@ -59,7 +59,7 @@ variable "environmnet_type" {
   validation {
     condition = contains([
       "Full",
-      "Full with conda",
+      "Full + conda",
       "PyTorch",
       "Tensorflow"
     ], var.environmnet_type)
@@ -91,9 +91,9 @@ variable "cpu" {
 variable "ram" {
   description = "Choose RAM for your workspace? (min: 24 GB, max: 128 GB)"
   default     = "24"
-  validation {                                                         # this will show a text input select
-    condition     = contains(["24", "48", "64", "96", "128"], var.ram) # this will show a picker
-    error_message = "Ram size must be an integer between 24 and 128 (GB)."
+  validation {
+    condition     = contains(["24", "48", "64"], var.ram) # this will show a picker
+    error_message = "Ram size must be an integer between 24 and 64 (GB)."
   }
 }
 
@@ -130,11 +130,10 @@ resource "coder_app" "code-server" {
 
   display_name = "VSCode"
   slug         = "code-server"
-
-  url  = "http://localhost:8000/@${data.coder_workspace.me.owner}/${lower(data.coder_workspace.me.name)}/apps/code-server?folder=/data/${data.coder_workspace.me.owner}/"
-  icon = "/icon/code.svg"
-
-  subdomain = "false"
+  url          = "http://localhost:8000/@${data.coder_workspace.me.owner}/${lower(data.coder_workspace.me.name)}/apps/code-server?folder=/home/${data.coder_workspace.me.owner}/data/${data.coder_workspace.me.owner}/"
+  icon         = "/icon/code.svg"
+  subdomain    = "false"
+  share        = "owner"
 }
 
 resource "coder_agent" "dev" {
