@@ -121,7 +121,7 @@ resource "coder_app" "jupyter" {
   slug         = "jupyter-${var.jupyter}"
   icon         = "https://cdn.icon-icons.com/icons2/2667/PNG/512/jupyter_app_icon_161280.png"
   url          = "http://localhost:8888/@${data.coder_workspace.me.owner}/${lower(data.coder_workspace.me.name)}/apps/jupyter-${var.jupyter}/"
-  subdomain    = false
+  subdomain    = "true"
   share        = "owner"
 }
 
@@ -132,7 +132,7 @@ resource "coder_app" "code-server" {
   slug         = "code-server"
   url          = "http://localhost:8000/@${data.coder_workspace.me.owner}/${lower(data.coder_workspace.me.name)}/apps/code-server?folder=/home/${data.coder_workspace.me.owner}/data/"
   icon         = "/icon/code.svg"
-  subdomain    = "false"
+  subdomain    = "true"
   share        = "owner"
 }
 
