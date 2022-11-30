@@ -195,8 +195,7 @@ resource "docker_container" "workspace" {
     ip   = "host-gateway"
   }
 
-  shm_size = "2048" # 2GB shared memory
-
+  ipc_mode = "host" # required for PyTorch with multiple workers
   # users data directory
   volumes {
     container_path = "/home/${data.coder_workspace.me.owner}/data/"
