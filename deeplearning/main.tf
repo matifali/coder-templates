@@ -194,6 +194,9 @@ resource "docker_container" "workspace" {
     host = "host.docker.internal"
     ip   = "host-gateway"
   }
+
+  shm_size = "2048" # 2GB shared memory
+
   # users data directory
   volumes {
     container_path = "/home/${data.coder_workspace.me.owner}/data/"
