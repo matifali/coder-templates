@@ -86,7 +86,7 @@ mkdir -p ~/share
 # start Matlab
 matlab-proxy-app 2>&1 | tee ~/matlab-proxy-app.log &
 # start desktop
-/bin/sh -vnc 2>&1 | tee ~/matlab.log &
+/bin/run.sh -vnc 2>&1 | tee ~/matlab.log &
   EOT
 }
 
