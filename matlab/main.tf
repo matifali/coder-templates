@@ -59,8 +59,8 @@ resource "coder_app" "matlab" {
   display_name = "Matlab Web"
   slug         = "matlab"
   icon         = "https://img.icons8.com/nolan/344/matlab.png"
-  url          = "http://localhost:8888/@${data.coder_workspace.me.owner}/${data.coder_workspace.me.name}/apps/matlab"
-  subdomain    = false
+  url          = "http://localhost:8888/index.html"
+  subdomain    = true
   share        = "owner"
 }
 
@@ -83,8 +83,8 @@ resource "coder_agent" "dev" {
 set -euo pipefail
 # make user share directory
 mkdir -p ~/share
-# start Matlab
-matlab-proxy-app 2>&1 | tee ~/matlab-proxy-app.log &
+# start Matlab browser
+/bin/run.sh -browser 2>&1 | tee ~/matlab_browser.log &
 # start desktop
 /bin/run.sh -vnc 2>&1 | tee ~/matlab.log &
   EOT
@@ -138,7 +138,8 @@ resource "docker_container" "workspace" {
   entrypoint = ["sh", "-c", replace(coder_agent.dev.init_script, "127.0.0.1", "host.docker.internal")]
 
 
-  env        = ["CODER_AGENT_TOKEN=${coder_agent.dev.token}",  "MWI_BASE_URL=/@${data.coder_workspace.me.owner}/${data.coder_workspace.me.name}/apps/matlab"]
+  env        = ["CODER_AGENT_TOKEN=${coder_agent.dev.token}"]
+  # "MWI_BASE_URL=/@${data.coder_workspace.me.owner}/${data.coder_workspace.me.name}/apps/matlab"
 
   host {
     host = "host.docker.internal"
