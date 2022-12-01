@@ -26,14 +26,14 @@ variable "OS" {
   sensitive   = true
 }
 
-variable "cpu" {
-  description = "How many CPU cores for this workspace?"
-  default     = "10"
-  validation {
-    condition     = contains(["05", "10", "20", "30", "40"], var.cpu)
-    error_message = "value must be one of the options"
-  }
-}
+# variable "cpu" {
+#   description = "How many CPU cores for this workspace?"
+#   default     = "10"
+#   validation {
+#     condition     = contains(["05", "10", "20", "30", "40"], var.cpu)
+#     error_message = "value must be one of the options"
+#   }
+# }
 variable "ram" {
   description = "How much RAM for your workspace? (min: 32 GB, max: 128 GB)"
   default     = "32"
@@ -84,7 +84,9 @@ set -euo pipefail
 # make user share directory
 mkdir -p ~/share
 # start Matlab
-matlab-proxy-app &
+matlab-proxy-app 2>&1 | tee /tmp/matlab-proxy-app.log &
+# start desktop
+/usr/bin/tini -- matlab -vnc 2>&1 | tee /tmp/matlab.log &
   EOT
 }
 
@@ -125,7 +127,7 @@ resource "docker_image" "coder_image" {
 resource "docker_container" "workspace" {
   count      = data.coder_workspace.me.start_count
   image      = docker_image.coder_image.image_id
-  cpu_shares = var.cpu
+  cpu_shares = 20 # 50% of 40 threads
   memory     = var.ram * 1024
   # Uses lower() to avoid Docker restriction on container names.
   name = "coder-${data.coder_workspace.me.owner}-${lower(data.coder_workspace.me.name)}"
@@ -135,9 +137,7 @@ resource "docker_container" "workspace" {
   # Use the docker gateway if the access URL is 127.0.0.1 
   entrypoint = ["sh", "-c", replace(coder_agent.dev.init_script, "127.0.0.1", "host.docker.internal")]
 
-  # MATLAB Specfic argumnets
-  stdin_open = true
-  tty        = true
+
   env        = ["CODER_AGENT_TOKEN=${coder_agent.dev.token}",  "MWI_BASE_URL=/@${data.coder_workspace.me.owner}/${data.coder_workspace.me.name}/apps/matlab"]
 
   host {
