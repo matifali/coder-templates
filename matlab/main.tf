@@ -59,8 +59,8 @@ resource "coder_app" "matlab" {
   display_name = "Matlab Web"
   slug         = "matlab"
   icon         = "https://img.icons8.com/nolan/344/matlab.png"
-  url          = "http://localhost:8888/index.html"
-  subdomain    = true
+  url          = "http://localhost:8888/@${data.coder_workspace.me.owner}/${data.coder_workspace.me.name}/apps/matlab"
+  subdomain    = false
   share        = "owner"
 }
 
@@ -138,8 +138,7 @@ resource "docker_container" "workspace" {
   entrypoint = ["sh", "-c", replace(coder_agent.dev.init_script, "127.0.0.1", "host.docker.internal")]
 
 
-  env        = ["CODER_AGENT_TOKEN=${coder_agent.dev.token}"]
-  # "MWI_BASE_URL=/@${data.coder_workspace.me.owner}/${data.coder_workspace.me.name}/apps/matlab"
+  env        = ["CODER_AGENT_TOKEN=${coder_agent.dev.token}",  "MWI_BASE_URL=/@${data.coder_workspace.me.owner}/${data.coder_workspace.me.name}/apps/matlab"]
 
   host {
     host = "host.docker.internal"
