@@ -8,10 +8,10 @@ ARG MATLAB_RELEASE=r2022b
 # To check the available matlab-deps images, see: https://hub.docker.com/r/mathworks/matlab-deps
 FROM mathworks/matlab:${MATLAB_RELEASE}
 
-# # Declare the global argument to use at the current build stage
+# Declare the global argument to use at the current build stage
 ARG MATLAB_RELEASE
 
-# # Set user as root
+# Set user as root
 USER root
 
 # Install mpm dependencies

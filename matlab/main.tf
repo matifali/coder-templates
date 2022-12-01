@@ -56,7 +56,7 @@ data "coder_workspace" "me" {
 # Matlab
 resource "coder_app" "matlab" {
   agent_id     = coder_agent.dev.id
-  display_name = "Matlab"
+  display_name = "Matlab Web"
   slug         = "matlab"
   icon         = "https://img.icons8.com/nolan/344/matlab.png"
   url          = "http://localhost:8888/@${data.coder_workspace.me.owner}/${data.coder_workspace.me.name}/apps/matlab"
@@ -64,6 +64,16 @@ resource "coder_app" "matlab" {
   share        = "owner"
 }
 
+
+resource "coder_app" "matlab_desktop" {
+  agent_id     = coder_agent.dev.id
+  display_name = "MATLAB Desktop"
+  slug         = "matlab_desktop"
+  icon         = "https://img.icons8.com/nolan/344/matlab.png"
+  url          = "http://localhost:6080"
+  subdomain    = true
+  share        = "owner"
+}
 
 resource "coder_agent" "dev" {
   arch           = var.arch
@@ -128,12 +138,14 @@ resource "docker_container" "workspace" {
   # MATLAB Specfic argumnets
   stdin_open = true
   tty        = true
-  env        = ["CODER_AGENT_TOKEN=${coder_agent.dev.token}"]
+  env        = ["CODER_AGENT_TOKEN=${coder_agent.dev.token}",  "MLM_LICENSE_FILE=/licenses/license.lic"]
 
   host {
     host = "host.docker.internal"
     ip   = "host-gateway"
   }
+
+  shm_size = 512
   # users home directory
   volumes {
     container_path = "/home/matlab"
