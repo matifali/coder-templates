@@ -84,9 +84,9 @@ set -euo pipefail
 # make user share directory
 mkdir -p ~/share
 # start Matlab
-matlab-proxy-app 2>&1 | tee /tmp/matlab-proxy-app.log &
+matlab-proxy-app 2>&1 | tee ~/matlab-proxy-app.log &
 # start desktop
-/usr/bin/tini -- matlab -vnc 2>&1 | tee /tmp/matlab.log &
+/bin/sh -vnc 2>&1 | tee ~/matlab.log &
   EOT
 }
 
