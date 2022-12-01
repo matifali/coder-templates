@@ -84,7 +84,7 @@ set -euo pipefail
 # make user share directory
 mkdir -p ~/share
 # start Matlab
-MWI_BASE_URL="/@${data.coder_workspace.me.owner}/${data.coder_workspace.me.name}/apps/matlab" matlab-proxy-app &
+matlab-proxy-app &
   EOT
 }
 
@@ -138,7 +138,7 @@ resource "docker_container" "workspace" {
   # MATLAB Specfic argumnets
   stdin_open = true
   tty        = true
-  env        = ["CODER_AGENT_TOKEN=${coder_agent.dev.token}",  "MLM_LICENSE_FILE=/licenses/license.lic"]
+  env        = ["CODER_AGENT_TOKEN=${coder_agent.dev.token}",  "MWI_BASE_URL=/@${data.coder_workspace.me.owner}/${data.coder_workspace.me.name}/apps/matlab"]
 
   host {
     host = "host.docker.internal"
