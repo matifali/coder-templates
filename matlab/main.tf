@@ -65,10 +65,10 @@ resource "coder_app" "matlab" {
 }
 
 
-resource "coder_app" "matlab_desktop" {
+resource "coder_app" "desktop" {
   agent_id     = coder_agent.dev.id
   display_name = "MATLAB Desktop"
-  slug         = "matlab_desktop"
+  slug         = "desktop"
   icon         = "https://img.icons8.com/nolan/344/matlab.png"
   url          = "http://localhost:6080"
   subdomain    = true
