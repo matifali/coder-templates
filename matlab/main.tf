@@ -59,8 +59,8 @@ resource "coder_app" "matlab" {
   display_name = "Matlab Web"
   slug         = "matlab"
   icon         = "https://img.icons8.com/nolan/344/matlab.png"
-  url          = "http://localhost:8888/@${data.coder_workspace.me.owner}/${data.coder_workspace.me.name}/apps/matlab"
-  subdomain    = false
+  url          = "http://localhost:8888/index.html"
+  subdomain    = true
   share        = "owner"
 }
 
