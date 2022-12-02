@@ -21,7 +21,7 @@ RUN wget -q https://www.mathworks.com/mpm/glnxa64/mpm && \
     chmod +x mpm && \
     MATLAB_RELEASE=`ls | grep R*` && \
     ./mpm install \
-    --release=${MATLAB_RELEASE} --destination=/opt/matlab/${MATLAB_RELEASE} --doc \
+    --release=${MATLAB_RELEASE} --destination=/opt/matlab/${MATLAB_RELEASE} \
     --products 5G_Toolbox \
     #AUTOSAR_Blockset \
     #Aerospace_Blockset \
