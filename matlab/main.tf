@@ -54,18 +54,18 @@ data "coder_workspace" "me" {
 }
 
 # Matlab
-resource "coder_app" "matlab" {
+resource "coder_app" "matlab_browser" {
   agent_id     = coder_agent.dev.id
-  display_name = "Matlab Web"
+  display_name = "Matlab Browser"
   slug         = "matlab"
   icon         = "https://img.icons8.com/nolan/344/matlab.png"
-  url          = "http://localhost:8888/index.html"
+  url          = "http://localhost:8888"
   subdomain    = true
   share        = "owner"
 }
 
 
-resource "coder_app" "desktop" {
+resource "coder_app" "matlab_desktop" {
   agent_id     = coder_agent.dev.id
   display_name = "MATLAB Desktop"
   slug         = "desktop"
