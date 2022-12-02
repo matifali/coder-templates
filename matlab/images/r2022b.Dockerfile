@@ -2,27 +2,27 @@
 
 # When you start the build stage, this Dockerfile by default uses the Ubuntu-based matlab-deps image.
 # To check the available matlab-deps images, see: https://hub.docker.com/r/mathworks/matlab-deps
-FROM mathworks/matlab:r2022b
+ARG MATLAB_DOCKER_TAG=r2022b
+FROM mathworks/matlab:${MATLAB_DOCKER_TAG}
 
-# Set user as root
 USER root
+WORKDIR /root
 
-# Install mpm dependencies
 RUN export DEBIAN_FRONTEND=noninteractive && apt-get update && \
-    apt-get install --no-install-recommends --yes \
-    wget \
-    unzip \
-    ca-certificates && \
-    apt-get clean && apt-get autoremove && rm -rf /var/lib/apt/lists/*
- 
+    apt-get install --no-install-recommends --yes wget && \
+    apt-get clean && apt-get -y autoremove && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /opt/matlab
     # Run mpm to install MATLAB in the target location and delete the mpm installation afterwards.
     # If mpm fails to install successfully then output the logfile to the terminal, otherwise cleanup.
 RUN wget -q https://www.mathworks.com/mpm/glnxa64/mpm && chmod +x mpm && \
+    MATLAB_RELEASE=`ls | grep R*` && \
     ./mpm install \
-    --release=r2022b \
-    --destination=/opt/matlab/R2022b/ \
+    --release=${MATLAB_RELEASE} \
+    --destination=/opt/matlab/${MATLAB_RELEASE}/ \
     --doc \
-    --products 5G_Toolbox \
+    --products \
+    5G_Toolbox \
     #AUTOSAR_Blockset \
     #Aerospace_Blockset \
     Aerospace_Toolbox \
@@ -61,7 +61,7 @@ RUN wget -q https://www.mathworks.com/mpm/glnxa64/mpm && chmod +x mpm && \
     #Instrument_Control_Toolbox \
     LTE_Toolbox \
     Lidar_Toolbox \
-    MATLAB \
+    #MATLAB \
     MATLAB_Coder \
     MATLAB_Compiler \
     MATLAB_Compiler_SDK \
