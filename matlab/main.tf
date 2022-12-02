@@ -138,7 +138,7 @@ resource "docker_container" "workspace" {
   entrypoint = ["sh", "-c", replace(coder_agent.dev.init_script, "127.0.0.1", "host.docker.internal")]
 
 
-  env        = ["CODER_AGENT_TOKEN=${coder_agent.dev.token}",  "MWI_BASE_URL=/@${data.coder_workspace.me.owner}/${data.coder_workspace.me.name}/apps/matlab"]
+  env        = ["CODER_AGENT_TOKEN=${coder_agent.dev.token}"]
 
   host {
     host = "host.docker.internal"
