@@ -19,8 +19,9 @@ RUN export DEBIAN_FRONTEND=noninteractive && apt-get update && \
     # If mpm fails to install successfully then output the logfile to the terminal, otherwise cleanup.
 RUN wget -q https://www.mathworks.com/mpm/glnxa64/mpm && chmod +x mpm && \
     ./mpm install \
-    --release=R2022b \
+    --release=r2022b \
     --destination=/opt/matlab/R2022b/ \
+    --doc \
     --products 5G_Toolbox \
     #AUTOSAR_Blockset \
     #Aerospace_Blockset \
