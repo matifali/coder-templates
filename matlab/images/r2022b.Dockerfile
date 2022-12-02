@@ -1,7 +1,7 @@
 # Copyright 2019 - 2022 The MathWorks, Inc.
 
-# To specify which MATLAB release to install in the container, edit the value of the MATLAB_RELEASE argument.
-# Use lower case to specify the release, for example: ARG MATLAB_RELEASE=r2021b
+# To specify which MATLAB release to install in the container, edit the value of the MATLAB_DOCKER_TAG argument.
+# Use lower case to specify the release, for example: ARG MATLAB_DOCKER_TAG=r2021b
 ARG MATLAB_DOCKER_TAG=r2022b
 
 # When you start the build stage, this Dockerfile by default uses the Ubuntu-based matlab-deps image.
