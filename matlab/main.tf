@@ -83,6 +83,8 @@ resource "coder_agent" "dev" {
 set -euo pipefail
 # make user share directory
 mkdir -p ~/share
+# Add matlab to PATH
+export PATH=/opt/matlab/`ls /opt/matlab | grep R*`/bin:$PATH
 # start Matlab browser
 /bin/run.sh -browser 2>&1 | tee ~/matlab_browser.log &
 # start desktop
