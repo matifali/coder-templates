@@ -27,7 +27,7 @@ RUN export DEBIAN_FRONTEND=noninteractive && apt-get update && \
     chmod +x mpm && \
     ./mpm install \
     --release=${MATLAB_RELEASE} \
-    --destination=/opt/matlab \
+    --destination=/opt/matlab/${MATLAB_RELEASE} \
     --products 5G_Toolbox \
     #AUTOSAR_Blockset \
     #Aerospace_Blockset \
@@ -147,5 +147,9 @@ RUN export DEBIAN_FRONTEND=noninteractive && apt-get update && \
     rm -f mpm /tmp/mathworks_root.log && \
     rm /usr/local/bin/matlab && \
     ln -s /opt/matlab/bin/matlab /usr/local/bin/matlab
+    
+# Seems to be needed for -browser version to install addons
+RUN mkdir /.Add-Ons && \
+    chown -R matlab /.Add-Ons
 
 USER matlab
