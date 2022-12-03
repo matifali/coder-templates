@@ -166,7 +166,7 @@ resource "docker_image" "deeplearning" {
     dockerfile = local.docker-image-file
     tag        = ["matifali/deeplearning:latest"]
     build_arg = {
-      USERNAME   = "${data.coder_workspace.me.owner}"
+      USERNAME   = "coder"
       PYTHON_VER = "${var.python_version}"
       TF_VERSION = "${local.tensorflow-version}"
     }
@@ -198,19 +198,19 @@ resource "docker_container" "workspace" {
   ipc_mode = "host" # required for PyTorch with multiple workers
   # users data directory
   volumes {
-    container_path = "/home/${data.coder_workspace.me.owner}/data/"
+    container_path = "/home/coder/data/"
     host_path      = "/data/${data.coder_workspace.me.owner}/"
     read_only      = false
   }
   # users home directory
   volumes {
-    container_path = "/home/${data.coder_workspace.me.owner}"
+    container_path = "/home/coder"
     volume_name    = docker_volume.home_volume.name
     read_only      = false
   }
   # shared data directory
   volumes {
-    container_path = "/home/${data.coder_workspace.me.owner}/share"
+    container_path = "/home/coder/share"
     host_path      = "/data/share/"
     read_only      = false
   }
