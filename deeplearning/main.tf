@@ -59,7 +59,7 @@ variable "environmnet_type" {
   validation {
     condition = contains([
       "Full",
-      "Full with conda",
+      "Full + conda",
       "PyTorch",
       "Tensorflow"
     ], var.environmnet_type)
@@ -89,11 +89,11 @@ variable "cpu" {
 }
 
 variable "ram" {
-  description = "How much RAM for your workspace? (min: 24 GB, max: 128 GB)"
+  description = "Choose RAM for your workspace? (min: 24 GB, max: 128 GB)"
   default     = "24"
-  validation {                                                         # this will show a text input select
-    condition     = contains(["24", "48", "64", "96", "128"], var.ram) # this will show a picker
-    error_message = "Ram size must be an integer between 24 and 128 (GB)."
+  validation {
+    condition     = contains(["24", "48", "64"], var.ram) # this will show a picker
+    error_message = "Ram size must be an integer between 24 and 64 (GB)."
   }
 }
 
@@ -110,25 +110,30 @@ data "coder_workspace" "me" {
 locals {
   jupyter-type-arg   = var.jupyter == "notebook" ? "Notebook" : "Server"
   tensorflow-version = var.tensorflow_version == "latest" ? "" : "${var.tensorflow_version}"
-  jupyter-path       = var.environmnet_type == "Full with conda" ? "/home/${data.coder_workspace.me.owner}/.conda/envs/DL/bin/" : "/home/${data.coder_workspace.me.owner}/.local/bin/"
+  jupyter-path       = var.environmnet_type == "Full with conda" ? "/home/coder/.conda/envs/DL/bin/" : "/home/coder/.local/bin/"
   docker-image-file  = var.environmnet_type == "Full" ? "no-conda.Dockerfile" : var.environmnet_type == "Full with conda" ? "conda.Dockerfile" : var.environmnet_type == "PyTorch" ? "pytorch.Dockerfile" : "tensorflow.Dockerfile"
 }
 
 # jupyter
 resource "coder_app" "jupyter" {
-  agent_id  = coder_agent.dev.id
+  agent_id     = coder_agent.dev.id
   display_name = "Jupyter"
-  slug      = "jupyter-${var.jupyter}"
-  icon      = "https://cdn.icon-icons.com/icons2/2667/PNG/512/jupyter_app_icon_161280.png"
-  url       = "http://localhost:8888/@${data.coder_workspace.me.owner}/${lower(data.coder_workspace.me.name)}/apps/jupyter-${var.jupyter}/"
-  subdomain = false
-  share     = "owner"
+  slug         = "jupyter-${var.jupyter}"
+  icon         = "https://cdn.icon-icons.com/icons2/2667/PNG/512/jupyter_app_icon_161280.png"
+  url          = "http://localhost:8888/"
+  subdomain    = true
+  share        = "owner"
+}
 
-  healthcheck {
-    url       = "http://localhost:8888/@${data.coder_workspace.me.owner}/${lower(data.coder_workspace.me.name)}/apps/jupyter-${var.jupyter}/healthz"
-    interval  = 5
-    threshold = 10
-  }
+resource "coder_app" "code-server" {
+  agent_id = coder_agent.dev.id
+
+  display_name = "VSCode"
+  slug         = "code-server"
+  url          = "http://localhost:8000?folder=/home/coder/data/"
+  icon         = "/icon/code.svg"
+  subdomain    = true
+  share        = "owner"
 }
 
 resource "coder_agent" "dev" {
@@ -142,7 +147,9 @@ mkdir -p ~/data
 # make user share directory
 mkdir -p ~/share
 # start jupyter
-${local.jupyter-path}/jupyter ${var.jupyter} --no-browser --${local.jupyter-type-arg}App.token='' --ip='*' --${local.jupyter-type-arg}App.base_url=/@${data.coder_workspace.me.owner}/${lower(data.coder_workspace.me.name)}/apps/jupyter-${var.jupyter}/ 2>&1 | tee -a ~/build.log &
+${local.jupyter-path}/jupyter ${var.jupyter} --no-browser --${local.jupyter-type-arg}App.token='' --ip='*' 2>&1 | tee -a ~/build.log &
+# start code-server
+code-server --accept-server-license-terms serve-local --without-connection-token --quality stable --telemetry-level off 2>&1 | tee -a ~/code-server.log &
 EOT
 }
 
@@ -157,7 +164,7 @@ resource "docker_image" "deeplearning" {
     dockerfile = local.docker-image-file
     tag        = ["matifali/deeplearning:latest"]
     build_arg = {
-      USERNAME   = "${data.coder_workspace.me.owner}"
+      USERNAME   = "coder"
       PYTHON_VER = "${var.python_version}"
       TF_VERSION = "${local.tensorflow-version}"
     }
@@ -185,21 +192,23 @@ resource "docker_container" "workspace" {
     host = "host.docker.internal"
     ip   = "host-gateway"
   }
+
+  ipc_mode = "host" # required for PyTorch with multiple workers
   # users data directory
   volumes {
-    container_path = "/home/${data.coder_workspace.me.owner}/data/"
+    container_path = "/home/coder/data/"
     host_path      = "/data/${data.coder_workspace.me.owner}/"
     read_only      = false
   }
   # users home directory
   volumes {
-    container_path = "/home/${data.coder_workspace.me.owner}"
+    container_path = "/home/coder"
     volume_name    = docker_volume.home_volume.name
     read_only      = false
   }
   # shared data directory
   volumes {
-    container_path = "/home/${data.coder_workspace.me.owner}/share"
+    container_path = "/home/coder/share"
     host_path      = "/data/share/"
     read_only      = false
   }
