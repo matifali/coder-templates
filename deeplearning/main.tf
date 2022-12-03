@@ -110,7 +110,7 @@ data "coder_workspace" "me" {
 locals {
   jupyter-type-arg   = var.jupyter == "notebook" ? "Notebook" : "Server"
   tensorflow-version = var.tensorflow_version == "latest" ? "" : "${var.tensorflow_version}"
-  jupyter-path       = var.environmnet_type == "Full with conda" ? "/home/${data.coder_workspace.me.owner}/.conda/envs/DL/bin/" : "/home/${data.coder_workspace.me.owner}/.local/bin/"
+  jupyter-path       = var.environmnet_type == "Full with conda" ? "/home/coder/.conda/envs/DL/bin/" : "/home/coder/.local/bin/"
   docker-image-file  = var.environmnet_type == "Full" ? "no-conda.Dockerfile" : var.environmnet_type == "Full with conda" ? "conda.Dockerfile" : var.environmnet_type == "PyTorch" ? "pytorch.Dockerfile" : "tensorflow.Dockerfile"
 }
 
