@@ -120,8 +120,8 @@ resource "coder_app" "jupyter" {
   display_name = "Jupyter"
   slug         = "jupyter-${var.jupyter}"
   icon         = "https://cdn.icon-icons.com/icons2/2667/PNG/512/jupyter_app_icon_161280.png"
-  url          = "http://localhost:8888/@${data.coder_workspace.me.owner}/${lower(data.coder_workspace.me.name)}/apps/jupyter-${var.jupyter}/"
-  subdomain    = false
+  url          = "http://localhost:8888/"
+  subdomain    = true
   share        = "owner"
 }
 
@@ -147,9 +147,7 @@ mkdir -p ~/data
 # make user share directory
 mkdir -p ~/share
 # start jupyter
-${local.jupyter-path}/jupyter ${var.jupyter} --no-browser --${local.jupyter-type-arg}App.token='' --ip='*' --${local.jupyter-type-arg}App.base_url=/@${data.coder_workspace.me.owner}/${lower(data.coder_workspace.me.name)}/apps/jupyter-${var.jupyter}/ 2>&1 | tee -a ~/build.log &
-# Install Microsoft's code-server
-wget -O- https://aka.ms/install-vscode-server/setup.sh | sh 2>&1 | tee -a ~/build.log
+${local.jupyter-path}/jupyter ${var.jupyter} --no-browser --${local.jupyter-type-arg}App.token='' --ip='*' 2>&1 | tee -a ~/build.log &
 # start code-server
 code-server --accept-server-license-terms serve-local --without-connection-token --quality stable --telemetry-level off 2>&1 | tee -a ~/code-server.log &
 EOT
