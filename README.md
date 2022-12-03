@@ -17,3 +17,6 @@ To update
 ```console
 coder templates push <template name>
 ```
+## Automatic updates
+Update your templaets automatically by using this GitHub action.
+[Update Coder Template](https://github.com/marketplace/actions/update-coder-template)
