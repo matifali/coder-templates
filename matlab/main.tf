@@ -154,6 +154,8 @@ resource "docker_container" "workspace" {
   image      = docker_image.matlab.image_id
   cpu_shares = 20 # 50% of 40 threads
   memory     = var.ram * 1024
+  # Use gpu if available
+  runtime = "nvidia"
   # Uses lower() to avoid Docker restriction on container names.
   name = "coder-${data.coder_workspace.me.owner}-${lower(data.coder_workspace.me.name)}"
   # Hostname makes the shell more user friendly: coder@my-workspace:~$
