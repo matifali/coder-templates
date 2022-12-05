@@ -5,8 +5,9 @@ terraform {
       version = "0.6.5"
     }
     docker = {
-      source  = "kreuzwerker/docker"
-      version = "2.23.1"
+      source = "kreuzwerker/docker"
+      # use the latest minor version
+      version = "~> 2.23"
     }
   }
 }
@@ -25,32 +26,6 @@ variable "OS" {
   What operating system is your Coder host on?
   EOF
   sensitive   = true
-}
-
-variable "python_version" {
-  description = "Python Version"
-  default     = "3.10"
-  validation {
-    condition = contains([
-      "3.10",
-      "3.9"
-    ], var.python_version)
-    error_message = "Not supported python version!"
-  }
-}
-
-variable "tensorflow_version" {
-  description = "Tensorflow Version"
-  default     = "latest"
-  validation {
-    condition = contains([
-      "latest",
-      "2.10.0",
-      "2.9.2",
-      "2.8.3"
-    ], var.tensorflow_version)
-    error_message = "Not supported tensorflow version!"
-  }
 }
 
 variable "environmnet_type" {
@@ -108,10 +83,9 @@ data "coder_workspace" "me" {
 }
 
 locals {
-  jupyter-type-arg   = var.jupyter == "notebook" ? "Notebook" : "Server"
-  tensorflow-version = var.tensorflow_version == "latest" ? "" : "${var.tensorflow_version}"
-  jupyter-path       = var.environmnet_type == "Full with conda" ? "/home/coder/.conda/envs/DL/bin/" : "/home/coder/.local/bin/"
-  docker-image-file  = var.environmnet_type == "Full" ? "no-conda.Dockerfile" : var.environmnet_type == "Full with conda" ? "conda.Dockerfile" : var.environmnet_type == "PyTorch" ? "pytorch.Dockerfile" : "tensorflow.Dockerfile"
+  jupyter-type-arg = var.jupyter == "notebook" ? "Notebook" : "Server"
+  jupyter-path     = var.environmnet_type == "Full with conda" ? "/home/coder/.conda/envs/DL/bin/" : "/home/coder/.local/bin/"
+  docker-tag       = var.environmnet_type == "Full" ? "no-conda" : var.environmnet_type == "Full with conda" ? "conda" : var.environmnet_type == "PyTorch" ? "pytorch" : "tensorflow"
 }
 
 # jupyter
@@ -155,27 +129,46 @@ EOT
 
 resource "docker_volume" "home_volume" {
   name = "coder-${data.coder_workspace.me.id}-home"
+  # Protect the volume from being deleted due to changes in attributes.
+  lifecycle {
+    ignore_changes = all
+  }
+  # Add labels in Docker to keep track of orphan resources.
+  labels {
+    label = "coder.owner"
+    value = data.coder_workspace.me.owner
+  }
+  labels {
+    label = "coder.owner_id"
+    value = data.coder_workspace.me.owner_id
+  }
+  labels {
+    label = "coder.workspace_id"
+    value = data.coder_workspace.me.id
+  }
+  # This field becomes outdated if the workspace is renamed but can
+  # be useful for debugging or cleaning out dangling volumes.
+  labels {
+    label = "coder.workspace_name_at_creation"
+    value = data.coder_workspace.me.name
+  }
 }
 
-resource "docker_image" "deeplearning" {
-  name = "coder-dl-${data.coder_workspace.me.owner}-${lower(data.coder_workspace.me.name)}"
-  build {
-    path       = "./images/"
-    dockerfile = local.docker-image-file
-    tag        = ["matifali/deeplearning:latest"]
-    build_arg = {
-      USERNAME   = "coder"
-      PYTHON_VER = "${var.python_version}"
-      TF_VERSION = "${local.tensorflow-version}"
-    }
-  }
+data "docker_registry_image" "dockerdl" {
+  name = "matifali/dockerdl:${local.docker-tag}"
+}
+
+resource "docker_image" "dockerdl" {
+  name          = data.docker_registry_image.dockerdl.name
+  pull_triggers = [data.docker_registry_image.dockerdl.sha256_digest]
+
   # Keep alive for other workspaces to use upon deletion
   keep_locally = true
 }
 
 resource "docker_container" "workspace" {
   count      = data.coder_workspace.me.start_count
-  image      = docker_image.deeplearning.image_id
+  image      = docker_image.dockerdl.image_id
   cpu_shares = var.cpu
   memory     = var.ram * 1024
   runtime    = "nvidia"
@@ -212,4 +205,23 @@ resource "docker_container" "workspace" {
     host_path      = "/data/share/"
     read_only      = false
   }
+
+  # Add labels in Docker to keep track of orphan resources.
+  labels {
+    label = "coder.owner"
+    value = data.coder_workspace.me.owner
+  }
+  labels {
+    label = "coder.owner_id"
+    value = data.coder_workspace.me.owner_id
+  }
+  labels {
+    label = "coder.workspace_id"
+    value = data.coder_workspace.me.id
+  }
+  labels {
+    label = "coder.workspace_name"
+    value = data.coder_workspace.me.name
+  }
+
 }

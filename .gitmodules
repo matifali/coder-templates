@@ -1,3 +1,0 @@
-[submodule "deeplearning/images"]
-	path = deeplearning/images
-	url = https://github.com/matifali/dockerdl
