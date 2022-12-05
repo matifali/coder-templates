@@ -155,7 +155,7 @@ resource "docker_container" "workspace" {
   cpu_shares = 20 # 50% of 40 threads
   memory     = var.ram * 1024
   # Use gpu if available
-  runtime = "nvidia"
+  gpus = "all"
   # Uses lower() to avoid Docker restriction on container names.
   name = "coder-${data.coder_workspace.me.owner}-${lower(data.coder_workspace.me.name)}"
   # Hostname makes the shell more user friendly: coder@my-workspace:~$
