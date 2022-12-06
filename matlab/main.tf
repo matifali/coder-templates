@@ -6,7 +6,7 @@ terraform {
     }
     docker = {
       source  = "kreuzwerker/docker"
-      version = "2.23.1"
+      version = "~> 2.23"
     }
   }
 }
@@ -112,9 +112,32 @@ variable "docker_image" {
 
 resource "docker_volume" "home_volume" {
   name = "coder-${data.coder_workspace.me.id}-home"
+  # Protect the volume from being deleted due to changes in attributes.
+  lifecycle {
+    ignore_changes = all
+  }
+  # Add labels in Docker to keep track of orphan resources.
+  labels {
+    label = "coder.owner"
+    value = data.coder_workspace.me.owner
+  }
+  labels {
+    label = "coder.owner_id"
+    value = data.coder_workspace.me.owner_id
+  }
+  labels {
+    label = "coder.workspace_id"
+    value = data.coder_workspace.me.id
+  }
+  # This field becomes outdated if the workspace is renamed but can
+  # be useful for debugging or cleaning out dangling volumes.
+  labels {
+    label = "coder.workspace_name_at_creation"
+    value = data.coder_workspace.me.name
+  }
 }
 
-resource "docker_image" "coder_image" {
+resource "docker_image" "matlab" {
   name = "coder-matlab-${data.coder_workspace.me.owner}-${lower(data.coder_workspace.me.name)}"
   build {
     path       = "./images/"
@@ -128,9 +151,11 @@ resource "docker_image" "coder_image" {
 
 resource "docker_container" "workspace" {
   count      = data.coder_workspace.me.start_count
-  image      = docker_image.coder_image.image_id
+  image      = docker_image.matlab.image_id
   cpu_shares = 20 # 50% of 40 threads
   memory     = var.ram * 1024
+  # Use gpu if available
+  gpus = "all"
   # Uses lower() to avoid Docker restriction on container names.
   name = "coder-${data.coder_workspace.me.owner}-${lower(data.coder_workspace.me.name)}"
   # Hostname makes the shell more user friendly: coder@my-workspace:~$
@@ -140,7 +165,7 @@ resource "docker_container" "workspace" {
   entrypoint = ["sh", "-c", replace(coder_agent.dev.init_script, "127.0.0.1", "host.docker.internal")]
 
 
-  env        = ["CODER_AGENT_TOKEN=${coder_agent.dev.token}"]
+  env = ["CODER_AGENT_TOKEN=${coder_agent.dev.token}"]
 
   host {
     host = "host.docker.internal"
@@ -165,5 +190,23 @@ resource "docker_container" "workspace" {
     container_path = "/home/matlab/share"
     host_path      = "/data/share"
     read_only      = false
+  }
+
+  # Add labels in Docker to keep track of orphan resources.
+  labels {
+    label = "coder.owner"
+    value = data.coder_workspace.me.owner
+  }
+  labels {
+    label = "coder.owner_id"
+    value = data.coder_workspace.me.owner_id
+  }
+  labels {
+    label = "coder.workspace_id"
+    value = data.coder_workspace.me.id
+  }
+  labels {
+    label = "coder.workspace_name"
+    value = data.coder_workspace.me.name
   }
 }
