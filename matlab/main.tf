@@ -84,24 +84,6 @@ export PATH=/opt/matlab/`ls /opt/matlab | grep R*`/bin:$PATH
   EOT
 }
 
-variable "docker_image" {
-  description = "What matlab version do you want to use?"
-  default     = "r2022b"
-
-  # List of images available for the user to choose from.
-  # Delete this condition to give users free text input.
-  validation {
-    condition     = contains(["r2022b"], var.docker_image)
-    error_message = "Invalid Docker image!"
-  }
-
-  # Prevents admin errors when the image is not found
-  validation {
-    condition     = fileexists("images/${var.docker_image}.Dockerfile")
-    error_message = "Invalid Docker image. The file does not exist in the images directory."
-  }
-}
-
 resource "docker_volume" "home_volume" {
   name = "coder-${data.coder_workspace.me.id}-home"
   # Protect the volume from being deleted due to changes in attributes.
@@ -129,7 +111,7 @@ resource "docker_volume" "home_volume" {
   }
 }
 
-resource "docker_registry_image" "matlab" {
+data "docker_registry_image" "matlab" {
   name = "matifali.matlab:latest"
 }
 
