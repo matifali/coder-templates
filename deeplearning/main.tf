@@ -171,7 +171,7 @@ resource "docker_container" "workspace" {
   image      = docker_image.dockerdl.image_id
   cpu_shares = var.cpu
   memory     = var.ram * 1024
-  runtime    = "nvidia"
+  gpus       = "all"
   # Uses lower() to avoid Docker restriction on container names.
   name = "coder-${data.coder_workspace.me.owner}-${lower(data.coder_workspace.me.name)}"
   # Hostname makes the shell more user friendly: coder@my-workspace:~$
