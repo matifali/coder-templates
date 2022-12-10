@@ -112,7 +112,7 @@ resource "docker_volume" "home_volume" {
 }
 
 data "docker_registry_image" "matlab" {
-  name = "matifali.matlab:latest"
+  name = "matifali/matlab:latest"
 }
 
 resource "docker_image" "matlab" {
