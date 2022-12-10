@@ -26,14 +26,6 @@ variable "OS" {
   sensitive   = true
 }
 
-# variable "cpu" {
-#   description = "How many CPU cores for this workspace?"
-#   default     = "10"
-#   validation {
-#     condition     = contains(["05", "10", "20", "30", "40"], var.cpu)
-#     error_message = "value must be one of the options"
-#   }
-# }
 variable "ram" {
   description = "How much RAM for your workspace? (min: 32 GB, max: 128 GB)"
   default     = "32"
@@ -137,16 +129,14 @@ resource "docker_volume" "home_volume" {
   }
 }
 
-resource "docker_image" "matlab" {
-  name = "coder-matlab-${data.coder_workspace.me.owner}-${lower(data.coder_workspace.me.name)}"
-  build {
-    path       = "./images/"
-    dockerfile = "${var.docker_image}.Dockerfile"
-    tag        = ["coder-matlab-${var.docker_image}:latest"]
-  }
+resource "docker_registry_image" "matlab" {
+  name = "matifali.matlab:latest"
+}
 
-  # Keep alive for other workspaces to use upon deletion
-  keep_locally = true
+resource "docker_image" "matlab" {
+  name          = data.docker_registry_image.matlab.name
+  pull_triggers = [data.docker_registry_image.matlab.sha256_digest]
+  keep_locally  = true
 }
 
 resource "docker_container" "workspace" {
@@ -163,9 +153,7 @@ resource "docker_container" "workspace" {
   dns      = ["1.1.1.1"]
   # Use the docker gateway if the access URL is 127.0.0.1 
   entrypoint = ["sh", "-c", replace(coder_agent.dev.init_script, "127.0.0.1", "host.docker.internal")]
-
-
-  env = ["CODER_AGENT_TOKEN=${coder_agent.dev.token}"]
+  env        = ["CODER_AGENT_TOKEN=${coder_agent.dev.token}"]
 
   host {
     host = "host.docker.internal"
