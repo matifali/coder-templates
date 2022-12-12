@@ -1,20 +1,35 @@
-# Coder Setup
+# Coder template matlab
+
+## Connecting
+
+There are multiple ways to connect to your workspace
+
+1. Click on the **Matlab Desktop** icon to launch a matlab instant in your browser using noVNC.
+2. Click on the **Matlab Browser** icon to launch a matlab instant in your browser using matlab web app.
+
+![matlab-connect-image](./matlab_connect.png)
+
+Also, you can connect using the **Web Terminal** or **SSH** by clicking on the above buttons.
+
+## Coder Setup
 
 Follow these steps to configure accessing your workspaces locally on any machine.
 
-## Linux/MacOS
+### Linux/MacOS
 
 1. Open a terminal and run
 
    ```bash
    curl -L https://coder.com/install.sh | sh
+   
    coder login https://gpu.ctar.ml
+   
    coder config-ssh
    ```
 
-## Windows
+### Windows
 
-1. Download coder executable from [https://gpu.ctar.ml/bin/coder-windows-amd64.exe](https://gpu.ctar.ml/bin/coder-windows-amd64.exe)
+1. Download coder executable from <https://gpu.ctar.ml/bin/coder-windows-amd64.exe>
 
 2. rename `coder-windows-amd64.exe` to `coder.exe`
 
@@ -25,7 +40,7 @@ Follow these steps to configure accessing your workspaces locally on any machine
 4. Open a `powershell` window and run
 
    ```powershell
-   md $HOME\.ssh
+   md $HOME/.ssh
    coder login https://gpu.ctar.ml
    coder config-ssh
    ```
@@ -33,21 +48,13 @@ Follow these steps to configure accessing your workspaces locally on any machine
    or alternatively open `cmd` window and run
 
    ```cmd
-   md %USERPROFILE%\.ssh
+   md %USERPROFILE%/.ssh
    coder login https://gpu.ctar.ml
    coder config-ssh
    ```
 
-After that follow the steps as shown in console and you can connect your workspaces using ssh.
+## Persistent Storage
 
-# Connecting
+There will be a `~/data` inside every workspace. All files placed here will survive reboots and be available to all workspaces.
 
-There are multiple ways to connect to your workspace
-
-## Browser
-
-Click on the **Matlab** icon to launch a matlab instant in your browser
-
-![](https://i.ibb.co/vxtQnv5/matlab-connect.png)
-
-Also, you can connect using the **Web Terminal** or **SSH** by clicking on the above buttons.
+To upload or download files to `~/data` go to https://share.ctar.ml
