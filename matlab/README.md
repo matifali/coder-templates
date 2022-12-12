@@ -1,39 +1,6 @@
 # Coder template matlab
 
-## Usage
-
-1. Clone this repository
-
-   ```bash
-   git clone https://github,com/matifali/coder-templates
-   cd coder-templates/matlab
-   ```
-
-2. Create a template
-
-   ```bash
-   coder templates create matlab
-   ```
-
-3. Create a workspace
-
-   ```bash
-   coder create matlab --template matlab
-   ```
-
-   Or,
-   Go to <https://coder.example.com/workspaces> and click on **Create Workspace** and select **matlab** template.
-
-## Connecting
-
-There are multiple ways to connect to your workspace
-
-1. Click on the **Matlab Desktop** icon to launch a matlab instant in your browser using noVNC.
-2. Click on the **Matlab Browser** icon to launch a matlab instant in your browser using matlab web app.
-
-![matlab-connect-image](./matlab_connect.png)
-
-Also, you can connect using the **Web Terminal** or **SSH** by clicking on the above buttons.
+A matlab template for [coder](https://coder.com/).
 
 ## Coder Setup
 
@@ -76,6 +43,41 @@ Follow these steps to configure accessing your workspaces locally on any machine
    coder login https://coder.example.com
    coder config-ssh
    ```
+
+## Usage
+
+1. Clone this repository
+
+   ```bash
+   git clone https://github,com/matifali/coder-templates
+   cd coder-templates/matlab
+   ```
+
+2. Create a template
+
+   ```bash
+   coder templates create matlab
+   ```
+
+3. Create a workspace
+
+   ```bash
+   coder create matlab --template matlab
+   ```
+
+   Or,
+   Go to <https://coder.example.com/workspaces> and click on **Create Workspace** and select **matlab** template.
+
+## Connecting
+
+There are multiple ways to connect to your workspace
+
+1. Click on the **Matlab Desktop** icon to launch a matlab instant in your browser using noVNC.
+2. Click on the **Matlab Browser** icon to launch a matlab instant in your browser using matlab web app.
+
+![matlab-connect-image](./matlab_connect.png)
+
+Also, you can connect using the **Web Terminal** or **SSH** by clicking on the above buttons.
 
 ## Persistent Storage
 
