@@ -22,4 +22,12 @@ Update your templaets automatically by using this GitHub action.
 [Update Coder Template](https://github.com/marketplace/actions/update-coder-template)
 
 ## Deeplearning Images
-Source code of deeplearning images can be found at, [https://github.com/matifali/dockerdl](https://github.com/matifali/dockerdl)
+Deeplearning images used in the template are available at [dockerhub](https://hub.docker.com/repository/docker/matifali/dockerdl).
+
+Source code of deeplearning images is available at, [https://github.com/matifali/dockerdl](https://github.com/matifali/dockerdl)
+
+## MATLAB Image
+MATLAB images used in the template is available at [dockerhub](https://hub.docker.com/repository/docker/matifali/matlab).
+
+Source code for the matlab docker image is available at  [https://github.com/matifali/matlab](https://github.com/matifali/matlab)
+
