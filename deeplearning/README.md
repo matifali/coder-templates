@@ -71,7 +71,7 @@ Follow these steps to configure accessing your workspaces locally on any machine
 ## Connecting
 
 There are multiple options to connect to your workspace using local clients or browser.
-[deeplearning-connect](./deeplearning-connect.png)
+![deeplearning-connect](./deeplearning-connect.png)
 
 ### VS Code Server
 
