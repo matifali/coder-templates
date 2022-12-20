@@ -36,6 +36,7 @@ variable "environmnet_type" {
       "Full",
       "Full + conda",
       "PyTorch",
+      "PyTorch Nightly"
       "Tensorflow"
     ], var.environmnet_type)
     error_message = "Not supported!"
@@ -85,7 +86,7 @@ data "coder_workspace" "me" {
 locals {
   jupyter-type-arg = var.jupyter == "notebook" ? "Notebook" : "Server"
   jupyter-path     = var.environmnet_type == "Full with conda" ? "/home/coder/.conda/envs/DL/bin/" : "/home/coder/.local/bin/"
-  docker-tag       = var.environmnet_type == "Full" ? "no-conda" : var.environmnet_type == "Full with conda" ? "conda" : var.environmnet_type == "PyTorch" ? "pytorch" : "tensorflow"
+  docker-tag       = var.environmnet_type == "Full" ? "no-conda" : var.environmnet_type == "Full with conda" ? "conda" : var.environmnet_type == "PyTorch" ? "pytorch" : var.environmnet_type == "Tensorflow" ? "tensorflow" : "pytorch-nightly"
 }
 
 # jupyter
