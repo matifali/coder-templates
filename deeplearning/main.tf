@@ -36,7 +36,7 @@ variable "environmnet_type" {
       "Full",
       "Full + conda",
       "PyTorch",
-      "PyTorch Nightly"
+      "PyTorch Nightly",
       "Tensorflow"
     ], var.environmnet_type)
     error_message = "Not supported!"
