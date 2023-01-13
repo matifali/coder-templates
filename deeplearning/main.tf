@@ -75,6 +75,11 @@ variable "ram" {
 resource "coder_metadata" "compute_resources" {
   count       = data.coder_workspace.me.start_count
   resource_id = data.coder_workspace.me.id
+  hide        = false
+  item {
+    key   = "description"
+    value = "Compute resources for this workspace."
+  }
   item {
     key   = "cpu"
     value = var.cpu
@@ -318,8 +323,6 @@ resource "docker_container" "workspace" {
     host_path      = "/data/share/"
     read_only      = false
   }
-
-
 
   # Add labels in Docker to keep track of orphan resources.
   labels {
