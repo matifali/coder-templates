@@ -259,11 +259,11 @@ resource "coder_metadata" "root_volume" {
 }
 
 resource "docker_container" "workspace" {
-  count   = data.coder_workspace.me.start_count
-  image   = docker_image.dockerdl.image_id
-  cpu_set = var.cpu
-  memory  = var.ram * 1024
-  gpus    = "all"
+  count      = data.coder_workspace.me.start_count
+  image      = docker_image.dockerdl.image_id
+  cpu_shares = var.cpu
+  memory     = var.ram * 1024
+  gpus       = "all"
   # Uses lower() to avoid Docker restriction on container names.
   name = "coder-${data.coder_workspace.me.owner}-${lower(data.coder_workspace.me.name)}"
   # Hostname makes the shell more user friendly: coder@my-workspace:~$
