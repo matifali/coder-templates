@@ -58,7 +58,7 @@ variable "cpu" {
   description = "How many CPU cores for this workspace?"
   default     = "08"
   validation {
-    condition     = contains(["08", "16", "32"], var.cpu) # this will show a picker
+    condition     = contains(["08", "16", "20"], var.cpu) # this will show a picker
     error_message = "Invalid CPU count!"
   }
 }
@@ -69,6 +69,23 @@ variable "ram" {
   validation {
     condition     = contains(["24", "48", "64"], var.ram) # this will show a picker
     error_message = "Ram size must be an integer between 24 and 64 (GB)."
+  }
+}
+
+resource "coder_metadata" "compute_resources" {
+  count       = data.coder_workspace.me.start_count
+  resource_id = data.coder_workspace.me.id
+  item {
+    key   = "cpu"
+    value = var.cpu
+  }
+  item {
+    key   = "ram"
+    value = var.ram
+  }
+  item {
+    key   = "gpu"
+    value = "Nvidia RTX A5000"
   }
 }
 
@@ -102,7 +119,7 @@ resource "coder_app" "jupyter" {
 resource "coder_app" "code-server" {
   agent_id = coder_agent.main.id
 
-  display_name = "VSCode"
+  display_name = "VS Code Web"
   slug         = "code-server"
   url          = "http://localhost:8000?folder=/home/coder/data/"
   icon         = "/icon/code.svg"
@@ -146,8 +163,17 @@ resource "docker_image" "dockerdl" {
   keep_locally = true
 }
 
-#Volumes Resources
+resource "coder_metadata" "docker_image" {
+  count       = data.coder_workspace.me.start_count
+  resource_id = docker_image.dockerdl.id
+  hide        = true
+  item {
+    key   = "docker_image"
+    value = docker_image.dockerdl.name
+  }
+}
 
+#Volumes Resources
 #home_volume
 resource "docker_volume" "home_volume" {
   name = "coder-${data.coder_workspace.me.owner}-${lower(data.coder_workspace.me.name)}-home"
@@ -228,11 +254,11 @@ resource "coder_metadata" "root_volume" {
 }
 
 resource "docker_container" "workspace" {
-  count      = data.coder_workspace.me.start_count
-  image      = docker_image.dockerdl.image_id
-  cpu_shares = var.cpu
-  memory     = var.ram * 1024
-  gpus       = "all"
+  count   = data.coder_workspace.me.start_count
+  image   = docker_image.dockerdl.image_id
+  cpu_set = var.cpu
+  memory  = var.ram * 1024
+  gpus    = "all"
   # Uses lower() to avoid Docker restriction on container names.
   name = "coder-${data.coder_workspace.me.owner}-${lower(data.coder_workspace.me.name)}"
   # Hostname makes the shell more user friendly: coder@my-workspace:~$
