@@ -26,12 +26,48 @@ variable "OS" {
   sensitive   = true
 }
 
+variable "cpu" {
+  description = "How many CPU cores for this workspace?"
+  default     = "08"
+  validation {
+    condition     = contains(["04", "08", "16", "32", "40"], var.cpu)
+    error_message = "value must be one of the options"
+  }
+}
+
 variable "ram" {
-  description = "How much RAM for your workspace? (min: 32 GB, max: 128 GB)"
+  description = "How much RAM for your workspace? (min: 32 GB, max: 64 GB)"
   default     = "32"
   validation {
-    condition     = contains(["32", "48", "64", "96", "128"], var.ram)
+    condition     = contains(["32", "48", "64"], var.ram)
     error_message = "value must be one of the options"
+  }
+}
+
+variable "gpu" {
+  description = "Do you need GPU?"
+  default     = "No"
+  validation {
+    condition     = contains(["No", "Yes"], var.gpu)
+    error_message = "value must be one of the options"
+  }
+
+}
+
+resource "coder_metadata" "compute_resources" {
+  count       = data.coder_workspace.me.start_count
+  resource_id = data.coder_workspace.me.id
+  item {
+    key   = "cpu"
+    value = var.cpu
+  }
+  item {
+    key   = "ram"
+    value = var.ram
+  }
+  item {
+    key   = "gpu"
+    value = var.gpu
   }
 }
 
@@ -55,7 +91,6 @@ resource "coder_app" "matlab_browser" {
   subdomain    = true
   share        = "owner"
 }
-
 
 resource "coder_app" "matlab_desktop" {
   agent_id     = coder_agent.main.id
@@ -102,7 +137,6 @@ resource "docker_image" "matlab" {
 }
 
 #Volumes Resources
-
 #home_volume
 resource "docker_volume" "home_volume" {
   name = "coder-${data.coder_workspace.me.owner}-${lower(data.coder_workspace.me.name)}-home"
@@ -183,12 +217,11 @@ resource "coder_metadata" "root_volume" {
 }
 
 resource "docker_container" "workspace" {
-  count      = data.coder_workspace.me.start_count
-  image      = docker_image.matlab.image_id
-  cpu_shares = 20 # 50% of 40 threads
-  memory     = var.ram * 1024
-  # Use gpu if available
-  gpus = "all"
+  count   = data.coder_workspace.me.start_count
+  image   = docker_image.matlab.image_id
+  cpu_set = var.cpu
+  memory  = var.ram * 1024
+  gpus    = var.gpu == "Yes" ? "all" : null
   # Uses lower() to avoid Docker restriction on container names.
   name = "coder-${data.coder_workspace.me.owner}-${lower(data.coder_workspace.me.name)}"
   # Hostname makes the shell more user friendly: coder@my-workspace:~$
