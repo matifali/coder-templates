@@ -1,9 +1,0 @@
-#!/bin/sh
-xrdb "$HOME/.Xresources"
-xsetroot -solid grey
-
-# Clipboard sharing
-autocutsel -fork
-
-export XKL_XMODMAP_DISABLE=1
-/etc/X11/Xsession
