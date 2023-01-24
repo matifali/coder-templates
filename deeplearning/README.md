@@ -1,37 +1,4 @@
-# Deep Learning Workspaces
-
-## Coder Setup
-
-Follow these steps to configure accessing your workspaces locally on any machine.
-
-### Linux/MacOS
-
-1. Open a terminal and run
-
-   ```bash
-   curl -L https://coder.com/install.sh | sh
-   coder login https://gpu.ctar.ml
-   coder config-ssh
-   ```
-
-### Windows
-
-1. Download coder executable from [https://gpu.ctar.ml/bin/coder-windows-amd64.exe](https://gpu.ctar.ml/bin/coder-windows-amd64.exe)
-
-2. rename `coder-windows-amd64.exe` to `coder.exe`
-
-3. copy `coder.exe` to `C:\Windows\`
-   ordeeplearning
-
-   or alternatively open `cmd` window and run
-
-   ```cmd
-   md %USERPROFILE%\.ssh
-   coder login https://gpu.ctar.ml
-   coder config-ssh
-   ```
-
-After that follow the steps as shown in console and you can connect your workspaces using ssh.
+# Deep Learning Workspaces for CTAR Bilkent
 
 ## Connecting
 
@@ -77,3 +44,6 @@ Once you've configured SSH, you can work on projects from your local copy of VS 
 There will be a `~/data` inside every workspace. All files placed here will survive reboots and be available to all workspaces.
 
 To upload or download files to `~/data` go to https://share.ctar.ml
+
+## Docker Image
+This template uses the following docker image: https://github.com/matifali/dockerdl
