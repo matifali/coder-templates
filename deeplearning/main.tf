@@ -29,12 +29,12 @@ variable "OS" {
 
 locals {
   options = {
-    "conda-base" = "conda (install whatever you need)",
-    "tensorflow" = "Tensorflow",
-    "pytorch"    = "PyTorch",
+    "conda-base"      = "conda (install whatever you need)",
+    "tensorflow"      = "Tensorflow",
+    "pytorch"         = "PyTorch",
     "pytorch-nightly" = "PyTorch Nightly",
-    "no-conda"   = "Tensorflow + PyTorch",
-    "conda"      = "Tensorflow + PyTorch + conda",
+    "no-conda"        = "Tensorflow + PyTorch",
+    "conda"           = "Tensorflow + PyTorch + conda",
   }
 }
 
@@ -43,12 +43,12 @@ variable "environmnet_type" {
   default     = "Tensorflow + PyTorch"
   validation {
     condition = contains([
-  "Only conda (install whatever you need)",
-  "Tensorflow",
-  "PyTorch",
-  "Tensorflow + PyTorch",
-  "Tensorflow + PyTorch + conda",
-  "PyTorch Nightly",
+      "Only conda (install whatever you need)",
+      "Tensorflow",
+      "PyTorch",
+      "Tensorflow + PyTorch",
+      "Tensorflow + PyTorch + conda",
+      "PyTorch Nightly",
     ], var.environmnet_type)
     error_message = "Invalid environment type!"
   }
@@ -120,12 +120,12 @@ data "coder_workspace" "me" {
 locals {
   jupyter-type-arg = var.jupyter == "notebook" ? "Notebook" : "Server"
   jupyter-path     = var.environmnet_type == "Full with conda" ? "/home/coder/.conda/envs/DL/bin/" : "/home/coder/.local/bin/"
-  docker-tag = var.environmnet_type == "Only conda (install whatever you need)" ? "conda-base" : var.environmnet_type == "Tensorflow" ? "tensorflow" : var.environmnet_type == "PyTorch" ? "pytorch" : var.environmnet_type == "PyTorch Nightly" ? "pytorch-nightly" : var.environmnet_type == "Tensorflow + PyTorch" ? "no-conda" : "conda"
+  docker-tag       = var.environmnet_type == "Only conda (install whatever you need)" ? "conda-base" : var.environmnet_type == "Tensorflow" ? "tensorflow" : var.environmnet_type == "PyTorch" ? "pytorch" : var.environmnet_type == "PyTorch Nightly" ? "pytorch-nightly" : var.environmnet_type == "Tensorflow + PyTorch" ? "no-conda" : "conda"
 }
 
 # jupyter
 resource "coder_app" "jupyter" {
-  count = local.docker-tag == "conda-base" ? 0 : 1
+  count        = local.docker-tag == "conda-base" ? 0 : 1
   agent_id     = coder_agent.main.id
   display_name = "Jupyter"
   slug         = "jupyter-${var.jupyter}"
