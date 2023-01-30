@@ -40,18 +40,18 @@ locals {
 
 variable "environmnet_type" {
   description = "Which environment type do you want to create?"
-  default     = local.options["no-conda"]
+  default     = "Tensorflow + PyTorch"
   validation {
     condition = contains([
-      locals.options["conda-base"],
-      locals.options["tensorflow"],
-      locals.options["pytorch"],
-      locals.options["pytorch-nightly"],
-      locals.options["no-conda"],
-      locals.options["conda"],
-    ])
-}
-  error_message = "Invalid environment type!"
+  "Only conda (install whatever you need)",
+  "Tensorflow",
+  "PyTorch",
+  "Tensorflow + PyTorch",
+  "Tensorflow + PyTorch + conda",
+  "PyTorch Nightly",
+    ], var.environmnet_type)
+    error_message = "Invalid environment type!"
+  }
 }
 
 
@@ -120,7 +120,7 @@ data "coder_workspace" "me" {
 locals {
   jupyter-type-arg = var.jupyter == "notebook" ? "Notebook" : "Server"
   jupyter-path     = var.environmnet_type == "Full with conda" ? "/home/coder/.conda/envs/DL/bin/" : "/home/coder/.local/bin/"
-  docker-tag = var.environmnet_type == locals.options["conda-base"] ? "conda-base" : var.environmnet_type == locals.options["tensorflow"] ? "tensorflow" : var.environmnet_type == locals.options["pytorch"] ? "pytorch" : var.environmnet_type == locals.options["pytorch-nightly"] ? "pytorch-nightly" : var.environmnet_type == locals.options["no-conda"] ? "no-conda" : "conda"
+  docker-tag = var.environmnet_type == "Only conda (install whatever you need)" ? "conda-base" : var.environmnet_type == "Tensorflow" ? "tensorflow" : var.environmnet_type == "PyTorch" ? "pytorch" : var.environmnet_type == "PyTorch Nightly" ? "pytorch-nightly" : var.environmnet_type == "Tensorflow + PyTorch" ? "no-conda" : "conda"
 }
 
 # jupyter
@@ -156,6 +156,11 @@ resource "coder_agent" "main" {
     mkdir -p ~/data
     # make user share directory
     mkdir -p ~/share
+    # if docker-tag is not conda-base then start jupyter
+    if [ "${local.docker-tag}" != "conda-base" ]; then
+      # start jupyter
+      ${local.jupyter-path}/jupyter ${var.jupyter} --no-browser --${local.jupyter-type-arg}App.token='' --ip='*' 2>&1 | tee -a ~/build.log &
+    fi
     # if docker-tag is not conda-base then start jupyter
     if [ "${local.docker-tag}" != "conda-base" ]; then
       # start jupyter
