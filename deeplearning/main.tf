@@ -91,7 +91,7 @@ variable "cpu" {
 }
 
 variable "ram" {
-  description = "Choose RAM for your workspace? (min: 24 GB, max: 128 GB)"
+  description = "Choose RAM for your workspace? (min: 16 GB, max: 64 GB)"
   default     = "16"
   validation {
     condition     = contains(["16", "32","64"], var.ram) # this will show a picker
