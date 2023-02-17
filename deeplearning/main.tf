@@ -67,7 +67,7 @@ variable "jupyter" {
 }
 
 variable "vscode-web" {
-  description = "VS Code Web IDE type"
+  description = "Do you want VS Code Web"
   default     = "no"
   validation {
     condition = contains([
