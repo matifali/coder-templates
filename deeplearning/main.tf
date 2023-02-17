@@ -28,27 +28,27 @@ variable "OS" {
 }
 
 locals {
-  options = {
-    "conda-base"      = "conda (install whatever you need)",
-    "tensorflow"      = "Tensorflow",
-    "pytorch"         = "PyTorch",
-    "pytorch-nightly" = "PyTorch Nightly",
-    "no-conda"        = "Tensorflow + PyTorch",
-    "conda"           = "Tensorflow + PyTorch + conda",
+  tags = {
+    "conda (install whatever you need)" = "conda-base",
+    "Tensorflow"        = "tensorflow",
+    "PyTorch"           = "pytorch",
+    "PyTorch Nightly"   = "pytorch-nightly",
+    "Tensorflow + PyTorch" = "no-conda",
+    "Tensorflow + PyTorch + conda" = "conda",
   }
 }
 
 variable "environmnet_type" {
   description = "Which environment type do you want to create?"
-  default     = "Tensorflow + PyTorch"
+  default     = null
   validation {
     condition = contains([
       "Only conda (install whatever you need)",
       "Tensorflow",
       "PyTorch",
+      "PyTorch Nightly",
       "Tensorflow + PyTorch",
       "Tensorflow + PyTorch + conda",
-      "PyTorch Nightly",
     ], var.environmnet_type)
     error_message = "Invalid environment type!"
   }
@@ -57,53 +57,45 @@ variable "environmnet_type" {
 
 variable "jupyter" {
   description = "Jupyter IDE type"
-  default     = "notebook"
+  default     = "no"
   validation {
     condition = contains([
+      "no",
       "notebook",
       "lab",
     ], var.jupyter)
-    error_message = "Invalid Jupyter!"
+    error_message = "Invalid selection!"
   }
+}
+
+variable "vscode-web" {
+  description = "VS Code Web IDE type"
+  default     = "no"
+  validation {
+    condition = contains([
+      "no",
+      "yes",
+    ], var.vscode-web)
+    error_message = "Invalid selection!"
+  }
+  
 }
 
 variable "cpu" {
   description = "How many CPU cores for this workspace?"
-  default     = "08"
+  default     = "04"
   validation {
-    condition     = contains(["08", "16", "20"], var.cpu) # this will show a picker
+    condition     = contains(["04", "08", "16"], var.cpu) # this will show a picker
     error_message = "Invalid CPU count!"
   }
 }
 
 variable "ram" {
   description = "Choose RAM for your workspace? (min: 24 GB, max: 128 GB)"
-  default     = "24"
+  default     = "16"
   validation {
-    condition     = contains(["24", "48", "64"], var.ram) # this will show a picker
-    error_message = "Ram size must be an integer between 24 and 64 (GB)."
-  }
-}
-
-resource "coder_metadata" "compute_resources" {
-  count       = data.coder_workspace.me.start_count
-  resource_id = data.coder_workspace.me.id
-  hide        = false
-  item {
-    key   = "description"
-    value = "Compute resources for this workspace."
-  }
-  item {
-    key   = "cpu"
-    value = var.cpu
-  }
-  item {
-    key   = "ram"
-    value = var.ram
-  }
-  item {
-    key   = "gpu"
-    value = "Nvidia RTX A5000"
+    condition     = contains(["16", "32","64"], var.ram) # this will show a picker
+    error_message = "Invalid RAM size!"
   }
 }
 
@@ -120,12 +112,12 @@ data "coder_workspace" "me" {
 locals {
   jupyter-type-arg = var.jupyter == "notebook" ? "Notebook" : "Server"
   jupyter-path     = var.environmnet_type == "Full with conda" ? "/home/coder/.conda/envs/DL/bin/" : "/home/coder/.local/bin/"
-  docker-tag       = var.environmnet_type == "Only conda (install whatever you need)" ? "conda-base" : var.environmnet_type == "Tensorflow" ? "tensorflow" : var.environmnet_type == "PyTorch" ? "pytorch" : var.environmnet_type == "PyTorch Nightly" ? "pytorch-nightly" : var.environmnet_type == "Tensorflow + PyTorch" ? "no-conda" : "conda"
+  docker-tag = local.tags[var.environmnet_type]
 }
 
 # jupyter
 resource "coder_app" "jupyter" {
-  count        = local.docker-tag == "conda-base" ? 0 : 1
+  count        = local.docker-tag == "conda-base" ? 0 : var.jupyter == "no" ? 0 : 1 
   agent_id     = coder_agent.main.id
   display_name = "Jupyter"
   slug         = "jupyter-${var.jupyter}"
@@ -136,8 +128,8 @@ resource "coder_app" "jupyter" {
 }
 
 resource "coder_app" "code-server" {
+  count        = var.vscode-web == "no" ? 0 : 1
   agent_id = coder_agent.main.id
-
   display_name = "VS Code Web"
   slug         = "code-server"
   url          = "http://localhost:8000?folder=/home/coder/data/"
@@ -156,18 +148,14 @@ resource "coder_agent" "main" {
     mkdir -p ~/data
     # make user share directory
     mkdir -p ~/share
-    # if docker-tag is not conda-base then start jupyter
-    if [ "${local.docker-tag}" != "conda-base" ]; then
-      # start jupyter
+    # if docker-tag is not conda-base and jupyter is not no, then start jupyter
+    if [ "${local.docker-tag}" != "conda-base" ] && [ "${var.jupyter}" != "no" ]; then
       ${local.jupyter-path}/jupyter ${var.jupyter} --no-browser --${local.jupyter-type-arg}App.token='' --ip='*' 2>&1 | tee -a ~/build.log &
     fi
-    # if docker-tag is not conda-base then start jupyter
-    if [ "${local.docker-tag}" != "conda-base" ]; then
-      # start jupyter
-      ${local.jupyter-path}/jupyter ${var.jupyter} --no-browser --${local.jupyter-type-arg}App.token='' --ip='*' 2>&1 | tee -a ~/build.log &
+    # start code-server if vscode-web is yes
+    if [ "${var.vscode-web}" == "yes" ]; then
+      code-server --accept-server-license-terms serve-local --without-connection-token --quality stable --telemetry-level off 2>&1 | tee -a ~/code-server.log &
     fi
-    # start code-server
-    code-server --accept-server-license-terms serve-local --without-connection-token --quality stable --telemetry-level off 2>&1 | tee -a ~/code-server.log &
     EOT
 
   env = {
@@ -190,95 +178,37 @@ resource "docker_image" "dockerdl" {
   keep_locally = true
 }
 
-resource "coder_metadata" "docker_image" {
-  count       = data.coder_workspace.me.start_count
-  resource_id = docker_image.dockerdl.id
-  hide        = true
-  item {
-    key   = "docker_image"
-    value = docker_image.dockerdl.name
-  }
-}
-
 #Volumes Resources
 #home_volume
 resource "docker_volume" "home_volume" {
   name = "coder-${data.coder_workspace.me.owner}-${lower(data.coder_workspace.me.name)}-home"
 }
-resource "coder_metadata" "home_volume" {
-  count       = data.coder_workspace.me.start_count
-  resource_id = docker_volume.home_volume.id
-  hide        = true
-  item {
-    key   = "home_volume"
-    value = docker_volume.home_volume.mountpoint
-  }
-}
+
 #usr_volume
 resource "docker_volume" "usr_volume" {
   name = "coder-${data.coder_workspace.me.owner}-${lower(data.coder_workspace.me.name)}-usr"
 }
-resource "coder_metadata" "usr_volume" {
-  count       = data.coder_workspace.me.start_count
-  resource_id = docker_volume.usr_volume.id
-  hide        = true
-  item {
-    key   = "usr_volume"
-    value = docker_volume.usr_volume.mountpoint
-  }
-}
+
 #var_volume
 resource "docker_volume" "var_volume" {
   name = "coder-${data.coder_workspace.me.owner}-${lower(data.coder_workspace.me.name)}-var"
 }
-resource "coder_metadata" "var_volume" {
-  count       = data.coder_workspace.me.start_count
-  resource_id = docker_volume.var_volume.id
-  hide        = true
-  item {
-    key   = "var_volume"
-    value = docker_volume.var_volume.mountpoint
-  }
-}
+
 #etc_volume
 resource "docker_volume" "etc_volume" {
   name = "coder-${data.coder_workspace.me.owner}-${lower(data.coder_workspace.me.name)}-etc"
 }
-resource "coder_metadata" "etc_volume" {
-  count       = data.coder_workspace.me.start_count
-  resource_id = docker_volume.etc_volume.id
-  hide        = true
-  item {
-    key   = "etc_volume"
-    value = docker_volume.etc_volume.mountpoint
-  }
-}
+
 #opt_volume
 resource "docker_volume" "opt_volume" {
   name = "coder-${data.coder_workspace.me.owner}-${lower(data.coder_workspace.me.name)}-opt"
 }
-resource "coder_metadata" "opt_volume" {
-  count       = data.coder_workspace.me.start_count
-  resource_id = docker_volume.opt_volume.id
-  hide        = true
-  item {
-    key   = "etc_volume"
-    value = docker_volume.opt_volume.mountpoint
-  }
-}
+
 #root_volume
 resource "docker_volume" "root_volume" {
   name = "coder-${data.coder_workspace.me.owner}-${lower(data.coder_workspace.me.name)}-root"
 }
-resource "coder_metadata" "root_volume" {
-  count       = data.coder_workspace.me.start_count
-  resource_id = docker_volume.root_volume.id
-  hide        = true
-  item {
-    key   = "root_volume"
-    value = docker_volume.root_volume.mountpoint
-  }
-}
+
 
 resource "docker_container" "workspace" {
   count      = data.coder_workspace.me.start_count
@@ -300,7 +230,7 @@ resource "docker_container" "workspace" {
     ip   = "host-gateway"
   }
 
-  ipc_mode = "host" # required for PyTorch with multiple workers
+  ipc_mode = "host" # recommended for GPU workloads
 
   # users home directory
   volumes {

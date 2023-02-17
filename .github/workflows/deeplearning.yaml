@@ -25,15 +25,13 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-        with:
-          submodules: true
 
       - name: Get latest short commit SHA
         id: get_commit_sha
         run: echo ::set-output name=sha_short::$(git rev-parse --short HEAD)
 
       - name: update coder template
-        uses: matifali/update-coder-template@v1
+        uses: matifali/update-coder-template@latest
         with:
           CODER_URL: "https://gpu.ctar.ml"
           CODER_TEMPLATE_NAME: "deeplearning"
