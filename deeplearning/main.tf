@@ -16,6 +16,7 @@ terraform {
 variable "arch" {
   default     = "amd64"
   description = "arch: What architecture is your Docker host on?"
+  sensitive = true
 }
 
 variable "OS" {
@@ -23,6 +24,7 @@ variable "OS" {
   description = <<-EOF
   What operating system is your Coder host on?
   EOF
+  sensitive = true
 }
 
 locals {
@@ -202,12 +204,6 @@ resource "docker_volume" "opt_volume" {
   name = "coder-${data.coder_workspace.me.owner}-${lower(data.coder_workspace.me.name)}-opt"
 }
 
-#root_volume
-resource "docker_volume" "root_volume" {
-  name = "coder-${data.coder_workspace.me.owner}-${lower(data.coder_workspace.me.name)}-root"
-}
-
-
 resource "docker_container" "workspace" {
   count      = data.coder_workspace.me.start_count
   image      = docker_image.dockerdl.image_id
@@ -254,11 +250,6 @@ resource "docker_container" "workspace" {
   volumes {
     container_path = "/opt/"
     volume_name    = docker_volume.opt_volume.name
-    read_only      = false
-  }
-  volumes {
-    container_path = "/root/"
-    volume_name    = docker_volume.root_volume.name
     read_only      = false
   }
   # users data directory
