@@ -16,7 +16,6 @@ terraform {
 variable "arch" {
   default     = "amd64"
   description = "arch: What architecture is your Docker host on?"
-  sensitive   = true
 }
 
 variable "OS" {
@@ -24,7 +23,6 @@ variable "OS" {
   description = <<-EOF
   What operating system is your Coder host on?
   EOF
-  sensitive   = true
 }
 
 locals {
@@ -40,7 +38,7 @@ locals {
 
 variable "environmnet_type" {
   description = "Which environment type do you want to create?"
-  default     = null
+  default     = "Tensorflow + PyTorch"
   validation {
     condition = contains([
       "Only conda (install whatever you need)",
