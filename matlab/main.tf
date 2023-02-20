@@ -63,6 +63,11 @@ locals {
 
 provider "docker" {
   host = lookup(local.docker_host, var.gpu)
+  ssh_opts = [
+    "-o", "StrictHostKeyChecking=no",
+    "-o", "UserKnownHostsFile=/dev/null",
+    "-i", "/home/ctar/.ssh/id_rsa"
+  ]
 }
 
 provider "coder" {
