@@ -1,0 +1,40 @@
+# An action to push templates to coder server
+
+name: deeplearning
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "deeplearning/main.tf"
+      - "deeplearning/images/*.Dockerfile"
+      - ".github/workflows/deeplearning.yaml"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "deeplearning/main.tf"
+      - "deeplearning/images/*.Dockerfile"
+      - ".github/workflows/deeplearning.yaml"
+  workflow_dispatch:
+
+jobs:
+  deploy_template:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Get latest short commit SHA
+        id: get_commit_sha
+        run: echo ::set-output name=sha_short::$(git rev-parse --short HEAD)
+
+      - name: update coder template
+        uses: matifali/update-coder-template@latest
+        with:
+          CODER_URL: "https://gpu.ctar.ml"
+          CODER_TEMPLATE_NAME: "deeplearning"
+          CODER_TEMPLATE_DIR: "deeplearning"
+          CODER_TEMPLATE_VERSION: ${{ steps.get_commit_sha.outputs.sha_short }}
+          CODER_SESSION_TOKEN: ${{ secrets.CODER_SESSION_TOKEN }}

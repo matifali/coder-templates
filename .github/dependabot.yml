@@ -4,25 +4,24 @@
 # https://docs.github.com/github/administering-a-repository/configuration-options-for-dependency-updates
 
 version: 2
-updates:
+updates:      
   # Maintain dependencies for terraform
-  - package-ecosystem: "terraform" # See documentation for possible values
-    directory: "/deeplearning" # Location of package manifests
+  - package-ecosystem: "terraform"
+    directory: "/deeplearning/"
     schedule:
-      interval: "monthly"
-  # Maintain dependencies for terraform
-  - package-ecosystem: "terraform" # See documentation for possible values
-    directory: "/matlab" # Location of package manifests
-    schedule:
-      interval: "monthly"
-
-  # Maintain dependencies for docker
-  - package-ecosystem: "docker"
-    directory: "/matlab/images"
+      interval: "weekly"
+  
+  - package-ecosystem: "terraform"
+    directory: "/aihwkit/"
     schedule:
       interval: "weekly"
       
-  # Update submodules
+  - package-ecosystem: "terraform"
+    directory: "/matlab/"
+    schedule:
+      interval: "weekly"
+      
+   # Update submodules
   - package-ecosystem: gitsubmodule
     schedule:
         interval: "daily"
