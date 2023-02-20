@@ -66,7 +66,7 @@ provider "docker" {
   ssh_opts = [
     "-o", "StrictHostKeyChecking=no",
     "-o", "UserKnownHostsFile=/dev/null",
-    "-i", "/home/ctar/.ssh/id_rsa"
+    "-i", "/home/coder/.ssh/id_rsa"
   ]
 }
 
