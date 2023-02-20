@@ -3,7 +3,7 @@
 Docker based templates.
 
 1. [deeplearning](https://github.com/matifali/coder-templates/tree/master/deeplearning) (tensorflow + pytorch + numpy + matplotlib + pandas + conda + pip + jupyter notebook or jupyter lab + Microsoft code-server)
-2. [matlab](https://github.com/matifali/coder-templates/tree/master/matlab) (You can add as many toolboxes as you wish by commenting them out in the associated [dockerfile](https://github.com/matifali/coder-templates/blob/master/matlab/images/r2022b.Dockerfile))
+2. [matlab](https://github.com/matifali/coder-templates/tree/master/matlab)
 
 ## Instructions
 
