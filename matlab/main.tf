@@ -56,8 +56,8 @@ variable "gpu" {
 
 locals {
   docker_host = {
-    "no"              = "tcp://139.179.99.239:2377" # This is leader node of docker swarm
-    "yes"             = "unix:///var/run/docker.sock" # This is the Coder host
+    "No"  = "ssh://ctar@139.179.99.239" # This is leader node of docker swarm
+    "Yes" = "unix:///var/run/docker.sock" # This is the Coder host
   }
 }
 
