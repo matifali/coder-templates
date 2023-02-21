@@ -56,7 +56,7 @@ variable "gpu" {
 
 locals {
   docker_host = {
-    "No"  = "ssh://ctar@139.179.99.239" # This is leader node of docker swarm
+    "No"  = "ssh://ctar@139.179.99.239"   # This is leader node of docker swarm
     "Yes" = "unix:///var/run/docker.sock" # This is the Coder host
   }
 }
@@ -140,10 +140,6 @@ resource "docker_volume" "home_volume" {
 resource "docker_volume" "usr_volume" {
   name = "coder-${data.coder_workspace.me.owner}-${lower(data.coder_workspace.me.name)}-usr"
 }
-#var_volume
-resource "docker_volume" "var_volume" {
-  name = "coder-${data.coder_workspace.me.owner}-${lower(data.coder_workspace.me.name)}-var"
-}
 #etc_volume
 resource "docker_volume" "etc_volume" {
   name = "coder-${data.coder_workspace.me.owner}-${lower(data.coder_workspace.me.name)}-etc"
@@ -184,11 +180,6 @@ resource "docker_container" "workspace" {
   volumes {
     container_path = "/usr/"
     volume_name    = docker_volume.usr_volume.name
-    read_only      = false
-  }
-  volumes {
-    container_path = "/var/"
-    volume_name    = docker_volume.var_volume.name
     read_only      = false
   }
   volumes {

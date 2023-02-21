@@ -16,7 +16,7 @@ terraform {
 variable "arch" {
   default     = "amd64"
   description = "arch: What architecture is your Docker host on?"
-  sensitive = true
+  sensitive   = true
 }
 
 variable "OS" {
@@ -24,17 +24,17 @@ variable "OS" {
   description = <<-EOF
   What operating system is your Coder host on?
   EOF
-  sensitive = true
+  sensitive   = true
 }
 
 locals {
   tags = {
     "conda (install whatever you need)" = "conda-base",
-    "Tensorflow"        = "tensorflow",
-    "PyTorch"           = "pytorch",
-    "PyTorch Nightly"   = "pytorch-nightly",
-    "Tensorflow + PyTorch" = "no-conda",
-    "Tensorflow + PyTorch + conda" = "conda",
+    "Tensorflow"                        = "tensorflow",
+    "PyTorch"                           = "pytorch",
+    "PyTorch Nightly"                   = "pytorch-nightly",
+    "Tensorflow + PyTorch"              = "no-conda",
+    "Tensorflow + PyTorch + conda"      = "conda",
   }
 }
 
@@ -78,7 +78,7 @@ variable "vscode-web" {
     ], var.vscode-web)
     error_message = "Invalid selection!"
   }
-  
+
 }
 
 variable "cpu" {
@@ -94,7 +94,7 @@ variable "ram" {
   description = "Choose RAM for your workspace? (min: 16 GB, max: 64 GB)"
   default     = "16"
   validation {
-    condition     = contains(["16", "32","64"], var.ram) # this will show a picker
+    condition     = contains(["16", "32", "64"], var.ram) # this will show a picker
     error_message = "Invalid RAM size!"
   }
 }
@@ -112,12 +112,12 @@ data "coder_workspace" "me" {
 locals {
   jupyter-type-arg = var.jupyter == "notebook" ? "Notebook" : "Server"
   jupyter-path     = var.environmnet_type == "Full with conda" ? "/home/coder/.conda/envs/DL/bin/" : "/home/coder/.local/bin/"
-  docker-tag = local.tags[var.environmnet_type]
+  docker-tag       = local.tags[var.environmnet_type]
 }
 
 # jupyter
 resource "coder_app" "jupyter" {
-  count        = local.docker-tag == "conda-base" ? 0 : var.jupyter == "no" ? 0 : 1 
+  count        = local.docker-tag == "conda-base" ? 0 : var.jupyter == "no" ? 0 : 1
   agent_id     = coder_agent.main.id
   display_name = "Jupyter"
   slug         = "jupyter-${var.jupyter}"
@@ -129,7 +129,7 @@ resource "coder_app" "jupyter" {
 
 resource "coder_app" "code-server" {
   count        = var.vscode-web == "no" ? 0 : 1
-  agent_id = coder_agent.main.id
+  agent_id     = coder_agent.main.id
   display_name = "VS Code Web"
   slug         = "code-server"
   url          = "http://localhost:8000?folder=/home/coder/data/"
@@ -189,11 +189,6 @@ resource "docker_volume" "usr_volume" {
   name = "coder-${data.coder_workspace.me.owner}-${lower(data.coder_workspace.me.name)}-usr"
 }
 
-#var_volume
-resource "docker_volume" "var_volume" {
-  name = "coder-${data.coder_workspace.me.owner}-${lower(data.coder_workspace.me.name)}-var"
-}
-
 #etc_volume
 resource "docker_volume" "etc_volume" {
   name = "coder-${data.coder_workspace.me.owner}-${lower(data.coder_workspace.me.name)}-etc"
@@ -238,11 +233,6 @@ resource "docker_container" "workspace" {
     read_only      = false
   }
   volumes {
-    container_path = "/var/"
-    volume_name    = docker_volume.var_volume.name
-    read_only      = false
-  }
-  volumes {
     container_path = "/etc/"
     volume_name    = docker_volume.etc_volume.name
     read_only      = false
@@ -282,5 +272,4 @@ resource "docker_container" "workspace" {
     label = "coder.workspace_name"
     value = data.coder_workspace.me.name
   }
-
 }
