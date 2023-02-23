@@ -11,21 +11,6 @@ terraform {
   }
 }
 
-# Admin parameters
-variable "arch" {
-  default     = "amd64"
-  description = "arch: What architecture is your Docker host on?"
-  sensitive   = true
-}
-
-variable "OS" {
-  default     = "Linux"
-  description = <<-EOF
-  What operating system is your Coder host on?
-  EOF
-  sensitive   = true
-}
-
 variable "cpu" {
   description = "How many CPU cores for this workspace?"
   default     = "08"
@@ -98,7 +83,7 @@ resource "coder_app" "matlab_desktop" {
 }
 
 resource "coder_agent" "main" {
-  arch           = var.arch
+  arch           = "amd64"
   os             = "linux"
   startup_script = <<EOT
     #!/bin/bash
@@ -131,22 +116,9 @@ resource "docker_image" "matlab" {
   keep_locally  = true
 }
 
-#Volumes Resources
 #home_volume
 resource "docker_volume" "home_volume" {
   name = "coder-${data.coder_workspace.me.owner}-${lower(data.coder_workspace.me.name)}-home"
-}
-#usr_volume
-resource "docker_volume" "usr_volume" {
-  name = "coder-${data.coder_workspace.me.owner}-${lower(data.coder_workspace.me.name)}-usr"
-}
-#etc_volume
-resource "docker_volume" "etc_volume" {
-  name = "coder-${data.coder_workspace.me.owner}-${lower(data.coder_workspace.me.name)}-etc"
-}
-#opt_volume
-resource "docker_volume" "opt_volume" {
-  name = "coder-${data.coder_workspace.me.owner}-${lower(data.coder_workspace.me.name)}-opt"
 }
 
 resource "docker_container" "workspace" {
@@ -175,21 +147,6 @@ resource "docker_container" "workspace" {
   volumes {
     container_path = "/home/coder"
     volume_name    = docker_volume.home_volume.name
-    read_only      = false
-  }
-  volumes {
-    container_path = "/usr/"
-    volume_name    = docker_volume.usr_volume.name
-    read_only      = false
-  }
-  volumes {
-    container_path = "/etc/"
-    volume_name    = docker_volume.etc_volume.name
-    read_only      = false
-  }
-  volumes {
-    container_path = "/opt/"
-    volume_name    = docker_volume.opt_volume.name
     read_only      = false
   }
   # users data directory
