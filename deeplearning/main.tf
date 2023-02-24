@@ -66,7 +66,7 @@ data "coder_parameter" "ram" {
 
 data "coder_parameter" "framework" {
   name        = "Framework"
-  icon        = "https://raw.githubusercontent.com/matifali/logos/main/memory.png"
+  icon        = "https://raw.githubusercontent.com/matifali/logos/main/memory.svg"
   description = "Choose your preffered framework"
   type        = "string"
   mutable     = false
