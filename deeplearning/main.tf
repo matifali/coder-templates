@@ -19,7 +19,7 @@ data "coder_parameter" "cpu" {
   name        = "CPU"
   description = "Choose number of CPU cores (min: 4, max: 16)"
   type        = "number"
-  icon        = "/icon/memory.svg"
+  icon        = "https://raw.githubusercontent.com/matifali/logos/main/memory.svg"
   mutable     = true
   default     = "8"
   option {
@@ -43,7 +43,7 @@ data "coder_parameter" "ram" {
   name        = "RAM"
   description = "Choose amount of RAM (min: 16 GB, max: 64 GB)"
   type        = "number"
-  icon        = "/icon/memory.svg"
+  icon        = "https://raw.githubusercontent.com/matifali/logos/main/memory.svg"
   mutable     = true
   default     = "32"
   option {
@@ -66,7 +66,7 @@ data "coder_parameter" "ram" {
 
 data "coder_parameter" "framework" {
   name        = "Framework"
-  icon        = "/icon/azure.png"
+  icon        = "https://raw.githubusercontent.com/matifali/logos/main/memory.png"
   description = "Choose your preffered framework"
   type        = "string"
   mutable     = false
@@ -75,43 +75,43 @@ data "coder_parameter" "framework" {
     name        = "PyTorch"
     description = "PyTorch"
     value       = "pytorch"
-    icon        = "./pytorch.svg"
+    icon        = "https://raw.githubusercontent.com/matifali/logos/main/pytorch.svg"
   }
   option {
     name        = "PyTorch Nightly"
     description = "PyTorch Nightly"
     value       = "pytorch-nightly"
-    icon        = "./pytorch.svg"
+    icon        = "https://raw.githubusercontent.com/matifali/logos/main/pytorch.svg"
   }
   option {
     name        = "Tensorflow"
     description = "Tensorflow"
     value       = "tensorflow"
-    icon        = "./tensorflow.svg"
+    icon        = "https://raw.githubusercontent.com/matifali/logos/main/tensorflow.svg"
   }
   option {
     name        = "Tensorflow + PyTorch"
     description = "Tensorflow + PyTorch"
     value       = "no-conda"
-    icon        = "./tf-torch.svg"
+    icon        = "https://raw.githubusercontent.com/matifali/logos/main/tf-torch.svg"
   }
   option {
     name        = "Tensorflow + PyTorch + conda"
     description = "Tensorflow + PyTorch + conda"
     value       = "conda"
-    icon        = "./tf-torch-conda.svg"
+    icon        = "https://raw.githubusercontent.com/matifali/logos/main/tf-torch-conda.svg"
   }
   option {
     name        = "Conda"
     description = "Only conda (install whatever you need)"
     value       = "conda-base"
-    icon        = "./conda.svg"
+    icon        = "https://raw.githubusercontent.com/matifali/logos/main/conda.svg"
   }
 }
 
 data "coder_parameter" "vscode-web" {
   name        = "VS Code Web"
-  icon        = "/icon/code.svg"
+  icon        = "https://raw.githubusercontent.com/matifali/logos/main/code.svg"
   description = "Do you want VS Code Web?"
   type        = "bool"
   mutable     = true
@@ -120,7 +120,7 @@ data "coder_parameter" "vscode-web" {
 
 data "coder_parameter" "jupyter" {
   name        = "Jupyter"
-  icon        = "/icon/jupyter.svg"
+  icon        = "https://raw.githubusercontent.com/matifali/logos/main/jupyter.svg"
   description = "Choose your preffered Jupyter IDE"
   type        = "string"
   mutable     = true
@@ -158,7 +158,7 @@ resource "coder_app" "jupyter" {
   agent_id     = coder_agent.main.id
   display_name = "Jupyter ${data.coder_parameter.jupyter.value}"
   slug         = "jupyter${lower(data.coder_parameter.jupyter.value)}"
-  icon         = "/icon/jupyter.svg"
+  icon         = "https://raw.githubusercontent.com/matifali/logos/main/jupyter.svg"
   url          = "http://localhost:8888/"
   subdomain    = true
   share        = "owner"
@@ -170,7 +170,7 @@ resource "coder_app" "code-server" {
   display_name = "VS Code Web"
   slug         = "code-server"
   url          = "http://localhost:8000?folder=/home/coder/data/"
-  icon         = "/icon/code.svg"
+  icon         = "https://raw.githubusercontent.com/matifali/logos/main/code.svg"
   subdomain    = true
   share        = "owner"
 }
