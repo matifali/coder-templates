@@ -11,21 +11,6 @@ terraform {
   }
 }
 
-# Admin parameters
-variable "arch" {
-  default     = "amd64"
-  description = "arch: What architecture is your Docker host on?"
-  sensitive   = true
-}
-
-variable "OS" {
-  default     = "Linux"
-  description = <<-EOF
-  What operating system is your Coder host on?
-  EOF
-  sensitive   = true
-}
-
 variable "cpu" {
   description = "How many CPU cores for this workspace?"
   default     = "08"
@@ -54,25 +39,20 @@ variable "gpu" {
 
 }
 
-resource "coder_metadata" "compute_resources" {
-  count       = data.coder_workspace.me.start_count
-  resource_id = data.coder_workspace.me.id
-  item {
-    key   = "cpu"
-    value = var.cpu
-  }
-  item {
-    key   = "ram"
-    value = var.ram
-  }
-  item {
-    key   = "gpu"
-    value = var.gpu
+locals {
+  docker_host = {
+    "No"  = "ssh://ctar@139.179.99.239"   # This is leader node of docker swarm
+    "Yes" = "unix:///var/run/docker.sock" # This is the Coder host
   }
 }
 
 provider "docker" {
-  host = "unix:///var/run/docker.sock"
+  host = lookup(local.docker_host, var.gpu)
+  ssh_opts = [
+    "-o", "StrictHostKeyChecking=no",
+    "-o", "UserKnownHostsFile=/dev/null",
+    "-i", "/home/coder/.ssh/id_rsa"
+  ]
 }
 
 provider "coder" {
@@ -103,7 +83,7 @@ resource "coder_app" "matlab_desktop" {
 }
 
 resource "coder_agent" "main" {
-  arch           = var.arch
+  arch           = "amd64"
   os             = "linux"
   startup_script = <<EOT
     #!/bin/bash
@@ -136,84 +116,9 @@ resource "docker_image" "matlab" {
   keep_locally  = true
 }
 
-#Volumes Resources
 #home_volume
 resource "docker_volume" "home_volume" {
   name = "coder-${data.coder_workspace.me.owner}-${lower(data.coder_workspace.me.name)}-home"
-}
-resource "coder_metadata" "home_volume" {
-  count       = data.coder_workspace.me.start_count
-  resource_id = docker_volume.home_volume.id
-  hide        = true
-  item {
-    key   = "home_volume"
-    value = docker_volume.home_volume.mountpoint
-  }
-}
-#usr_volume
-resource "docker_volume" "usr_volume" {
-  name = "coder-${data.coder_workspace.me.owner}-${lower(data.coder_workspace.me.name)}-usr"
-}
-resource "coder_metadata" "usr_volume" {
-  count       = data.coder_workspace.me.start_count
-  resource_id = docker_volume.usr_volume.id
-  hide        = true
-  item {
-    key   = "usr_volume"
-    value = docker_volume.usr_volume.mountpoint
-  }
-}
-#var_volume
-resource "docker_volume" "var_volume" {
-  name = "coder-${data.coder_workspace.me.owner}-${lower(data.coder_workspace.me.name)}-var"
-}
-resource "coder_metadata" "var_volume" {
-  count       = data.coder_workspace.me.start_count
-  resource_id = docker_volume.var_volume.id
-  hide        = true
-  item {
-    key   = "var_volume"
-    value = docker_volume.var_volume.mountpoint
-  }
-}
-#etc_volume
-resource "docker_volume" "etc_volume" {
-  name = "coder-${data.coder_workspace.me.owner}-${lower(data.coder_workspace.me.name)}-etc"
-}
-resource "coder_metadata" "etc_volume" {
-  count       = data.coder_workspace.me.start_count
-  resource_id = docker_volume.etc_volume.id
-  hide        = true
-  item {
-    key   = "etc_volume"
-    value = docker_volume.etc_volume.mountpoint
-  }
-}
-#opt_volume
-resource "docker_volume" "opt_volume" {
-  name = "coder-${data.coder_workspace.me.owner}-${lower(data.coder_workspace.me.name)}-opt"
-}
-resource "coder_metadata" "opt_volume" {
-  count       = data.coder_workspace.me.start_count
-  resource_id = docker_volume.opt_volume.id
-  hide        = true
-  item {
-    key   = "etc_volume"
-    value = docker_volume.opt_volume.mountpoint
-  }
-}
-#root_volume
-resource "docker_volume" "root_volume" {
-  name = "coder-${data.coder_workspace.me.owner}-${lower(data.coder_workspace.me.name)}-root"
-}
-resource "coder_metadata" "root_volume" {
-  count       = data.coder_workspace.me.start_count
-  resource_id = docker_volume.root_volume.id
-  hide        = true
-  item {
-    key   = "root_volume"
-    value = docker_volume.root_volume.mountpoint
-  }
 }
 
 resource "docker_container" "workspace" {
@@ -242,31 +147,6 @@ resource "docker_container" "workspace" {
   volumes {
     container_path = "/home/coder"
     volume_name    = docker_volume.home_volume.name
-    read_only      = false
-  }
-  volumes {
-    container_path = "/usr/"
-    volume_name    = docker_volume.usr_volume.name
-    read_only      = false
-  }
-  volumes {
-    container_path = "/var/"
-    volume_name    = docker_volume.var_volume.name
-    read_only      = false
-  }
-  volumes {
-    container_path = "/etc/"
-    volume_name    = docker_volume.etc_volume.name
-    read_only      = false
-  }
-  volumes {
-    container_path = "/opt/"
-    volume_name    = docker_volume.opt_volume.name
-    read_only      = false
-  }
-  volumes {
-    container_path = "/root/"
-    volume_name    = docker_volume.root_volume.name
     read_only      = false
   }
   # users data directory
