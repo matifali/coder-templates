@@ -22,20 +22,9 @@ data "coder_parameter" "cpu" {
   icon        = "https://raw.githubusercontent.com/matifali/logos/main/memory.svg"
   mutable     = true
   default     = "8"
-  option {
-    name        = "4"
-    description = "4"
-    value       = "4"
-  }
-  option {
-    name        = "8"
-    description = "8"
-    value       = "8"
-  }
-  option {
-    name        = "16"
-    description = "16"
-    value       = "16"
+  validation {
+    min = 4
+    max = 16
   }
 }
 
@@ -46,20 +35,9 @@ data "coder_parameter" "ram" {
   icon        = "https://raw.githubusercontent.com/matifali/logos/main/memory.svg"
   mutable     = true
   default     = "32"
-  option {
-    name        = "16 GB"
-    description = "16"
-    value       = "16"
-  }
-  option {
-    name        = "32 GB"
-    description = "32"
-    value       = "32"
-  }
-  option {
-    name        = "64 GB"
-    description = "64"
-    value       = "64"
+  validation {
+    min = 16
+    max = 64
   }
 }
 
