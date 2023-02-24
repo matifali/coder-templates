@@ -41,7 +41,7 @@ variable "gpu" {
 
 locals {
   docker_host = {
-    "No"  = "ssh://ctar@139.179.99.239"   # This is leader node of docker swarm
+    "No"  = "ssh://user@192.168.0.239"   # This is leader node of docker swarm replace with IP of your docker host.
     "Yes" = "unix:///var/run/docker.sock" # This is the Coder host
   }
 }
@@ -51,7 +51,7 @@ provider "docker" {
   ssh_opts = [
     "-o", "StrictHostKeyChecking=no",
     "-o", "UserKnownHostsFile=/dev/null",
-    "-i", "/home/coder/.ssh/id_rsa"
+    "-i", "/home/coder/.ssh/id_rsa"   # Copy the ssh public key to coder user's home directory
   ]
 }
 
