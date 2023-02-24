@@ -1,16 +1,16 @@
-# CTAR Coder Templates
+# Coder OSS templates
 
-This repo contains the coder templates for CTAR-Bilkent. These are based on Docker.
+Docker based templates.
 
-1. [deeplearning](https://github.com/CTAR-Bilkent/coder-templates/tree/master/deeplearning) (tensorflow + pytorch + numpy + matplotlib + pandas + conda + pip + jupyter notebook or jupyter lab + Microsoft code-server)
-2. [matlab](https://github.com/CTAR-Bilkent/coder-templates/tree/master/matlab)
+1. [deeplearning](https://github.com/matifali/coder-templates/tree/master/deeplearning) (tensorflow + pytorch + numpy + matplotlib + pandas + conda + pip + jupyter notebook or jupyter lab + Microsoft code-server)
+2. [matlab](https://github.com/matifali/coder-templates/tree/master/matlab)
 
 ## Instructions
 
 To use these templates simply clone the repo and run,
 
 ```console
-git clone https://github.com/CTAR-Bilkent/coder-templates.git
+git clone https://github.com/matifali/coder-templates.git
 cd <template directory>
 coder templates create <template name>
 ```

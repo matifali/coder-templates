@@ -1,4 +1,72 @@
-# Deep Learning Workspaces for CTAR Bilkent
+# Coder Deeplearning Template
+
+A deeplearning template for [coder](https://coder.com/).
+
+## Coder Setup
+
+Follow these steps to configure accessing your workspaces locally on any machine.
+
+### Linux/MacOS
+
+1. Open a terminal and run
+
+   ```bash
+   curl -L https://coder.com/install.sh | sh
+   
+   coder login https://coder.example.com
+   
+   coder config-ssh
+   ```
+
+### Windows
+
+1. Download coder executable from <https://coder.example.com/bin/coder-windows-amd64.exe>
+
+2. rename `coder-windows-amd64.exe` to `coder.exe`
+
+3. copy `coder.exe` to `C:\Windows\`
+   or
+   add `coder.exe` to `PATH`
+
+4. Open a `powershell` window and run
+
+   ```powershell
+   md $HOME/.ssh
+   coder login https://coder.example.com
+   coder config-ssh
+   ```
+
+   or alternatively open `cmd` window and run
+
+   ```cmd
+   md %USERPROFILE%/.ssh
+   coder login https://coder.example.com
+   coder config-ssh
+   ```
+
+## Usage
+
+1. Clone this repository
+
+   ```bash
+   git clone https://github,com/matifali/coder-templates
+   cd coder-templates/deeplearning
+   ```
+
+2. Create a template
+
+   ```bash
+   coder templates create deeplearning
+   ```
+
+3. Create a workspace
+
+   ```bash
+   coder create DL --template deeplearning
+   ```
+
+   Or,
+   Go to <https://coder.example.com/workspaces> and click on **Create Workspace** and select **deeplearning** template.
 
 ## Connecting
 
@@ -41,9 +109,22 @@ Once you've configured SSH, you can work on projects from your local copy of VS 
 
 ## Persistent Storage
 
-There will be a `~/data` inside every workspace. All files placed here will survive reboots and be available to all workspaces.
+<https://github.com/matifali/coder-templates/blob/f6429fe2fc54a8de89621e118c68bf5cd97c003e/deeplearning/main.tf#L136>
+This is the host directory that will be mapped to `~/data` inside the workspace. make sure you set the permissions and owner ship as a user with `uid:gid` 1000. create subdirectories with the usernames of all coder users.
 
-To upload or download files to `~/data` go to https://share.ctar.ml
+```console
+sudo chown 1000:1000 -R your_data_dir
+sudo chmod -R 755 your_data_dir
+```
 
-## Docker Image
-This template uses the following docker image: https://github.com/matifali/dockerdl
+After this `your_data_dir/user` will be mapped to `~/data` inside every workspace.
+
+If you do not want this just remove this volume mount from [`main.tf`](./main.tf)
+
+This will persists reboots and will be available in all your work-spaces. It is suggested to store your training data in this directory.
+
+## Docker Images
+
+Deeplearning images used in the template are available at [dockerhub](https://hub.docker.com/repository/docker/matifali/dockerdl).
+
+Source code of deeplearning images is available at, [https://github.com/matifali/dockerdl](https://github.com/matifali/dockerdl)
