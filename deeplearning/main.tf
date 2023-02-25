@@ -254,19 +254,7 @@ resource "docker_container" "workspace" {
     volume_name    = docker_volume.opt_volume.name
     read_only      = false
   }
-  # users data directory
-  volumes {
-    container_path = "/home/coder/data/"
-    host_path      = "/data/${data.coder_workspace.me.owner}/"
-    read_only      = false
-  }
-  # shared data directory
-  volumes {
-    container_path = "/home/coder/share"
-    host_path      = "/data/share/"
-    read_only      = false
-  }
-
+  
   # Add labels in Docker to keep track of orphan resources.
   labels {
     label = "coder.owner"
