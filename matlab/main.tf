@@ -2,7 +2,7 @@ terraform {
   required_providers {
     coder = {
       source  = "coder/coder"
-      version = "0.6.12"
+      version = "0.6.14"
     }
     docker = {
       source  = "kreuzwerker/docker"
@@ -11,47 +11,63 @@ terraform {
   }
 }
 
-variable "cpu" {
-  description = "How many CPU cores for this workspace?"
-  default     = "08"
+data "coder_parameter" "cpu" {
+  name        = "CPU"
+  description = "Choose number of CPU cores (min: 4, max: 40)"
+  type        = "number"
+  icon        = "https://raw.githubusercontent.com/matifali/logos/main/memory.svg"
+  mutable     = true
+  default     = "8"
   validation {
-    condition     = contains(["04", "08", "16", "32", "40"], var.cpu)
-    error_message = "value must be one of the options"
+    min = 4
+    max = 40
   }
 }
 
-variable "ram" {
-  description = "How much RAM for your workspace? (min: 32 GB, max: 64 GB)"
+data "coder_parameter" "ram" {
+  name        = "RAM"
+  description = "Choose amount of RAM (min: 16 GB, max: 64 GB)"
+  type        = "number"
+  icon        = "https://raw.githubusercontent.com/matifali/logos/main/memory.svg"
+  mutable     = true
   default     = "32"
   validation {
-    condition     = contains(["32", "48", "64"], var.ram)
-    error_message = "value must be one of the options"
+    min = 16
+    max = 64
   }
 }
 
-variable "gpu" {
-  description = "Do you need GPU?"
-  default     = "No"
-  validation {
-    condition     = contains(["No", "Yes"], var.gpu)
-    error_message = "value must be one of the options"
-  }
 
+data "coder_parameter" "gpu" {
+  name        = "GPU"
+  description = "Do you need GPU?"
+  type        = "string"
+  icon        = "https://raw.githubusercontent.com/matifali/logos/main/memory.svg"
+  mutable     = false
+  default     = "No"
+  option {
+    name  = "No"
+    value = "No"
+  }
+  option {
+    name  = "Yes"
+    value = "Yes"
+  }
 }
 
 locals {
   docker_host = {
-    "No"  = "ssh://user@192.168.0.239"   # This is leader node of docker swarm replace with IP of your docker host.
+    "No"  = "ssh://user@192.168.0.239"    # This is leader node of docker swarm replace with IP of your docker host.
     "Yes" = "unix:///var/run/docker.sock" # This is the Coder host
   }
 }
 
 provider "docker" {
-  host = lookup(local.docker_host, var.gpu)
+  host = lookup(local.docker_host, data.coder_parameter.gpu.value)
   ssh_opts = [
     "-o", "StrictHostKeyChecking=no",
     "-o", "UserKnownHostsFile=/dev/null",
-    "-i", "/home/coder/.ssh/id_rsa"   # Copy the ssh public key to coder user's home directory
+    "-i", "/home/coder/.ssh/id_rsa" # Copy the ssh public key to coder user's home directory
   ]
 }
 
@@ -124,9 +140,9 @@ resource "docker_volume" "home_volume" {
 resource "docker_container" "workspace" {
   count      = data.coder_workspace.me.start_count
   image      = docker_image.matlab.image_id
-  cpu_shares = var.cpu
-  memory     = var.ram * 1024
-  gpus       = var.gpu == "Yes" ? "all" : null
+  cpu_shares = data.coder_parameter.cpu.value
+  memory     = data.coder_parameter.ram.value * 1024
+  gpus       = data.coder_parameter.gpu.value == "Yes" ? "all" : null
   # Uses lower() to avoid Docker restriction on container names.
   name = "coder-${data.coder_workspace.me.owner}-${lower(data.coder_workspace.me.name)}"
   # Hostname makes the shell more user friendly: coder@my-workspace:~$
