@@ -12,38 +12,16 @@ Follow these steps to configure accessing your workspaces locally on any machine
 
    ```bash
    curl -L https://coder.com/install.sh | sh
-   
-   coder login https://coder.example.com
-   
-   coder config-ssh
    ```
 
 ### Windows
 
-1. Download coder executable from <https://coder.example.com/bin/coder-windows-amd64.exe>
-
-2. rename `coder-windows-amd64.exe` to `coder.exe`
-
-3. copy `coder.exe` to `C:\Windows\`
-   or
-   add `coder.exe` to `PATH`
-
-4. Open a `powershell` window and run
+1. Open a `powershell` window and run
 
    ```powershell
-   md $HOME/.ssh
-   coder login https://coder.example.com
-   coder config-ssh
+   winget install Coder.Coder
    ```
-
-   or alternatively open `cmd` window and run
-
-   ```cmd
-   md %USERPROFILE%/.ssh
-   coder login https://coder.example.com
-   coder config-ssh
-   ```
-
+   
 ## Usage
 
 1. Clone this repository
@@ -52,21 +30,23 @@ Follow these steps to configure accessing your workspaces locally on any machine
    git clone https://github,com/matifali/coder-templates
    cd coder-templates/deeplearning
    ```
+2. Login to coder
 
-2. Create a template
+   ```bash
+   coder login coder.example.com
+   ```
+   > Replace coder.example.com with your coder deplyment URL or IP
+
+
+3. Create a template
 
    ```bash
    coder templates create deeplearning
    ```
 
-3. Create a workspace
+4. Create a workspace
 
-   ```bash
-   coder create DL --template deeplearning
-   ```
-
-   Or,
-   Go to <https://coder.example.com/workspaces> and click on **Create Workspace** and select **deeplearning** template.
+   Go to <https://coder.example.com/workspaces> and click on **Create Workspace** and select **matlab** template.
 
 ## Connecting
 
