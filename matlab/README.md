@@ -12,38 +12,16 @@ Follow these steps to configure accessing your workspaces locally on any machine
 
    ```bash
    curl -L https://coder.com/install.sh | sh
-   
-   coder login https://coder.example.com
-   
-   coder config-ssh
    ```
 
 ### Windows
 
-1. Download coder executable from <https://coder.example.com/bin/coder-windows-amd64.exe>
-
-2. rename `coder-windows-amd64.exe` to `coder.exe`
-
-3. copy `coder.exe` to `C:\Windows\`
-   or
-   add `coder.exe` to `PATH`
-
-4. Open a `powershell` window and run
+1. Open a `powershell` window and run
 
    ```powershell
-   md $HOME/.ssh
-   coder login https://coder.example.com
-   coder config-ssh
+   winget install Coder.Coder
    ```
-
-   or alternatively open `cmd` window and run
-
-   ```cmd
-   md %USERPROFILE%/.ssh
-   coder login https://coder.example.com
-   coder config-ssh
-   ```
-
+   
 ## Usage
 
 1. Clone this repository
@@ -52,8 +30,15 @@ Follow these steps to configure accessing your workspaces locally on any machine
    git clone https://github,com/matifali/coder-templates
    cd coder-templates/matlab
    ```
+2. Login to coder
 
-2. Create a template
+   ```bash
+   coder login coder.example.com
+   ```
+   > Replace coder.example.com with your coder deplyment URL or IP
+
+
+4. Create a template
 
    ```bash
    coder templates create matlab
@@ -79,16 +64,8 @@ There are multiple ways to connect to your workspace
 
 Also, you can connect using the **Web Terminal** or **SSH** by clicking on the above buttons.
 
-## Persistent Storage
 
-<https://github.com/matifali/coder-templates/blob/55dd329783eb2583be6334c950acf4fcf73e1d0f/matlab/main.tf#L136>
-This is the host directory that will be mapped to `~/data` inside the workspace. make sure you set the permissions and owner ship as a user with `uid:gid` 1000. create subdirectories with the usernames of all coder users.
+## Docker Image
 
-```console
-sudo chown 1000:1000 -R your_data_dir
-sudo chmod -R 755 your_data_dir
-```
-
-After this `your_data_dir/user` will be mapped to `~/data` inside every workspace. This is useful for storing persistent data as well as sharing data between workspaces. This will survive workspace restarts and image updates.
-
-If you do not want this just remove this volume mount from `[main.tf](https://github.com/matifali/coder-templates/blob/master/matlab/main.tf)`
+- dockerhub: https://hub.docker.com/repository/docker/matifali/matlab/general
+- Source: https://github.com/matifali/matlab
