@@ -41,7 +41,6 @@ data "coder_parameter" "ram" {
   }
 }
 
-
 data "coder_parameter" "framework" {
   name        = "Framework"
   icon        = "https://raw.githubusercontent.com/matifali/logos/main/memory.svg"
@@ -87,13 +86,13 @@ data "coder_parameter" "framework" {
   }
 }
 
-data "coder_parameter" "vscode-web" {
+data "coder_parameter" "code-server" {
   name        = "VS Code Web"
   icon        = "https://raw.githubusercontent.com/matifali/logos/main/code.svg"
   description = "Do you want VS Code Web?"
   type        = "bool"
   mutable     = true
-  default     = true
+  default     = "false"
 }
 
 data "coder_parameter" "jupyter" {
@@ -132,7 +131,7 @@ data "coder_workspace" "me" {
 
 # jupyter
 resource "coder_app" "jupyter" {
-  count        = data.coder_parameter.framework.value == "conda-base" ? 0 : data.coder_parameter.jupyter.value == "no" ? 0 : 1
+  count        = data.coder_parameter.framework.value == "conda-base" ? 0 : data.coder_parameter.jupyter.value == "no" ? 0 : 1 # if conda-base is selected or jupyter is not selected, don't show jupyter
   agent_id     = coder_agent.main.id
   display_name = "Jupyter ${data.coder_parameter.jupyter.value}"
   slug         = "jupyter${lower(data.coder_parameter.jupyter.value)}"
@@ -143,7 +142,7 @@ resource "coder_app" "jupyter" {
 }
 
 resource "coder_app" "code-server" {
-  count        = data.coder_parameter.vscode-web.value == false ? 0 : 1
+  count        = data.coder_parameter.code-server.value == "false" ? 0 : 1
   agent_id     = coder_agent.main.id
   display_name = "VS Code Web"
   slug         = "code-server"
@@ -166,7 +165,7 @@ resource "coder_agent" "main" {
     if [ "${data.coder_parameter.framework.value}" != "conda-base" ] && [ "${data.coder_parameter.jupyter.value}" != "no" ]; then
       ${local.jupyter-path}/jupyter ${data.coder_parameter.jupyter.value} --no-browser --${data.coder_parameter.jupyter.description}App.token='' --ip='*' 2>&1 | tee -a ~/build.log &
     fi
-    if [ ${data.coder_parameter.vscode-web.value} ]; then
+    if [ "${data.coder_parameter.code-server.value}" == "true" ]; then
       code-server --accept-server-license-terms serve-local --without-connection-token --quality stable --telemetry-level off 2>&1 | tee -a ~/code-server.log &
     fi
     EOT
@@ -254,7 +253,7 @@ resource "docker_container" "workspace" {
     volume_name    = docker_volume.opt_volume.name
     read_only      = false
   }
-  
+
   # Add labels in Docker to keep track of orphan resources.
   labels {
     label = "coder.owner"
