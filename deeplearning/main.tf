@@ -155,6 +155,8 @@ resource "coder_app" "code-server" {
 resource "coder_agent" "main" {
   arch           = "amd64"
   os             = "linux"
+  login_before_ready     = false
+  startup_script_timeout = 60
   startup_script = <<EOT
     #!/bin/bash
     set -euo pipefail
