@@ -95,7 +95,7 @@ data "coder_parameter" "docker-image" {
 
 data "coder_parameter" "cpu" {
   name        = "CPU"
-  description = "The number of CPUs to allocate to the workspace"
+  description = "The number of CPUs to allocate to the workspace (1-8)"
   type        = "number"
   default     = "1"
   icon        = "https://raw.githubusercontent.com/matifali/logos/main/cpu-3.svg"
@@ -108,7 +108,7 @@ data "coder_parameter" "cpu" {
 
 data "coder_parameter" "memory" {
   name        = "Memory (GB)"
-  description = "The amount of memory to allocate to the workspace in GB"
+  description = "The amount of memory to allocate to the workspace in GB (1-8)"
   type        = "number"
   default     = "1"
   icon        = "/icon/memory.svg"
@@ -121,7 +121,7 @@ data "coder_parameter" "memory" {
 
 data "coder_parameter" "volume-size" {
   name        = "Volume Size"
-  description = "The size of the volume to create for the workspace"
+  description = "The size of the volume to create for the workspace in GB (1-20)"
   type        = "number"
   default     = "3"
   icon        = "https://raw.githubusercontent.com/matifali/logos/main/database.svg"

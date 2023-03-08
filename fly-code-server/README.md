@@ -11,13 +11,19 @@ This template provisions a [code-server](https://github.com/coder/code-server) i
 
 1. Clone this repo and cd into `fly-code-server` directory.
 2. Add a secret or environment variable to your Coder deployment with the name `FLY_API_TOKEN` and the value of your fly.io API token.
-   > This is needed to deploy the workspace to fly.io.
 
 ```shell
-$ flyctl auth login
-$ export FLY_API_TOKEN=$(flyctl auth token)
+flyctl auth login
+export FLY_API_TOKEN=$(flyctl auth token)
 ```
 
-3. Run `coder templates create fly-code-server` to create a template in Coder.
+> This is needed to deploy the workspace to fly.io.
 
+3. Run `coder templates create fly-code-server` to create a template in Coder.
+   ![template](static/template.png)
 4. Create a new workspace from the template.
+   ![workspace-1](static/workspace-1.png)
+   ![workspace-regions](static/workspace-region.png)
+   ![workspace-resources](static/workspace-resources.png)
+
+This is all. You should now have a code-server instance running on fly.io.
