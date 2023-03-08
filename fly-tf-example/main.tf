@@ -44,7 +44,7 @@ resource "fly_machine" "workspace" {
   app      = fly_app.workspace.name
   region   = data.coder_parameter.region.value
   name     = data.coder_workspace.me.name
-  image    = "codercom/code-server:latest" # docker image to use for the workspace
+  image    = data.coder_parameter.docker-image.value
   cpus     = data.coder_parameter.cpu.value
   memorymb = data.coder_parameter.memory.value * 1024
   env = {
@@ -86,11 +86,18 @@ resource "fly_machine" "workspace" {
   ]
 }
 
+data "coder_parameter" "docker-image" {
+  name        = "Docker Image"
+  description = "The docker image to use for the workspace"
+  default     = "codercom/code-server:latest"
+  icon        = "https://raw.githubusercontent.com/matifali/logos/main/docker.svg"
+}
+
 data "coder_parameter" "cpu" {
   name        = "CPU"
   description = "The number of CPUs to allocate to the workspace"
   type        = "number"
-  default     = "2"
+  default     = "1"
   icon        = "https://raw.githubusercontent.com/matifali/logos/main/cpu-3.svg"
   mutable     = true
   validation {
@@ -103,7 +110,7 @@ data "coder_parameter" "memory" {
   name        = "Memory (GB)"
   description = "The amount of memory to allocate to the workspace in GB"
   type        = "number"
-  default     = "2"
+  default     = "1"
   icon        = "/icon/memory.svg"
   mutable     = true
   validation {
@@ -116,14 +123,15 @@ data "coder_parameter" "volume-size" {
   name        = "Volume Size"
   description = "The size of the volume to create for the workspace"
   type        = "number"
-  default     = "10"
+  default     = "3"
   icon        = "https://raw.githubusercontent.com/matifali/logos/main/database.svg"
   validation {
     min = 1
-    max = 100
+    max = 20
   }
 }
 
+# You can see all available regions here: https://fly.io/docs/reference/regions/
 data "coder_parameter" "region" {
   name        = "Region"
   description = "The region to deploy the workspace in"
@@ -209,7 +217,7 @@ data "coder_parameter" "region" {
 data "coder_parameter" "fly-org" {
   name        = "Fly.io Organization"
   description = "The Fly.io organization to deploy the workspace in"
-  default     = "coder-409"
+  default     = "coder-409" # Replace with your own org or personal account
   icon        = "/emojis/1f3ec.png"
 }
 
@@ -237,12 +245,14 @@ resource "coder_agent" "main" {
   startup_script_timeout = 180
   startup_script         = <<-EOT
     set -e
+    # Start code-server
     code-server --auth none >/tmp/code-server.log 2>&1 &
+    # Set the hostname to the workspace name
+    sudo hostname -b "${data.coder_workspace.me.name}-fly"
   EOT
 }
 
 data "coder_provisioner" "me" {
-
 }
 
 data "coder_workspace" "me" {
