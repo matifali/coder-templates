@@ -11,13 +11,21 @@ This template provisions a [code-server](https://github.com/coder/code-server) i
 
 1. Clone this repo and cd into `fly-docker-image` directory.
 2. Add a secret or environment variable to your Coder deployment with the name `FLY_API_TOKEN` and the value of your fly.io API token.
+   > This is needed to deploy the workspace to fly.io.
 
 ```shell
 flyctl auth login
 export FLY_API_TOKEN=$(flyctl auth token)
 ```
 
-> This is needed to deploy the workspace to fly.io.
+Or, If Coder is running as a fly.io app, you can set the secret directly:
+
+```shell
+flyctl secrets set FLY_API_TOKEN=$(flyctl auth token) -a <coder-app-name>
+# where <coder-app-name> is the name of the Coder app on fly.io
+```
+
+> Read our blog [post](coder.com/blog/using-fly-io-with-coder) to learn more about how to deploy Coder on fly.io.
 
 3. Run `coder templates create fly-docker-image` to create a template in Coder.
    ![template](static/template.png)
