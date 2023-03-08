@@ -25,7 +25,7 @@ flyctl secrets set FLY_API_TOKEN=$(flyctl auth token) -a <coder-app-name>
 # where <coder-app-name> is the name of the Coder app on fly.io
 ```
 
-> Read our blog [post](coder.com/blog/using-fly-io-with-coder) to learn more about how to deploy Coder on fly.io.
+> Read our blog [post](coder.com/blog/deploying-coder-on-fly-io) to learn more about how to deploy Coder on fly.io.
 
 3. Run `coder templates create fly-docker-image` to create a template in Coder.
    ![template](static/template.png)
