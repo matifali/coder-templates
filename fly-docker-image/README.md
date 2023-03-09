@@ -18,6 +18,8 @@ flyctl auth login
 export FLY_API_TOKEN=$(flyctl auth token)
 ```
 
+Add this to your Coder deployment's environment variables. (e.g. `/etc/coder.d/coder.env`)
+
 Or, If Coder is running as a fly.io app, you can set the secret directly:
 
 ```shell
