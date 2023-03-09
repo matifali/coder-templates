@@ -6,21 +6,24 @@ terraform {
     }
     coder = {
       source  = "coder/coder"
-      version = "~>0.6.15"
+      version = "~>0.6.16"
     }
   }
 }
 
 provider "fly" {
   useinternaltunnel    = true
-  internaltunnelorg    = data.coder_parameter.fly-org.value
+  internaltunnelorg    = var.fly_org
   internaltunnelregion = data.coder_parameter.region.value
 }
 
+provider "coder" {
+  feature_use_managed_variables = true
+}
 
 resource "fly_app" "workspace" {
   name = "coder-${data.coder_workspace.me.owner}-${lower(data.coder_workspace.me.name)}"
-  org  = data.coder_parameter.fly-org.value
+  org  = var.fly_org
 }
 
 resource "fly_ip" "workspace-ip4" {
@@ -33,7 +36,7 @@ resource "fly_ip" "workspace-ip6" {
   type = "v6"
 }
 
-resource "fly_volume" "hame-volume" {
+resource "fly_volume" "home-volume" {
   app    = fly_app.workspace.name
   name   = "coder_${data.coder_workspace.me.owner}_${lower(data.coder_workspace.me.name)}_home"
   size   = data.coder_parameter.volume-size.value
@@ -41,6 +44,7 @@ resource "fly_volume" "hame-volume" {
 }
 
 resource "fly_machine" "workspace" {
+  count    = data.coder_workspace.me.start_count
   app      = fly_app.workspace.name
   region   = data.coder_parameter.region.value
   name     = data.coder_workspace.me.name
@@ -80,10 +84,16 @@ resource "fly_machine" "workspace" {
   ]
   mounts = [
     {
-      volume = fly_volume.hame-volume.id
+      volume = fly_volume.home-volume.id
       path   = "/home/coder"
     }
   ]
+}
+
+variable "fly_org" {
+  type        = string
+  default     = "coder-409"
+  description = "The Fly.io organization to deploy the workspace in"
 }
 
 data "coder_parameter" "docker-image" {
@@ -212,13 +222,6 @@ data "coder_parameter" "region" {
     value = "yyz"
     icon  = "/emojis/1f1e8-1f1e6.png"
   }
-}
-
-data "coder_parameter" "fly-org" {
-  name        = "Fly.io Organization"
-  description = "The Fly.io organization to deploy the workspace in"
-  default     = "coder-409" # Replace with your own org or personal account
-  icon        = "/emojis/1f3ec.png"
 }
 
 resource "coder_app" "code-server" {
