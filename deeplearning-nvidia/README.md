@@ -1,3 +1,10 @@
+---
+name: Nvidia NGC Deeplearning Template
+description: Use this template to create a deeplearning workspace on Coder based on Nvidia NGC containers.
+tags: [docker, deeplearning, pytorch, tensorflow, jupyter, nvidia, ngc]
+icon: https://raw.githubusercontent.com/matifali/logos/main/nvidia.svg
+---
+
 # Deep Learning Workspaces Using Nvidia NGC Containers
 
 ## Coder Setup

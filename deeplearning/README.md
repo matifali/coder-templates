@@ -1,3 +1,10 @@
+---
+name: Deeplearning Template
+description: Use this template to create a deeplearning workspace on Coder.
+tags: [docker, deeplearning, pytorch, tensorflow, jupyter, conda]
+icon: https://raw.githubusercontent.com/matifali/logos/main/tf-torch-conda.svg
+---
+
 # Coder Deeplearning Template
 
 A deeplearning template for [coder](https://coder.com/).

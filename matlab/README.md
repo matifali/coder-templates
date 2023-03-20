@@ -1,3 +1,10 @@
+---
+name: Matlab
+description: Use this template to create a matlab workspace with browser based matlab instant.
+tags: [matlab, noVNC, webapp, browser. desktop, docker]
+icon: https://raw.githubusercontent.com/matifali/logos/main/matlab.svg
+---
+
 # Coder template matlab
 
 A matlab template for [coder](https://coder.com/).
