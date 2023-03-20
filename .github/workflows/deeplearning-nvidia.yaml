@@ -1,20 +1,20 @@
 # An action to push templates to coder server
 
-name: MATLAB
+name: Deeplearning Nvidia
 
 on:
   push:
     branches:
       - main
     paths:
-      - "matlab/main.tf"
-      - ".github/workflows/matlab.yaml"
+      - "deeplearning-nvidia/main.tf"
+      - ".github/workflows/deeplearning-nvidia.yaml"
   pull_request:
     branches:
       - main
     paths:
-      - "matlab/main.tf"
-      - ".github/workflows/matlab.yaml"
+      - "deeplearning-nvidia/main.tf"
+      - ".github/workflows/deeplearning-nvidia.yaml"
   workflow_dispatch:
 
 jobs:
@@ -29,10 +29,10 @@ jobs:
         run: echo ::set-output name=sha_short::$(git rev-parse --short HEAD)
 
       - name: update coder template
-        uses: matifali/update-coder-template@v1
+        uses: matifali/update-coder-template@latest
         with:
           CODER_URL: ${{ secrets.CODER_URL }}
-          CODER_TEMPLATE_NAME: "matlab"
-          CODER_TEMPLATE_DIR: "matlab"
+          CODER_TEMPLATE_NAME: "deeplearning-nvidia"
+          CODER_TEMPLATE_DIR: "deeplearning-nvidia"
           CODER_TEMPLATE_VERSION: ${{ steps.get_commit_sha.outputs.sha_short }}
           CODER_SESSION_TOKEN: ${{ secrets.CODER_SESSION_TOKEN }}

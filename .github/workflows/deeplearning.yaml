@@ -1,6 +1,6 @@
 # An action to push templates to coder server
 
-name: deeplearning
+name: Deeplearning
 
 on:
   push:
@@ -8,14 +8,12 @@ on:
       - main
     paths:
       - "deeplearning/main.tf"
-      - "deeplearning/images/*.Dockerfile"
       - ".github/workflows/deeplearning.yaml"
   pull_request:
     branches:
       - main
     paths:
       - "deeplearning/main.tf"
-      - "deeplearning/images/*.Dockerfile"
       - ".github/workflows/deeplearning.yaml"
   workflow_dispatch:
 
@@ -33,7 +31,7 @@ jobs:
       - name: update coder template
         uses: matifali/update-coder-template@latest
         with:
-          CODER_URL: "https://gpu.ctar.ml"
+          CODER_URL: ${{ secrets.CODER_URL }}
           CODER_TEMPLATE_NAME: "deeplearning"
           CODER_TEMPLATE_DIR: "deeplearning"
           CODER_TEMPLATE_VERSION: ${{ steps.get_commit_sha.outputs.sha_short }}
