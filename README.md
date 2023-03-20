@@ -3,7 +3,7 @@
 Docker based templates.
 
 1. [deeplearning](https://github.com/matifali/coder-templates/tree/master/deeplearning) (tensorflow + pytorch + numpy + matplotlib + pandas + conda + pip + jupyter notebook or jupyter lab + Microsoft code-server)
-2. [deeplearning=nvidia](https://github.com/matifali/coder-templates/tree/master/deeplearning-nvidia) (Nvidia NGC containers)
+2. [deeplearning-nvidia](https://github.com/matifali/coder-templates/tree/master/deeplearning-nvidia) (Nvidia NGC containers)
 3. [matlab](https://github.com/matifali/coder-templates/tree/master/matlab) (MATLAB docker images)
 
 ## Pre-requisites
