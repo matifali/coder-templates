@@ -2,56 +2,63 @@ terraform {
   required_providers {
     coder = {
       source  = "coder/coder"
-      version = "0.6.12"
+      version = "0.6.20"
     }
     docker = {
       source  = "kreuzwerker/docker"
-      version = "3.0.1"
+      version = "3.0.2"
     }
   }
 }
 
-variable "cpu" {
-  description = "How many CPU cores for this workspace?"
-  default     = "08"
+data "coder_parameter" "cpu" {
+  name        = "CPU"
+  description = "Choose number of CPU cores (min: 8, max: 20)"
+  type        = "number"
+  icon        = "https://raw.githubusercontent.com/matifali/logos/main/cpu-1.svg"
+  mutable     = true
+  default     = "8"
   validation {
-    condition     = contains(["04", "08", "16", "32", "40"], var.cpu)
-    error_message = "value must be one of the options"
+    min = 4
+    max = 20
   }
 }
 
-variable "ram" {
-  description = "How much RAM for your workspace? (min: 32 GB, max: 64 GB)"
+data "coder_parameter" "ram" {
+  name        = "RAM"
+  description = "Choose amount of RAM (min: 32 GB, max: 64 GB)"
+  type        = "number"
+  icon        = "https://raw.githubusercontent.com/matifali/logos/main/memory.svg"
+  mutable     = true
   default     = "32"
   validation {
-    condition     = contains(["32", "48", "64"], var.ram)
-    error_message = "value must be one of the options"
+    min = 32
+    max = 64
   }
 }
 
-variable "gpu" {
+data "coder_parameter" "gpu" {
+  name        = "GPU"
   description = "Do you need GPU?"
-  default     = "No"
-  validation {
-    condition     = contains(["No", "Yes"], var.gpu)
-    error_message = "value must be one of the options"
-  }
-
+  type        = "bool"
+  icon        = "https://raw.githubusercontent.com/matifali/logos/main/gpu-1.svg"
+  mutable     = false
+  default     = "true"
 }
 
 locals {
   docker_host = {
-    "No"  = "ssh://user@192.168.0.239"   # This is leader node of docker swarm replace with IP of your docker host.
-    "Yes" = "unix:///var/run/docker.sock" # This is the Coder host
+    "false" = "ssh://ctar@139.179.99.239"   # This is leader node of docker swarm
+    "true"  = "unix:///var/run/docker.sock" # This is the Coder host
   }
 }
 
 provider "docker" {
-  host = lookup(local.docker_host, var.gpu)
+  host = lookup(local.docker_host, data.coder_parameter.gpu.value)
   ssh_opts = [
     "-o", "StrictHostKeyChecking=no",
     "-o", "UserKnownHostsFile=/dev/null",
-    "-i", "/home/coder/.ssh/id_rsa"   # Copy the ssh public key to coder user's home directory
+    "-i", "/home/coder/.ssh/id_rsa"
   ]
 }
 
@@ -82,20 +89,37 @@ resource "coder_app" "matlab_desktop" {
   share        = "owner"
 }
 
+resource "coder_app" "filebrowser" {
+  agent_id     = coder_agent.main.id
+  display_name = "File Browser"
+  slug         = "filebrowser"
+  icon         = "https://raw.githubusercontent.com/matifali/logos/main/database.svg"
+  url          = "http://localhost:8080"
+  subdomain    = true
+  share        = "owner"
+}
+
 resource "coder_agent" "main" {
-  arch           = "amd64"
-  os             = "linux"
-  startup_script = <<EOT
+  arch                   = "amd64"
+  os                     = "linux"
+  login_before_ready     = false
+  startup_script_timeout = 180
+  startup_script         = <<EOT
     #!/bin/bash
     set -euo pipefail
     # make user share directory
     mkdir -p ~/share
+    # make user data directory
+    mkdir -p ~/data
     # Add matlab to PATH
     export PATH=/opt/matlab/`ls /opt/matlab | grep R*`/bin:$PATH
     # start Matlab browser
     /bin/run.sh -browser 2>&1 | tee ~/matlab_browser.log &
     # start desktop
     /bin/run.sh -vnc 2>&1 | tee ~/matlab.log &
+    # Intall and start filebrowser
+    curl -fsSL https://raw.githubusercontent.com/filebrowser/get/master/get.sh | bash
+    filebrowser --noauth -r ~/data 2>&1 | tee ~/filebrowser.log &
     EOT
 
   env = {
@@ -124,9 +148,18 @@ resource "docker_volume" "home_volume" {
 resource "docker_container" "workspace" {
   count      = data.coder_workspace.me.start_count
   image      = docker_image.matlab.image_id
-  cpu_shares = var.cpu
-  memory     = var.ram * 1024
-  gpus       = var.gpu == "Yes" ? "all" : null
+  cpu_shares = data.coder_parameter.cpu.value
+  memory     = data.coder_parameter.ram.value * 1024
+  gpus       = "${data.coder_parameter.gpu.value}" == "true" ? "all" : null
+
+  devices {
+    host_path = "/dev/nvidia0"
+  }
+
+  devices {
+    host_path = "/dev/nvidiactl"
+  }
+
   # Uses lower() to avoid Docker restriction on container names.
   name = "coder-${data.coder_workspace.me.owner}-${lower(data.coder_workspace.me.name)}"
   # Hostname makes the shell more user friendly: coder@my-workspace:~$
@@ -141,13 +174,26 @@ resource "docker_container" "workspace" {
     ip   = "host-gateway"
   }
 
-  shm_size = 512
+  ipc_mode = "host"
 
   # users home directory
   volumes {
     container_path = "/home/coder"
     volume_name    = docker_volume.home_volume.name
     read_only      = false
+  }
+  # users data directory
+  volumes {
+    container_path = "/home/coder/data/"
+    host_path      = "/data/${data.coder_workspace.me.owner}/"
+    read_only      = false
+  }
+
+  # shared data directory
+  volumes {
+    container_path = "/home/coder/share"
+    host_path      = "/data/share/"
+    read_only      = true
   }
 
   # Add labels in Docker to keep track of orphan resources.

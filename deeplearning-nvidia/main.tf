@@ -12,9 +12,10 @@ terraform {
 }
 
 locals {
-  jupyter-path      = data.coder_parameter.framework.value == "matifali/dockerdl:conda" ? "/home/coder/.conda/envs/DL/bin/jupyter" : "/home/coder/.local/bin/jupyter"
-  jupyter-count     = (data.coder_parameter.framework.value == "matifali/dockerdl:conda" || data.coder_parameter.jupyter.value == "false") ? 0 : 1
+  jupyter-path      = "/usr/local/bin/jupyter"
+  jupyter-count     = data.coder_parameter.jupyter.value == "false" ? 0 : 1
   code-server-count = data.coder_parameter.code-server.value == "false" ? 0 : 1
+  ngc-version       = "23.02"
 }
 
 data "coder_parameter" "cpu" {
@@ -48,43 +49,19 @@ data "coder_parameter" "framework" {
   icon        = "https://raw.githubusercontent.com/matifali/logos/main/memory.svg"
   description = "Choose your preffered framework"
   type        = "string"
+  default     = "nvcr.io/nvidia/pytorch:${local.ngc-version}-py3"
   mutable     = false
-  default     = "matifali/dockerdl:tf-torch"
   option {
-    name        = "PyTorch"
-    description = "PyTorch"
-    value       = "matifali/dockerdl:torch"
+    name        = "Nvidia PyTorch"
+    description = "Nvidia NGC PyTorch"
+    value       = "nvcr.io/nvidia/pytorch:${local.ngc-version}-py3"
     icon        = "https://raw.githubusercontent.com/matifali/logos/main/pytorch.svg"
   }
   option {
-    name        = "PyTorch Nightly"
-    description = "PyTorch Nightly"
-    value       = "matifali/dockerdl:torch-nightly"
-    icon        = "https://raw.githubusercontent.com/matifali/logos/main/pytorch.svg"
-  }
-  option {
-    name        = "Tensorflow"
-    description = "Tensorflow"
-    value       = "matifali/dockerdl:tf"
+    name        = "Nvidia Tensorflow"
+    description = "Nvidia NGC Tensorflow"
+    value       = "nvcr.io/nvidia/tensorflow:${local.ngc-version}-tf2-py3"
     icon        = "https://raw.githubusercontent.com/matifali/logos/main/tensorflow.svg"
-  }
-  option {
-    name        = "Tensorflow + PyTorch"
-    description = "Tensorflow + PyTorch"
-    value       = "matifali/dockerdl:tf-torch"
-    icon        = "https://raw.githubusercontent.com/matifali/logos/main/tf-torch.svg"
-  }
-  option {
-    name        = "Tensorflow + PyTorch + conda"
-    description = "Tensorflow + PyTorch + conda"
-    value       = "matifali/dockerdl:tf-torch-conda"
-    icon        = "https://raw.githubusercontent.com/matifali/logos/main/tf-torch-conda.svg"
-  }
-  option {
-    name        = "Conda"
-    description = "Only conda (install whatever you need)"
-    value       = "matifali/dockerdl:conda"
-    icon        = "https://raw.githubusercontent.com/matifali/logos/main/conda.svg"
   }
 }
 
@@ -122,6 +99,7 @@ data "coder_parameter" "jupyter" {
   type        = "bool"
   mutable     = true
   default     = "false"
+
 }
 
 provider "docker" {
@@ -134,6 +112,7 @@ provider "coder" {
 data "coder_workspace" "me" {
 }
 
+# jupyter
 resource "coder_app" "jupyter" {
   count        = local.jupyter-count
   agent_id     = coder_agent.main.id
@@ -185,14 +164,15 @@ resource "coder_agent" "main" {
     filebrowser --noauth --root ~/data 2>&1 | tee -a ~/filebrowser.log &
   
     # launch jupyter
-    if [ "${local.jupyter-count}" == "1" && "${data.coder_parameter.jupyter.value}" == "true" ];
+    if [ "${data.coder_parameter.jupyter.value}" == "true" ];
     then
-      ${local.jupyter-path}/jupyter lab --no-browser --ServerApp.token='' --ip='*' 2>&1 | tee -a ~/build.log &
+      ${local.jupyter-path}/jupyter lab --no-browser --ServerApp.token='' --ip='*' 2>&1 | tee -a ~/jupyter.log &
     fi
 
-    # launch code-server
+    # Install and launch code-server
     if [ "${data.coder_parameter.code-server.value}" == "true" ];
     then
+      wget -O- https://aka.ms/install-vscode-server/setup.sh | sh
       code-server --accept-server-license-terms serve-local --without-connection-token --quality stable --telemetry-level off 2>&1 | tee -a ~/code-server.log &
     fi
     
@@ -262,6 +242,9 @@ resource "docker_container" "workspace" {
   }
 
   ipc_mode = "host"
+
+  # Start as use with UID and GID of 1000
+  user = "1000:1000"
 
   # users home directory
   volumes {
