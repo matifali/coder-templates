@@ -21,7 +21,7 @@ Follow these steps to configure accessing your workspaces locally on any machine
    ```powershell
    winget install Coder.Coder
    ```
-   
+
 ## Usage
 
 1. Clone this repository
@@ -30,28 +30,31 @@ Follow these steps to configure accessing your workspaces locally on any machine
    git clone https://github,com/matifali/coder-templates
    cd coder-templates/matlab
    ```
+
 2. Login to coder
 
    ```bash
-   coder login coder.example.com
+   coder login CODER_URL
    ```
+
    > Replace coder.example.com with your coder deplyment URL or IP
 
-
-4. Create a template
+3. Create a template
 
    ```bash
    coder templates create matlab
    ```
 
-3. Create a workspace
+4. Create a workspace
 
    ```bash
    coder create matlab --template matlab
    ```
 
    Or,
-   Go to <https://coder.example.com/workspaces> and click on **Create Workspace** and select **matlab** template.
+   Go to `https://CODER_URL/workspaces` and click on **Create Workspace** and select **matlab** template.
+
+> Note: Do not forget to change the `CODER_URL` to your coder deployment URL.
 
 ## Connecting
 
@@ -63,7 +66,6 @@ There are multiple ways to connect to your workspace
 ![matlab-connect-image](./matlab_connect.png)
 
 Also, you can connect using the **Web Terminal** or **SSH** by clicking on the above buttons.
-
 
 ## Docker Image
 

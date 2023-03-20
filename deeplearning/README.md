@@ -21,7 +21,7 @@ Follow these steps to configure accessing your workspaces locally on any machine
    ```powershell
    winget install Coder.Coder
    ```
-   
+
 ## Usage
 
 1. Clone this repository
@@ -30,13 +30,14 @@ Follow these steps to configure accessing your workspaces locally on any machine
    git clone https://github,com/matifali/coder-templates
    cd coder-templates/deeplearning
    ```
+
 2. Login to coder
 
    ```bash
-   coder login coder.example.com
+   coder login CODER_URL
    ```
-   > Replace coder.example.com with your coder deplyment URL or IP
 
+   > Replace coder.example.com with your coder deplyment URL or IP
 
 3. Create a template
 
@@ -46,46 +47,32 @@ Follow these steps to configure accessing your workspaces locally on any machine
 
 4. Create a workspace
 
-   Go to <https://coder.example.com/workspaces> and click on **Create Workspace** and select **matlab** template.
+   Go to `https://CODER_URL/workspaces` and click on **Create Workspace** and select **deeplearning** template.
+
+> Note: Do not forget to change the `CODER_URL` to your coder deployment URL.
 
 ## Connecting
 
 There are multiple options to connect to your workspace using local clients or browser.
 ![deeplearning-connect](./deeplearning-connect.png)
 
-### VS Code Server
+### VS Code Browser
 
-Click on the VS Code icon to launch a VS Code server that you can connect from your browser.
+Click on the VS Code Browser icon to launch a VS Code server that you can connect from your browser.
 
-### Jupyter Notebook
+### Jupyter Lab
 
-Click on the jupyter icon to launch a jupyter notebook server that you can connect from your browser.
+Click on the jupyter icon to launch a jupyter lab server that you can connect from your browser.
 
 Also, you can connect using the **Web Terminal** or **SSH** by clicking on the above buttons.
 
-### VS Code Remote
+### VS Code Desktop
 
-Once you've configured SSH, you can work on projects from your local copy of VS Code, connected to your Coder workspace for compute, etc.
-
-1. Open [VS Code](https://code.visualstudio.com/download) locally.
-2. Install the [Remote - SSH](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-ssh) extension.
-3. In VS Code's left-hand nav bar, click **Remote Explorer** and right-click on a workspace to connect.
-
-### JetBrains PyCharm Professional
-
-1. Install PyCharm Professional by using [JetBrains Toolbox App](https://www.jetbrains.com/toolbox-app/).
-2. Connect your local machine to server via ssh by following the [instructions](https://www.jetbrains.com/help/pycharm/configuring-remote-interpreters-via-ssh.html#prereq) here.
+Click on the VS Code Desktop icon to conNect to your workspace using VS Code Desktop.
 
 ### JetBrains Gateway
 
-1. Follow the [instructions](https://coder.com/docs/coder-oss/latest/ides/gateway) here to get a fully working PyCharm IDE.
-
-### Spyder (Remote Kernels) [Advanced]
-
-(not tested)
-
-1. Install [Spyder](https://docs.spyder-ide.org/current/installation.html) on your local machine.
-2. Connect Spyder with external kernel by following the [instructions](https://docs.spyder-ide.org/current/panes/ipythonconsole.html#using-external-kernels) here.
+Follow the [instructions](https://coder.com/docs/v2/latest/ides/gateway) to use the JetBrains Gateway with Coder.
 
 ## Docker Images
 
