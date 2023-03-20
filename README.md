@@ -57,7 +57,7 @@ Set up the following Github secrets in your repo.
    To create a token with life of 1 year, run,
 
    ```shell
-   coder tokens create --lifetime 8760h
+   coder tokens create --lifetime 8760h0m0s
    ```
 
 2. `CODER_URL` - Coder deployment url (e.g. https://coder.example.com)
