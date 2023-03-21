@@ -1,4 +1,11 @@
-# Coder Docker Image fly.io Template
+---
+name: Develop on a Fly.io container
+description: Run workspaces as Firecracker VMs on Fly.io
+tags: [docker, fly.io]
+icon: /icon/fly.io.svg
+---
+
+# Coder Fly.io Template
 
 This template provisions a [code-server](https://github.com/coder/code-server) instance on [fly.io](https://fly.io) using the [codercom/code-server](https://hub.docker.com/r/codercom/code-server) image.
 
@@ -7,35 +14,26 @@ This template provisions a [code-server](https://github.com/coder/code-server) i
 - [flyctl](https://fly.io/docs/getting-started/installing-flyctl/) installed.
 - [Coder](https://coder.com/) already setup and running with coder-cli installed locally.
 
-## Deploy
+## Getting started
 
-1. Clone this repo and cd into `fly-docker-image` directory.
-2. Add a secret or environment variable to your Coder deployment with the name `FLY_API_TOKEN` and the value of your fly.io API token.
-   > This is needed to deploy the workspace to fly.io.
+1. Run `coder templates init` and select this template. Follow the instructions that appear.
+2. cd into the directory that was created. (e.g. `cd fly-docker-image`)
+3. Create the new template by running the following command from the `fly-docker-image` directory:
 
-```shell
-flyctl auth login
-export FLY_API_TOKEN=$(flyctl auth token)
+```bash
+coder templates create fly-docker-image \
+  --variable fly_api_token=$(flyctl auth token) \
+  --variable fly_org=personal
 ```
 
-Add this to your Coder deployment's environment variables. (e.g. `/etc/coder.d/coder.env`)
+> If the Coder server is also running as a fly.io app, then instead of setting variable `fly_api_token` you can also set a fly.io secret with the name `FLY_API_TOKEN`
+>
+> ```bash
+> flyctl secrets set FLY_API_TOKEN=$(flyctl auth token) --app <your-coder-app-name>
+> ```
 
-Or, If Coder is running as a fly.io app, you can set the secret directly:
+> Read the blog [post](https://coder.com/blog/deploying-coder-on-fly-io) to learn more about how to deploy Coder on fly.io.
 
-```shell
-flyctl secrets set FLY_API_TOKEN=$(flyctl auth token) -a <coder-app-name>
-# where <coder-app-name> is the name of the Coder app on fly.io
-```
-
-> Read our blog [post](coder.com/blog/deploying-coder-on-fly-io) to learn more about how to deploy Coder on fly.io.
-
-3. Run `coder templates create fly-docker-image` to create a template in Coder.
-   ![template](static/template.png)
-4. Create a new workspace from the template.
-   ![workspace-1](static/workspace-1.png)
-   ![workspace-regions](static/workspace-region.png)
-   ![workspace-resources](static/workspace-resources.png)
+4. Navigate to the Coder dashboard and create a new workspace using the template.
 
 This is all. You should now have a code-server instance running on fly.io.
-
-> Note: Change the image and the startup command to suit your needs.
