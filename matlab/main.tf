@@ -46,20 +46,8 @@ data "coder_parameter" "gpu" {
   default     = "true"
 }
 
-locals {
-  docker_host = {
-    "false" = "ssh://ctar@139.179.99.239"   # This is leader node of docker swarm
-    "true"  = "unix:///var/run/docker.sock" # This is the Coder host
-  }
-}
-
 provider "docker" {
-  host = lookup(local.docker_host, data.coder_parameter.gpu.value)
-  ssh_opts = [
-    "-o", "StrictHostKeyChecking=no",
-    "-o", "UserKnownHostsFile=/dev/null",
-    "-i", "/home/coder/.ssh/id_rsa"
-  ]
+  host = "unix:///var/run/docker.sock"
 }
 
 provider "coder" {
