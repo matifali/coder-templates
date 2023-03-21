@@ -12,7 +12,6 @@ terraform {
 }
 
 locals {
-  jupyter-path      = "/usr/local/bin/jupyter"
   jupyter-count     = data.coder_parameter.jupyter.value == "false" ? 0 : 1
   code-server-count = data.coder_parameter.code-server.value == "false" ? 0 : 1
   ngc-version       = "23.02"
@@ -49,18 +48,18 @@ data "coder_parameter" "framework" {
   icon        = "https://raw.githubusercontent.com/matifali/logos/main/memory.svg"
   description = "Choose your preffered framework"
   type        = "string"
-  default     = "nvcr.io/nvidia/pytorch:${local.ngc-version}-py3"
+  default     = "pytorch"
   mutable     = false
   option {
     name        = "Nvidia PyTorch"
     description = "Nvidia NGC PyTorch"
-    value       = "nvcr.io/nvidia/pytorch:${local.ngc-version}-py3"
+    value       = "pytorch"
     icon        = "https://raw.githubusercontent.com/matifali/logos/main/pytorch.svg"
   }
   option {
     name        = "Nvidia Tensorflow"
     description = "Nvidia NGC Tensorflow"
-    value       = "nvcr.io/nvidia/tensorflow:${local.ngc-version}-tf2-py3"
+    value       = "tensorflow"
     icon        = "https://raw.githubusercontent.com/matifali/logos/main/tensorflow.svg"
   }
 }
@@ -155,30 +154,24 @@ resource "coder_agent" "main" {
     #!/bin/bash
     set -euo pipefail
 
-    # Create a user with name coder and uid:gid 1000:1000
-    useradd -m -u 1000 -U -s /bin/bash coder
-    echo "coder ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
-    
     # Create user data directory
-    mkdir -p /home/coder/data && chown -R coder:coder /home/coder/data
+    mkdir -p /home/coder/data
     # make user share directory
-    mkdir -p /home/coder/share && chown -R coder:coder /home/coder/share
+    mkdir -p /home/coder/share
 
-    # Install and launch filebrowser
-    curl -fsSL https://raw.githubusercontent.com/filebrowser/get/master/get.sh | bash
-    filebrowser --noauth --root ~/data 2>&1 | tee -a ~/filebrowser.log &
+    # Start filebrowser
+    filebrowser --noauth --root /home/coder/data 2>&1 | tee -a /home/coder/filebrowser.log &
   
-    # launch jupyter
+    # Start jupyter
     if [ "${data.coder_parameter.jupyter.value}" == "true" ];
     then
-      ${local.jupyter-path}/jupyter lab --no-browser --ServerApp.token='' --ip='*' 2>&1 | tee -a ~/jupyter.log &
+      /usr/local/bin/jupyter lab --no-browser --LabApp.token='' --LabApp.password='' 2>&1 | tee -a /home/coder/jupyter.log &
     fi
 
-    # Install and launch code-server
+    # Satrt code-server
     if [ "${data.coder_parameter.code-server.value}" == "true" ];
     then
-      wget -O- https://aka.ms/install-vscode-server/setup.sh | sh
-      code-server --accept-server-license-terms serve-local --without-connection-token --quality stable --telemetry-level off 2>&1 | tee -a ~/code-server.log &
+      code-server --accept-server-license-terms serve-local --without-connection-token --quality stable --telemetry-level off 2>&1 | tee -a /home/coder/code-server.log &
     fi
 
     EOT
@@ -191,14 +184,21 @@ resource "coder_agent" "main" {
   }
 }
 
-data "docker_registry_image" "deeplearning" {
-  name = data.coder_parameter.framework.value
-}
-
 resource "docker_image" "deeplearning" {
-  name          = data.docker_registry_image.deeplearning.name
-  pull_triggers = [data.docker_registry_image.deeplearning.sha256_digest]
-  keep_locally  = true
+  name = "coder-${data.coder_workspace.me.owner}-${lower(data.coder_workspace.me.name)}-${data.coder_parameter.framework.value}"
+  build {
+    context    = "./images"
+    dockerfile = "${data.coder_parameter.framework.value}.Dockerfile"
+    tag        = ["latest"]
+    build_args = {
+      "NGC_VERSION" = "${local.ngc-version}"
+    }
+    pull_parent = true
+  }
+  triggers = {
+    file_sha1 = sha1(join("", [for f in fileset(path.module, "images/${data.coder_parameter.framework.value}.Dockerfile") : filesha1(f)]))
+  }
+  keep_locally = true
 }
 
 #Volumes Resources
@@ -247,9 +247,6 @@ resource "docker_container" "workspace" {
   }
 
   ipc_mode = "host"
-
-  # Start as use with UID and GID of 1000
-  user = "1000:1000"
 
   # users home directory
   volumes {
