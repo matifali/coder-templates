@@ -154,11 +154,16 @@ resource "coder_agent" "main" {
   startup_script         = <<EOT
     #!/bin/bash
     set -euo pipefail
+
+    # Create a user with name coder and uid:gid 1000:1000
+    useradd -m -u 1000 -U -s /bin/bash coder
+    echo "coder ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+    
     # Create user data directory
-    mkdir -p ~/data
+    mkdir -p /home/coder/data && chown -R coder:coder /home/coder/data
     # make user share directory
-    mkdir -p ~/share
-  
+    mkdir -p /home/coder/share && chown -R coder:coder /home/coder/share
+
     # Install and launch filebrowser
     curl -fsSL https://raw.githubusercontent.com/filebrowser/get/master/get.sh | bash
     filebrowser --noauth --root ~/data 2>&1 | tee -a ~/filebrowser.log &
@@ -175,7 +180,7 @@ resource "coder_agent" "main" {
       wget -O- https://aka.ms/install-vscode-server/setup.sh | sh
       code-server --accept-server-license-terms serve-local --without-connection-token --quality stable --telemetry-level off 2>&1 | tee -a ~/code-server.log &
     fi
-    
+
     EOT
 
   env = {
