@@ -14,7 +14,11 @@ terraform {
 locals {
   jupyter-count     = data.coder_parameter.jupyter.value == "false" ? 0 : 1
   code-server-count = data.coder_parameter.code-server.value == "false" ? 0 : 1
-  ngc-version       = "23.02"
+  # This gets the latest version of the ngc version if the user didn't specify one (e.g. 23.02)
+  ngc_version_major = formatdate("YY", timestamp())
+  last_month        = formatdate("M", timestamp()) - 1 == 0 ? 12 : formatdate("M", timestamp()) - 1
+  ngc_version_minor = local.last_month < 10 ? "0${local.last_month}" : local.last_month
+  ngc-version       = "${local.ngc_version_major}.${local.ngc_version_minor}"
 }
 
 data "coder_parameter" "cpu" {
@@ -71,6 +75,10 @@ resource "coder_metadata" "workspace_info" {
   item {
     key   = "Framework"
     value = data.coder_parameter.framework.option[index(data.coder_parameter.framework.option.*.value, data.coder_parameter.framework.value)].name
+  }
+  item {
+    key   = "NGC Version"
+    value = local.ngc-version
   }
   item {
     key   = "CPU Cores"
