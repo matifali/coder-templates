@@ -7,7 +7,7 @@ icon: https://raw.githubusercontent.com/matifali/logos/main/tf-torch-conda.svg
 
 # Coder Deeplearning Template
 
-A deeplearning template for [coder](https://coder.com/).
+A deeplearning template for [Coder](https://coder.com/).
 
 ## Coder Setup
 
@@ -43,8 +43,6 @@ Follow these steps to configure accessing your workspaces locally on any machine
    ```bash
    coder login CODER_URL
    ```
-
-   > Replace coder.example.com with your coder deplyment URL or IP
 
 3. Create a template
 
