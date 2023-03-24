@@ -1,5 +1,5 @@
 ARG NGC_VERSION=23.02
-FROM nvcr.io/nvidia/tesnorflow:${NGC_VERSION}-tf2-py3
+FROM nvcr.io/nvidia/tensorflow:${NGC_VERSION}-tf2-py3
 
 # Install extra packages
 RUN apt-get update && apt-get install -y --no-install-recommends \
