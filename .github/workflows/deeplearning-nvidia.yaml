@@ -9,12 +9,14 @@ on:
     paths:
       - "deeplearning-nvidia/main.tf"
       - ".github/workflows/deeplearning-nvidia.yaml"
+      - "deeplearning-nvidia/images/*"
   pull_request:
     branches:
       - main
     paths:
       - "deeplearning-nvidia/main.tf"
       - ".github/workflows/deeplearning-nvidia.yaml"
+      - "deeplearning-nvidia/images/*"
   workflow_dispatch:
 
 jobs:
