@@ -193,11 +193,11 @@ resource "coder_agent" "main" {
 }
 
 resource "docker_image" "deeplearning" {
-  name = "coder-${data.coder_workspace.me.owner}-${lower(data.coder_workspace.me.name)}-${data.coder_parameter.framework.value}"
+  name = "matifali/ngc-${data.coder_parameter.framework.value}"
   build {
     context    = "./images"
     dockerfile = "${data.coder_parameter.framework.value}.Dockerfile"
-    tag        = ["latest"]
+    tag        = ["${local.ngc-version}"]
     build_args = {
       "NGC_VERSION" = "${local.ngc-version}"
     }
