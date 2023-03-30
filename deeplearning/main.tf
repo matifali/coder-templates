@@ -185,7 +185,7 @@ resource "coder_agent" "main" {
     filebrowser --noauth --root ~/data 2>&1 | tee -a /home/coder/filebrowser.log &
   
     # launch jupyter
-    if [ "${local.jupyter-count}" == "1" && "${data.coder_parameter.jupyter.value}" == "true" ];
+    if [[ local.jupyter-count == 1 && data.coder_parameter.jupyter.value == true ]];
     then
       ${local.jupyter-path} lab --no-browser --LabApp.token='' --LabApp.password='' 2>&1 | tee -a /home/coder/jupyter.log &
     fi
