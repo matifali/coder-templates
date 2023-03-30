@@ -171,13 +171,13 @@ resource "coder_agent" "main" {
     filebrowser --noauth --root /home/coder/data 2>&1 | tee -a /home/coder/filebrowser.log &
   
     # Start jupyter
-    if [ "${data.coder_parameter.jupyter.value}" == "true" ];
+    if [ data.coder_parameter.jupyter.value == true ];
     then
       /usr/local/bin/jupyter lab --no-browser --LabApp.token='' --LabApp.password='' 2>&1 | tee -a /home/coder/jupyter.log &
     fi
 
     # Satrt code-server
-    if [ "${data.coder_parameter.code-server.value}" == "true" ];
+    if [ data.coder_parameter.code-server.value == true ];
     then
       code-server --accept-server-license-terms serve-local --without-connection-token --quality stable --telemetry-level off 2>&1 | tee -a /home/coder/code-server.log &
     fi
