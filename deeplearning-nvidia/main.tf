@@ -22,12 +22,13 @@ locals {
 }
 
 data "coder_parameter" "cpu" {
-  name        = "CPU"
-  description = "Choose number of CPU cores (min: 4, max: 16)"
-  type        = "number"
-  icon        = "https://raw.githubusercontent.com/matifali/logos/main/memory.svg"
-  mutable     = true
-  default     = "8"
+  name         = "cpu"
+  display_name = "CPU Cores"
+  description  = "Choose number of CPU cores (min: 4, max: 16)"
+  type         = "number"
+  icon         = "https://raw.githubusercontent.com/matifali/logos/main/memory.svg"
+  mutable      = true
+  default      = "8"
   validation {
     min = 4
     max = 16
@@ -35,12 +36,13 @@ data "coder_parameter" "cpu" {
 }
 
 data "coder_parameter" "ram" {
-  name        = "RAM"
-  description = "Choose amount of RAM (min: 16 GB, max: 128 GB)"
-  type        = "number"
-  icon        = "https://raw.githubusercontent.com/matifali/logos/main/memory.svg"
-  mutable     = true
-  default     = "32"
+  name         = "ram"
+  display_name = "RAM (GB)"
+  description  = "Choose amount of RAM (min: 16 GB, max: 128 GB)"
+  type         = "number"
+  icon         = "https://raw.githubusercontent.com/matifali/logos/main/memory.svg"
+  mutable      = true
+  default      = "32"
   validation {
     min = 16
     max = 128
@@ -48,12 +50,13 @@ data "coder_parameter" "ram" {
 }
 
 data "coder_parameter" "framework" {
-  name        = "Framework"
-  icon        = "https://raw.githubusercontent.com/matifali/logos/main/memory.svg"
-  description = "Choose your preffered framework"
-  type        = "string"
-  default     = "pytorch"
-  mutable     = false
+  name         = "framework"
+  display_name = "Deeplearning Framework"
+  icon         = "https://raw.githubusercontent.com/matifali/logos/main/memory.svg"
+  description  = "Choose your preffered framework"
+  type         = "string"
+  default      = "pytorch"
+  mutable      = false
   option {
     name        = "Nvidia PyTorch"
     description = "Nvidia NGC PyTorch"
@@ -91,21 +94,23 @@ resource "coder_metadata" "workspace_info" {
 }
 
 data "coder_parameter" "code-server" {
-  name        = "VS Code Web"
-  icon        = "https://raw.githubusercontent.com/matifali/logos/main/code.svg"
-  description = "Do you want VS Code Web?"
-  type        = "bool"
-  mutable     = true
-  default     = "false"
+  name         = "code-server"
+  display_name = "VS Code Web"
+  icon         = "https://raw.githubusercontent.com/matifali/logos/main/code.svg"
+  description  = "Do you want VS Code Web?"
+  type         = "bool"
+  mutable      = true
+  default      = "false"
 }
 
 data "coder_parameter" "jupyter" {
-  name        = "Jupyter"
-  icon        = "https://raw.githubusercontent.com/matifali/logos/main/jupyter.svg"
-  description = "Do you want Jupyter Lab?"
-  type        = "bool"
-  mutable     = true
-  default     = "false"
+  name         = "jupyter"
+  display_name = "Jupyter Lab"
+  icon         = "https://raw.githubusercontent.com/matifali/logos/main/jupyter.svg"
+  description  = "Do you want Jupyter Lab?"
+  type         = "bool"
+  mutable      = true
+  default      = "false"
 
 }
 
