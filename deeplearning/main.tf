@@ -18,12 +18,13 @@ locals {
 }
 
 data "coder_parameter" "cpu" {
-  name        = "CPU"
-  description = "Choose number of CPU cores (min: 4, max: 16)"
-  type        = "number"
-  icon        = "https://raw.githubusercontent.com/matifali/logos/main/memory.svg"
-  mutable     = true
-  default     = "8"
+  name         = "cpu"
+  display_name = "CPU Cores"
+  description  = "Choose number of CPU cores (min: 4, max: 16)"
+  type         = "number"
+  icon         = "https://raw.githubusercontent.com/matifali/logos/main/memory.svg"
+  mutable      = true
+  default      = "8"
   validation {
     min = 4
     max = 16
@@ -31,12 +32,13 @@ data "coder_parameter" "cpu" {
 }
 
 data "coder_parameter" "ram" {
-  name        = "RAM"
-  description = "Choose amount of RAM (min: 16 GB, max: 128 GB)"
-  type        = "number"
-  icon        = "https://raw.githubusercontent.com/matifali/logos/main/memory.svg"
-  mutable     = true
-  default     = "32"
+  name         = "ram"
+  display_name = "RAM (GB)"
+  description  = "Choose amount of RAM (min: 16 GB, max: 128 GB)"
+  type         = "number"
+  icon         = "https://raw.githubusercontent.com/matifali/logos/main/memory.svg"
+  mutable      = true
+  default      = "32"
   validation {
     min = 16
     max = 128
@@ -44,12 +46,13 @@ data "coder_parameter" "ram" {
 }
 
 data "coder_parameter" "framework" {
-  name        = "Framework"
-  icon        = "https://raw.githubusercontent.com/matifali/logos/main/memory.svg"
-  description = "Choose your preffered framework"
-  type        = "string"
-  mutable     = false
-  default     = "matifali/dockerdl:tf-torch"
+  name         = "framework"
+  display_name = "Deep Learning Framework"
+  icon         = "https://raw.githubusercontent.com/matifali/logos/main/memory.svg"
+  description  = "Choose your preffered framework"
+  type         = "string"
+  mutable      = false
+  default      = "matifali/dockerdl:tf-torch"
   option {
     name        = "PyTorch"
     description = "PyTorch"

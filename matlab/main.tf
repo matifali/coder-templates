@@ -12,12 +12,13 @@ terraform {
 }
 
 data "coder_parameter" "cpu" {
-  name        = "CPU"
-  description = "Choose number of CPU cores (min: 8, max: 20)"
-  type        = "number"
-  icon        = "https://raw.githubusercontent.com/matifali/logos/main/cpu-1.svg"
-  mutable     = true
-  default     = "8"
+  name         = "cpu"
+  display_name = "CPU Cores"
+  description  = "Choose number of CPU cores (min: 8, max: 20)"
+  type         = "number"
+  icon         = "https://raw.githubusercontent.com/matifali/logos/main/cpu-1.svg"
+  mutable      = true
+  default      = "8"
   validation {
     min = 4
     max = 20
@@ -25,12 +26,13 @@ data "coder_parameter" "cpu" {
 }
 
 data "coder_parameter" "ram" {
-  name        = "RAM"
-  description = "Choose amount of RAM (min: 32 GB, max: 64 GB)"
-  type        = "number"
-  icon        = "https://raw.githubusercontent.com/matifali/logos/main/memory.svg"
-  mutable     = true
-  default     = "32"
+  name         = "ram"
+  display_name = "RAM (GB)"
+  description  = "Choose amount of RAM (min: 32 GB, max: 64 GB)"
+  type         = "number"
+  icon         = "https://raw.githubusercontent.com/matifali/logos/main/memory.svg"
+  mutable      = true
+  default      = "32"
   validation {
     min = 32
     max = 64
@@ -38,12 +40,13 @@ data "coder_parameter" "ram" {
 }
 
 data "coder_parameter" "gpu" {
-  name        = "GPU"
-  description = "Do you need GPU?"
-  type        = "bool"
-  icon        = "https://raw.githubusercontent.com/matifali/logos/main/gpu-1.svg"
-  mutable     = false
-  default     = "true"
+  name         = "gpu"
+  display_name = "GPU"
+  description  = "Do you need GPU?"
+  type         = "bool"
+  icon         = "https://raw.githubusercontent.com/matifali/logos/main/gpu-1.svg"
+  mutable      = false
+  default      = "true"
 }
 
 provider "docker" {
