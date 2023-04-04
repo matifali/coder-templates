@@ -191,7 +191,7 @@ resource "coder_agent" "main" {
     fi
 
     # launch code-server
-    if [ ${data.coder_parameter.code-server.value} == "true" ];
+    if [ ${data.coder_parameter.code-server.value} == true ];
     then
       code-server --accept-server-license-terms serve-local --without-connection-token --quality stable --telemetry-level off 2>&1 | tee -a /home/coder/code-server.log &
     fi
@@ -204,6 +204,78 @@ resource "coder_agent" "main" {
     GIT_AUTHOR_EMAIL    = "${data.coder_workspace.me.owner_email}"
     GIT_COMMITTER_EMAIL = "${data.coder_workspace.me.owner_email}"
   }
+
+  metadata {
+    display_name = "CPU Usage"
+    interval     = 10
+    key          = "cpu_usage"
+    script       = <<EOT
+      #!/bin/bash
+      vmstat | awk 'FNR==3 {printf "%2.0f%%", $13+$14+$16}'
+
+      EOT
+  }
+
+  metadata {
+    display_name = "RAM Usage"
+    interval     = 10
+    key          = "ram_usage"
+    script       = <<EOT
+      #!/bin/bash
+      free -m | awk 'NR==2{printf "%.2f%%", $3*100/$2 }'
+      EOT
+  }
+
+  metadata {
+    display_name = "GPU Usage"
+    interval     = 10
+    key          = "gpu_usage"
+    script       = <<EOT
+      #!/bin/bash
+      nvidia-smi --query-gpu=utilization.gpu --format=csv,noheader,nounits | awk '{printf "%s%%", $1}'
+      EOT
+  }
+
+  metadata {
+    display_name = "GPU Memory Usage"
+    interval     = 10
+    key          = "gpu_memory_usage"
+    script       = <<EOT
+      #!/bin/bash
+      nvidia-smi --query-gpu=utilization.memory --format=csv,noheader,nounits | awk '{printf "%s%%", $1}'
+      EOT
+  }
+
+  metadata {
+    display_name = "Disk Usage"
+    interval     = 600
+    key          = "disk_usage"
+    script       = <<EOT
+      #!/bin/bash
+      df -h | awk '$NF=="/"{printf "%s", $5}'
+      EOT
+  }
+
+  metadata {
+    display_name = "Load Average"
+    interval     = 10
+    key          = "load_average"
+    script       = <<EOT
+      #!/bin/bash
+      uptime | awk '{print $10}' | sed 's/,//'
+      EOT
+  }
+
+  metadata {
+    display_name = "Word of the Day"
+    interval     = 86400
+    key          = "word_of_the_day"
+    script       = <<EOT
+      #!/bin/bash
+      curl -o - --silent https://www.merriam-webster.com/word-of-the-day 2>&1 | awk ' $0 ~ "Word of the Day: [A-z]+" { print $5; exit }'
+      EOT
+  }
+
 }
 
 data "docker_registry_image" "deeplearning" {
