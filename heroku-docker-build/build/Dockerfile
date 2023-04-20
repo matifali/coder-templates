@@ -1,0 +1,1 @@
+FROM ghcr.io/coder/code-server:latest
