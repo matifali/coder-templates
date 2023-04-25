@@ -37,7 +37,9 @@ resource "heroku_app" "workspace" {
   stack  = "container"
   config_vars = {
     CODER_AGENT_TOKEN = coder_agent.main.token
-    CODER_ENTRYPOINT  = coder_agent.main.init_script
+    ACCESS_URL        = "${data.coder_workspace.me.access_url}/"
+    ARCH              = data.coder_provisioner.me.arch
+    AUTH_TYPE         = coder_agent.main.auth
   }
 }
 
@@ -133,11 +135,8 @@ resource "coder_agent" "main" {
   startup_script         = <<-EOT
     set -e
     # Start code-server
+    echo "Starting code-server... on port $PORT"
     code-server --auth none --bind-addr 0.0.0.0:$PORT >/tmp/code-server.log 2>&1 &
-    # Set the hostname to the workspace name
-    sudo hostname -b "${data.coder_workspace.me.name}"
-    # Install the Heroku CLI and add it to the PATH
-    curl https://cli-assets.heroku.com/install.sh | sh
   EOT
 }
 
