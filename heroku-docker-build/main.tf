@@ -31,24 +31,27 @@ provider "coder" {
 }
 
 resource "heroku_app" "workspace" {
-  name   = "heroku-${data.coder_workspace.me.name}"
+  count  = data.coder_workspace.me.start_count
+  name   = "coder-heroku-${data.coder_workspace.me.owner}-${data.coder_workspace.me.name}"
   region = data.coder_parameter.region.value
   stack  = "container"
   config_vars = {
     CODER_AGENT_TOKEN = coder_agent.main.token
+    CODER_ENTRYPOINT  = coder_agent.main.init_script
   }
-  entrypoint = ["sh", "-c", coder_agent.main.init_script]
 }
 
 resource "heroku_build" "workspace" {
-  app_id = heroku_app.workspace.id
+  count  = data.coder_workspace.me.start_count
+  app_id = heroku_app.workspace[count.index].id
   source {
     path = "build"
   }
 }
 
 resource "heroku_formation" "workspace" {
-  app_id     = heroku_app.workspace.id
+  count      = data.coder_workspace.me.start_count
+  app_id     = heroku_app.workspace[count.index].id
   type       = "web"
   size       = data.coder_parameter.size.value
   quantity   = 1
@@ -86,27 +89,22 @@ data "coder_parameter" "size" {
   option {
     name  = "Basic"
     value = "basic"
-    icon  = "/emojis/1f1e9-1f1ea.png"
   }
   option {
     name  = "Standard-1x"
     value = "standard-1x"
-    icon  = "/emojis/1f1e9-1f1ea.png"
   }
   option {
     name  = "Standard-2x"
     value = "standard-2x"
-    icon  = "/emojis/1f1e9-1f1ea.png"
   }
   option {
     name  = "Performance-M"
     value = "performance-m"
-    icon  = "/emojis/1f1e9-1f1ea.png"
   }
   option {
     name  = "Performance-L"
     value = "performance-l"
-    icon  = "/emojis/1f1e9-1f1ea.png"
   }
 }
 
@@ -145,7 +143,7 @@ resource "coder_agent" "main" {
 
 resource "coder_metadata" "workspace" {
   count       = data.coder_workspace.me.start_count
-  resource_id = heroku_app.workspace.id
+  resource_id = heroku_app.workspace[count.index].id
   icon        = data.coder_parameter.region.option[index(data.coder_parameter.region.option.*.value, data.coder_parameter.region.value)].icon
   item {
     key   = "Region"
