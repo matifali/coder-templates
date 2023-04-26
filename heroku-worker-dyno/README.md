@@ -11,7 +11,7 @@ This template provisions a [code-server](https://github.com/coder/code-server) i
 
 ## Prerequisites
 
-- [heroku cli](https://fly.io/docs/getting-started/installing-flyctl/) installed.
+- [heroku cli](https://devcenter.heroku.com/articles/heroku-cli#install-the-heroku-cli) installed.
 - [Coder](https://coder.com/) already setup and running with coder-cli installed locally.
 
 ## Getting started
