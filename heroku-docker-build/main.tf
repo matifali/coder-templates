@@ -76,7 +76,7 @@ data "coder_parameter" "region" {
   option {
     name  = "Europe"
     value = "eu"
-    icon  = "/emojis/1f1e9-1f1ea.png"
+    icon  = "/emojis/1f1ea-1f1fa.png"
   }
 }
 
