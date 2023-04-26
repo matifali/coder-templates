@@ -27,6 +27,9 @@ coder templates create heroku-worker-dyno \
 
 > Read the [docs](https://github.com/coder/packages/blob/main/heroku/README.md) to learn more about how to deploy Coder on Heroku.
 
-1. Navigate to the Coder dashboard and create a new workspace using the template.
+4. Navigate to the Coder dashboard and create a new workspace using the template.
+
+![template](template.png)
+![workspace](workspace.png)
 
 This is all. You should now have a code-server instance running on Heroku.
