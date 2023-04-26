@@ -17,7 +17,7 @@ variable "heroku_api_key" {
     The Heroku API key to use for authentication. You can generate one by either:
         Heroku Dashboard → Account Settings → Applications → Authorizations
     or by running the
-        `heroku auth` command of the Heroku CLI.
+        `heroku auth:token` command of the Heroku CLI.
     EOT
   sensitive   = true
 }
@@ -138,6 +138,9 @@ resource "coder_agent" "main" {
     # Start code-server
     echo "Starting code-server..."
     code-server --auth none --port 13337 >/tmp/code-server.log 2>&1 &
+    # Install tea package manager
+    echo "Installing tea..."
+    sh <(curl https://tea.xyz) --yes 2>&1 &
   EOT
 }
 
