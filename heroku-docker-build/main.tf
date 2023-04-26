@@ -54,7 +54,7 @@ resource "heroku_build" "workspace" {
 resource "heroku_formation" "workspace" {
   count      = data.coder_workspace.me.start_count
   app_id     = heroku_app.workspace[count.index].id
-  type       = "web"
+  type       = "worker"
   size       = data.coder_parameter.size.value
   quantity   = 1
   depends_on = [heroku_build.workspace]
@@ -115,13 +115,13 @@ resource "coder_app" "code-server" {
   agent_id     = coder_agent.main.id
   display_name = "Code Server"
   slug         = "code-server"
-  url          = "http://localhost:8080?folder=/home/coder/"
+  url          = "http://localhost:13337?folder=/home/coder/"
   icon         = "/icon/code.svg"
   subdomain    = false
   share        = "owner"
 
   healthcheck {
-    url       = "http://localhost:8080/healthz"
+    url       = "http://localhost:13337/healthz"
     interval  = 3
     threshold = 10
   }
@@ -135,8 +135,8 @@ resource "coder_agent" "main" {
   startup_script         = <<-EOT
     set -e
     # Start code-server
-    echo "Starting code-server... on port $PORT"
-    code-server --auth none --bind-addr 0.0.0.0:$PORT >/tmp/code-server.log 2>&1 &
+    echo "Starting code-server..."
+    code-server --auth none --port 13337 >/tmp/code-server.log 2>&1 &
   EOT
 }
 
