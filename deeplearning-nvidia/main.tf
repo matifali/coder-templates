@@ -199,48 +199,47 @@ resource "coder_agent" "main" {
   metadata {
     display_name = "CPU Usage"
     interval     = 10
-    key          = "cpu_usage"
+    key          = "0_cpu_usage"
     script       = <<EOT
       #!/bin/bash
       vmstat | awk 'FNR==3 {printf "%2.0f%%", $13+$14+$16}'
-
-      EOT
+    EOT
   }
 
   metadata {
-    display_name = "RAM Usage"
+    display_name = "RAM Usage MB"
     interval     = 10
-    key          = "ram_usage"
+    key          = "1_ram_usage"
     script       = <<EOT
       #!/bin/bash
-      free -m | awk 'NR==2{printf "%.2f%%", $3*100/$2 }'
-      EOT
+      cat /sys/fs/cgroup/memory.current  | awk '{ byte =$1 /1024/1024; print byte }' | awk -F. '{ print $1 }'
+     EOT
   }
 
   metadata {
     display_name = "GPU Usage"
     interval     = 10
-    key          = "gpu_usage"
+    key          = "2_gpu_usage"
     script       = <<EOT
       #!/bin/bash
       nvidia-smi --query-gpu=utilization.gpu --format=csv,noheader,nounits | awk '{printf "%s%%", $1}'
-      EOT
+    EOT
   }
 
   metadata {
     display_name = "GPU Memory Usage"
     interval     = 10
-    key          = "gpu_memory_usage"
+    key          = "3_gpu_memory_usage"
     script       = <<EOT
       #!/bin/bash
       nvidia-smi --query-gpu=utilization.memory --format=csv,noheader,nounits | awk '{printf "%s%%", $1}'
-      EOT
+    EOT
   }
 
   metadata {
     display_name = "Disk Usage"
     interval     = 600
-    key          = "disk_usage"
+    key          = "4_disk_usage"
     script       = <<EOT
       #!/bin/bash
       df -h | awk '$NF=="/"{printf "%s", $5}'
@@ -248,19 +247,9 @@ resource "coder_agent" "main" {
   }
 
   metadata {
-    display_name = "Load Average"
-    interval     = 10
-    key          = "load_average"
-    script       = <<EOT
-      #!/bin/bash
-      uptime | awk '{print $10}' | sed 's/,//'
-      EOT
-  }
-
-  metadata {
     display_name = "Word of the Day"
     interval     = 86400
-    key          = "word_of_the_day"
+    key          = "5_word_of_the_day"
     script       = <<EOT
       #!/bin/bash
       curl -o - --silent https://www.merriam-webster.com/word-of-the-day 2>&1 | awk ' $0 ~ "Word of the Day: [A-z]+" { print $5; exit }'
