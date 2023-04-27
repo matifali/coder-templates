@@ -173,18 +173,21 @@ resource "coder_agent" "main" {
     mkdir -p /home/coder/share
 
     # Start filebrowser
-    filebrowser --noauth --root /home/coder/data 2>&1 | tee -a /home/coder/filebrowser.log &
+    echo "Starting filebrowser"
+    filebrowser --noauth --root /home/coder/data 2>&1 &
   
     # Start jupyter
     if [ ${data.coder_parameter.jupyter.value} == true ];
     then
-      /usr/local/bin/jupyter lab --no-browser --LabApp.token='' --LabApp.password='' 2>&1 | tee -a /home/coder/jupyter.log &
+      echo "Starting Jupyter Lab"
+      /usr/local/bin/jupyter lab --no-browser --LabApp.token='' --LabApp.password='' 2>&1 &
     fi
 
     # Satrt code-server
     if [ ${data.coder_parameter.code-server.value} == true ];
     then
-      code-server --accept-server-license-terms serve-local --without-connection-token --quality stable --telemetry-level off 2>&1 | tee -a /home/coder/code-server.log &
+      echo "Starting VS Code Web"
+      code-server --accept-server-license-terms serve-local --without-connection-token --quality stable --telemetry-level off 2>&1 &
     fi
 
     EOT

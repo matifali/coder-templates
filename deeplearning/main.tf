@@ -100,10 +100,6 @@ resource "coder_metadata" "workspace_info" {
     value = data.coder_parameter.framework.option[index(data.coder_parameter.framework.option.*.value, data.coder_parameter.framework.value)].name
   }
   item {
-    key   = "CPU Cores"
-    value = data.coder_parameter.cpu.value
-  }
-  item {
     key   = "RAM (GB)"
     value = data.coder_parameter.ram.value
   }
@@ -185,18 +181,18 @@ resource "coder_agent" "main" {
   
     # Install and launch filebrowser
     curl -fsSL https://raw.githubusercontent.com/filebrowser/get/master/get.sh | bash
-    filebrowser --noauth --root ~/data 2>&1 | tee -a /home/coder/filebrowser.log &
+    filebrowser --noauth --root ~/data 2>&1 > /home/coder/filebrowser.log &
   
     # launch jupyter
     if [[ ${local.jupyter-count} == 1 && ${data.coder_parameter.jupyter.value} == true ]];
     then
-      ${local.jupyter-path} lab --no-browser --LabApp.token='' --LabApp.password='' 2>&1 | tee -a /home/coder/jupyter.log &
+      ${local.jupyter-path} lab --no-browser --LabApp.token='' --LabApp.password='' 2>&1 > /home/coder/jupyter.log &
     fi
 
     # launch code-server
     if [ ${data.coder_parameter.code-server.value} == true ];
     then
-      code-server --accept-server-license-terms serve-local --without-connection-token --quality stable --telemetry-level off 2>&1 | tee -a /home/coder/code-server.log &
+      code-server --accept-server-license-terms serve-local --without-connection-token --quality stable --telemetry-level off 2>&1 > /home/coder/code-server.log &
     fi
     
     EOT
@@ -211,7 +207,7 @@ resource "coder_agent" "main" {
   metadata {
     display_name = "CPU Usage"
     interval     = 10
-    key          = "cpu_usage"
+    key          = "0_cpu_usage"
     script       = <<EOT
       #!/bin/bash
       vmstat | awk 'FNR==3 {printf "%2.0f%%", $13+$14+$16}'
@@ -222,17 +218,17 @@ resource "coder_agent" "main" {
   metadata {
     display_name = "RAM Usage"
     interval     = 10
-    key          = "ram_usage"
+    key          = "1_ram_usage"
     script       = <<EOT
       #!/bin/bash
-      free -m | awk 'NR==2{printf "%.2f%%", $3*100/$2 }'
+      echo "`cat /sys/fs/cgroup/memory.current` `cat /sys/fs/cgroup/memory.max`" | awk '{ used=$1/1024/1024/1024; total=$2/1024/1024/1024; printf "%0.2f / %0.2f GB\n", used, total }'
       EOT
   }
 
   metadata {
     display_name = "GPU Usage"
     interval     = 10
-    key          = "gpu_usage"
+    key          = "2_gpu_usage"
     script       = <<EOT
       #!/bin/bash
       nvidia-smi --query-gpu=utilization.gpu --format=csv,noheader,nounits | awk '{printf "%s%%", $1}'
@@ -242,7 +238,7 @@ resource "coder_agent" "main" {
   metadata {
     display_name = "GPU Memory Usage"
     interval     = 10
-    key          = "gpu_memory_usage"
+    key          = "3_gpu_memory_usage"
     script       = <<EOT
       #!/bin/bash
       nvidia-smi --query-gpu=utilization.memory --format=csv,noheader,nounits | awk '{printf "%s%%", $1}'
@@ -252,7 +248,7 @@ resource "coder_agent" "main" {
   metadata {
     display_name = "Disk Usage"
     interval     = 600
-    key          = "disk_usage"
+    key          = "4_disk_usage"
     script       = <<EOT
       #!/bin/bash
       df -h | awk '$NF=="/"{printf "%s", $5}'
@@ -260,19 +256,9 @@ resource "coder_agent" "main" {
   }
 
   metadata {
-    display_name = "Load Average"
-    interval     = 10
-    key          = "load_average"
-    script       = <<EOT
-      #!/bin/bash
-      uptime | awk '{print $10}' | sed 's/,//'
-      EOT
-  }
-
-  metadata {
     display_name = "Word of the Day"
     interval     = 86400
-    key          = "word_of_the_day"
+    key          = "5_word_of_the_day"
     script       = <<EOT
       #!/bin/bash
       curl -o - --silent https://www.merriam-webster.com/word-of-the-day 2>&1 | awk ' $0 ~ "Word of the Day: [A-z]+" { print $5; exit }'
