@@ -32,7 +32,7 @@ provider "coder" {
 
 resource "heroku_app" "workspace" {
   count = data.coder_workspace.me.start_count
-  name  = join("-", ["coder", data.coder_workspace.me.owner, data.coder_workspace.me.name, substr(data.coder_workspace.me.id, 0, 8)])
+  name  = join("-", [data.coder_workspace.me.owner, substr(data.coder_workspace.me.id, 0, 8)])
   # name   = "coder-${data.coder_workspace.me.owner}-${data.coder_workspace.me.name}-${data.coder_workspace.me.id}"
   region = data.coder_parameter.region.value
   stack  = "container"
