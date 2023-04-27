@@ -207,13 +207,13 @@ resource "coder_agent" "main" {
   }
 
   metadata {
-    display_name = "RAM Usage MB"
+    display_name = "RAM Usage"
     interval     = 10
     key          = "1_ram_usage"
     script       = <<EOT
       #!/bin/bash
-      cat /sys/fs/cgroup/memory.current  | awk '{ byte =$1 /1024/1024; print byte }' | awk -F. '{ print $1 }'
-     EOT
+      echo "`cat /sys/fs/cgroup/memory.current` `cat /sys/fs/cgroup/memory.max`" | awk '{ used=$1/1024/1024/1024; total=$2/1024/1024/1024; printf "%0.2f / %0.2f GB\n", used, total }'
+    EOT
   }
 
   metadata {
