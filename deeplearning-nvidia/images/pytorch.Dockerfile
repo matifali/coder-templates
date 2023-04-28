@@ -3,10 +3,11 @@ FROM nvcr.io/nvidia/pytorch:${NGC_VERSION}-py3
 
 # Install extra packages
 RUN apt-get update && apt-get install -y --no-install-recommends \
-        sudo \
-        curl \
-        tmux \
-        && \
+    htop \
+    sudo \
+    curl \
+    tmux \
+    && \
     rm -rf /var/lib/apt/lists/
 
 # Install filebrowser
@@ -25,7 +26,7 @@ RUN groupadd -g ${GROUPID} ${USERNAME} && \
     --uid ${USERID} \
     --gid ${GROUPID} \
     --shell=/bin/bash && \
-echo "${USERNAME} ALL=(ALL) NOPASSWD:ALL" >>/etc/sudoers.d/nopasswd
+    echo "${USERNAME} ALL=(ALL) NOPASSWD:ALL" >>/etc/sudoers.d/nopasswd
 
 USER ${USERNAME}
 WORKDIR /home/${USERNAME}
