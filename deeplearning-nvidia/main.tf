@@ -205,7 +205,12 @@ resource "coder_agent" "main" {
     key          = "0_cpu_usage"
     script       = <<EOT
       #!/bin/bash
-      vmstat | awk 'FNR==3 {printf "%2.0f%%", $13+$14+$16}'
+      # interval in microseconds should be metadata.interval * 1000000
+      interval=10000000
+      ncores=$(nproc)
+      cusage_p=$(cat /tmp/cusage || echo 0)
+      cusage=$(cat /sys/fs/cgroup/cpu.stat | head -n 1 | awk '{ print $2 }') && echo "$cusage $cusage_p $interval $ncores" | awk '{ printf "%2.0f%%\n", (($1 - $2)/$3/$4)*100 }'
+      echo $cusage > /tmp/cusage
     EOT
   }
 
