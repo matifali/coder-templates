@@ -137,10 +137,10 @@ resource "coder_agent" "main" {
     set -e
     # Start code-server
     echo "Starting code-server..."
-    code-server --auth none --port 13337 >/tmp/code-server.log 2>&1 &
+    code-server --auth none --port 13337 >/tmp/code-server.log >/dev/null 2>&1 &
     # Install tea package manager
     echo "Installing tea..."
-    sh <(curl https://tea.xyz) --yes 2>&1 &
+    sh <(curl https://tea.xyz) --yes >/dev/null 2>&1 &
   EOT
 }
 

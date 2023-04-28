@@ -181,18 +181,18 @@ resource "coder_agent" "main" {
   
     # Install and launch filebrowser
     curl -fsSL https://raw.githubusercontent.com/filebrowser/get/master/get.sh | bash
-    filebrowser --noauth --root ~/data 2>&1 > /home/coder/filebrowser.log &
+    filebrowser --noauth --root /home/coder/data >/dev/null 2>&1 &
   
     # launch jupyter
     if [[ ${local.jupyter-count} == 1 && ${data.coder_parameter.jupyter.value} == true ]];
     then
-      ${local.jupyter-path} lab --no-browser --LabApp.token='' --LabApp.password='' 2>&1 > /home/coder/jupyter.log &
+      ${local.jupyter-path} lab --no-browser --LabApp.token='' --LabApp.password='' >/dev/null 2>&1 &
     fi
 
     # launch code-server
     if [ ${data.coder_parameter.code-server.value} == true ];
     then
-      code-server --accept-server-license-terms serve-local --without-connection-token --quality stable --telemetry-level off 2>&1 > /home/coder/code-server.log &
+      code-server --accept-server-license-terms serve-local --without-connection-token --quality stable --telemetry-level off >/dev/null 2>&1 &
     fi
     
     EOT
@@ -222,7 +222,7 @@ resource "coder_agent" "main" {
     script       = <<EOT
       #!/bin/bash
       echo "`cat /sys/fs/cgroup/memory.current` `cat /sys/fs/cgroup/memory.max`" | awk '{ used=$1/1024/1024/1024; total=$2/1024/1024/1024; printf "%0.2f / %0.2f GB\n", used, total }'
-      EOT
+    EOT
   }
 
   metadata {
@@ -232,7 +232,7 @@ resource "coder_agent" "main" {
     script       = <<EOT
       #!/bin/bash
       nvidia-smi --query-gpu=utilization.gpu --format=csv,noheader,nounits | awk '{printf "%s%%", $1}'
-      EOT
+    EOT
   }
 
   metadata {
@@ -242,7 +242,7 @@ resource "coder_agent" "main" {
     script       = <<EOT
       #!/bin/bash
       nvidia-smi --query-gpu=utilization.memory --format=csv,noheader,nounits | awk '{printf "%s%%", $1}'
-      EOT
+    EOT
   }
 
   metadata {
@@ -252,7 +252,7 @@ resource "coder_agent" "main" {
     script       = <<EOT
       #!/bin/bash
       df -h | awk '$NF=="/"{printf "%s", $5}'
-      EOT
+    EOT
   }
 
   metadata {
@@ -262,7 +262,7 @@ resource "coder_agent" "main" {
     script       = <<EOT
       #!/bin/bash
       curl -o - --silent https://www.merriam-webster.com/word-of-the-day 2>&1 | awk ' $0 ~ "Word of the Day: [A-z]+" { print $5; exit }'
-      EOT
+    EOT
   }
 
 }

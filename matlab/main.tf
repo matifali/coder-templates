@@ -105,13 +105,13 @@ resource "coder_agent" "main" {
     # Add matlab to PATH
     export PATH=/opt/matlab/`ls /opt/matlab | grep R*`/bin:$PATH
     # start Matlab browser
-    /bin/run.sh -browser 2>&1 | tee ~/matlab_browser.log &
+    /bin/run.sh -browser >/dev/null 2>&1 &
     # start desktop
-    /bin/run.sh -vnc 2>&1 | tee ~/matlab.log &
+    /bin/run.sh -vnc >/dev/null 2>&1 &
     # Intall and start filebrowser
     curl -fsSL https://raw.githubusercontent.com/filebrowser/get/master/get.sh | bash
-    filebrowser --noauth -r ~/data 2>&1 | tee ~/filebrowser.log &
-    EOT
+    filebrowser --noauth -r ~/data >/dev/null 2>&1 &
+  EOT
 
   env = {
     GIT_AUTHOR_NAME     = "${data.coder_workspace.me.owner}"
@@ -123,72 +123,61 @@ resource "coder_agent" "main" {
   metadata {
     display_name = "CPU Usage"
     interval     = 10
-    key          = "cpu_usage"
+    key          = "0_cpu_usage"
     script       = <<EOT
       #!/bin/bash
       vmstat | awk 'FNR==3 {printf "%2.0f%%", $13+$14+$16}'
-
-      EOT
+    EOT
   }
 
   metadata {
     display_name = "RAM Usage"
     interval     = 10
-    key          = "ram_usage"
+    key          = "1_ram_usage"
     script       = <<EOT
       #!/bin/bash
-      free -m | awk 'NR==2{printf "%.2f%%", $3*100/$2 }'
-      EOT
+      echo "`cat /sys/fs/cgroup/memory.current` `cat /sys/fs/cgroup/memory.max`" | awk '{ used=$1/1024/1024/1024; total=$2/1024/1024/1024; printf "%0.2f / %0.2f GB\n", used, total }'
+    EOT
   }
 
   metadata {
     display_name = "GPU Usage"
     interval     = 10
-    key          = "gpu_usage"
+    key          = "2_gpu_usage"
     script       = <<EOT
       #!/bin/bash
       nvidia-smi --query-gpu=utilization.gpu --format=csv,noheader,nounits | awk '{printf "%s%%", $1}'
-      EOT
+    EOT
   }
 
   metadata {
     display_name = "GPU Memory Usage"
     interval     = 10
-    key          = "gpu_memory_usage"
+    key          = "3_gpu_memory_usage"
     script       = <<EOT
       #!/bin/bash
       nvidia-smi --query-gpu=utilization.memory --format=csv,noheader,nounits | awk '{printf "%s%%", $1}'
-      EOT
+    EOT
   }
 
   metadata {
     display_name = "Disk Usage"
     interval     = 600
-    key          = "disk_usage"
+    key          = "4_disk_usage"
     script       = <<EOT
       #!/bin/bash
       df -h | awk '$NF=="/"{printf "%s", $5}'
-      EOT
-  }
-
-  metadata {
-    display_name = "Load Average"
-    interval     = 10
-    key          = "load_average"
-    script       = <<EOT
-      #!/bin/bash
-      uptime | awk '{print $10}' | sed 's/,//'
-      EOT
+    EOT
   }
 
   metadata {
     display_name = "Word of the Day"
     interval     = 86400
-    key          = "word_of_the_day"
+    key          = "5_word_of_the_day"
     script       = <<EOT
       #!/bin/bash
       curl -o - --silent https://www.merriam-webster.com/word-of-the-day 2>&1 | awk ' $0 ~ "Word of the Day: [A-z]+" { print $5; exit }'
-      EOT
+    EOT
   }
 
 }

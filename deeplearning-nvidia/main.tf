@@ -174,20 +174,20 @@ resource "coder_agent" "main" {
 
     # Start filebrowser
     echo "Starting filebrowser"
-    filebrowser --noauth --root /home/coder/data 2>&1 &
+    filebrowser --noauth --root /home/coder/data >/dev/null 2>&1 &
   
     # Start jupyter
     if [ ${data.coder_parameter.jupyter.value} == true ];
     then
       echo "Starting Jupyter Lab"
-      /usr/local/bin/jupyter lab --no-browser --LabApp.token='' --LabApp.password='' 2>&1 &
+      /usr/local/bin/jupyter lab --no-browser --LabApp.token='' --LabApp.password='' >/dev/null 2>&1 &
     fi
 
     # Satrt code-server
     if [ ${data.coder_parameter.code-server.value} == true ];
     then
       echo "Starting VS Code Web"
-      code-server --accept-server-license-terms serve-local --without-connection-token --quality stable --telemetry-level off 2>&1 &
+      code-server --accept-server-license-terms serve-local --without-connection-token --quality stable --telemetry-level off >/dev/null 2>&1 &
     fi
 
     EOT
