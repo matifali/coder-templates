@@ -12,7 +12,7 @@ Docker based templates.
 
 ## Installation
 
-### Linux
+### Linux / MacOS
 
 1. Open a terminal and run
 
