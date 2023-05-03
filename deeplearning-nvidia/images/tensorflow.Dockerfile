@@ -29,4 +29,5 @@ RUN groupadd -g ${GROUPID} ${USERNAME} && \
     echo "${USERNAME} ALL=(ALL) NOPASSWD:ALL" >>/etc/sudoers.d/nopasswd
 
 USER ${USERNAME}
+ENV PATH=/home/${USERNAME}/.local/bin:$PATH
 WORKDIR /home/${USERNAME}
