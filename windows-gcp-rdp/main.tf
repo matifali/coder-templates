@@ -28,27 +28,27 @@ data "coder_parameter" "zone" {
   icon         = "/emojis/1f30e.png"
 
   option {
-    name  = "northamerica-northeast1-a"
+    name  = "US NorthEast 1"
     value = "northamerica-northeast1-a"
     icon  = "/emojis/1f1fa-1f1f8.png"
   }
   option {
-    name  = "us-central1-a"
+    name  = "US Central 1"
     value = "us-central1-a"
     icon  = "/emojis/1f1fa-1f1f8.png"
   }
   option {
-    name  = "us-west2-c"
+    name  = "US West 2"
     value = "us-west2-c"
     icon  = "/emojis/1f1fa-1f1f8.png"
   }
   option {
-    name  = "europe-west4-b"
+    name  = "Europe West 4"
     value = "europe-west4-b"
     icon  = "/emojis/1f1ea-1f1fa.png"
   }
   option {
-    name  = "southamerica-east1-a"
+    name  = "South America East 1"
     value = "southamerica-east1-a"
     icon  = "/emojis/1f1e7-1f1f7.png"
   }
@@ -90,7 +90,7 @@ data "coder_parameter" "os" {
   name         = "os"
   display_name = "Windows OS"
   type         = "string"
-  description  = "What release of Microsoft Windows Server?"
+  description  = "Release of Microsoft Windows Server"
   mutable      = false
   default      = "windows-server-2022-dc-v20230414"
 
@@ -103,24 +103,6 @@ data "coder_parameter" "os" {
     value = "windows-server-2019-dc-v20230414"
   }
 }
-
-# data "coder_parameter" "vs" {
-#   name         = "vs"
-#   display_name = "Visual Studio"
-#   type         = "string"
-#   description  = "What release of Microsoft Visual Studio Community?"
-#   mutable      = false
-#   default      = "visualstudio2022community"
-
-#   option {
-#     name  = "2022"
-#     value = "visualstudio2022community"
-#   }
-#   option {
-#     name  = "2019"
-#     value = "visualstudio2019community"
-#   }
-# }
 
 provider "google" {
   zone        = data.coder_parameter.zone.value
@@ -140,8 +122,6 @@ resource "google_compute_disk" "root" {
   type  = "pd-ssd"
   zone  = data.coder_parameter.zone.value
   image = "projects/windows-cloud/global/images/${data.coder_parameter.os.value}"
-  #image = "projects/windows-cloud/global/images/windows-server-2022-dc-v20221109"  
-  #image = "projects/windows-cloud/global/images/windows-server-2019-dc-v20221014"
   lifecycle {
     ignore_changes = [image]
   }
@@ -150,10 +130,10 @@ resource "google_compute_disk" "root" {
 resource "coder_agent" "main" {
   auth               = "google-instance-identity"
   arch               = "amd64"
+  connection_timeout = 180 # the first boot takes some time
   os                 = "windows"
   login_before_ready = false
-  #startup_script_timeout = 300  
-  startup_script = <<EOF
+  startup_script     = <<EOF
 
 # Set admin password and enable admin user (must be in this order)
 Get-LocalUser -Name "Administrator" | Set-LocalUser -Password (ConvertTo-SecureString -AsPlainText "${local.admin_password}" -Force)
@@ -179,15 +159,21 @@ Invoke-WebRequest -Uri "https://github.com/cedrozor/myrtille/releases/download/v
 # Start Myrtille
 Start-Process C:\temp\myrtille.msi -ArgumentList "/quiet"
 
+# Workaround for myrtile not starting automatically
+Remove-Item -Path C:\inetpub\wwwroot\iisstart.htm -Force
+"<head>
+  <meta http-equiv='refresh' content='0; URL=https://${local.redirect_url_1}${local.redirect_url_2}${local.redirect_url_3}'>
+</head>" | Out-File -FilePath C:\inetpub\wwwroot\iisstart.htm
+
 EOF
 }
 
 locals {
-  # Password to log in via RDP
-  #
-  # Must meet Windows password complexity requirements:
-  # https://docs.microsoft.com/en-us/windows/security/threat-protection/security-policy-settings/password-must-meet-complexity-requirements#reference
   admin_password = "coderRDP!"
+  redirect_url_1 = "rdp--main--${lower(data.coder_workspace.me.name)}--${lower(data.coder_workspace.me.owner)}."
+  redirect_url_2 = split("//", data.coder_workspace.me.access_url)[1]
+  redirect_url_3 = "/Myrtille/?__EVENTTARGET=&__EVENTARGUMENT=&server=localhost&user=Administrator&password=${local.admin_password}&width=1920&height=1080&connect=Connect%21"
+  # redirect_url   = "https://${local.redirect_url_1}${local.redirect_url_2}${local.redirect_url_3}"
 }
 
 resource "google_compute_instance" "dev" {
@@ -236,7 +222,7 @@ resource "coder_app" "rdp" {
   display_name = "RDP Desktop"
   slug         = "rdp"
   icon         = "https://raw.githubusercontent.com/matifali/logos/main/windows.svg"
-  url          = "http://localhost/?__EVENTTARGET=&__EVENTARGUMENT=&server=localhost&user=Administrator&password=${local.admin_password}&width=1920&height=1080&connect=Connect%21"
+  url          = "http://localhost"
   subdomain    = true
   share        = "authenticated"
 }
@@ -261,8 +247,4 @@ resource "coder_metadata" "workspace_info" {
     key   = "windows os"
     value = data.coder_parameter.os.value
   }
-  #   item {
-  #     key   = "visual studio"
-  #     value = data.coder_parameter.vs.value
-  #   }
 }
