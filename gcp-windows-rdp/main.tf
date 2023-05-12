@@ -130,7 +130,7 @@ resource "google_compute_disk" "root" {
 resource "coder_agent" "main" {
   auth               = "google-instance-identity"
   arch               = "amd64"
-  connection_timeout = 180 # the first boot takes some time
+  connection_timeout = 300 # the first boot takes some time
   os                 = "windows"
   login_before_ready = false
   startup_script     = <<EOF
@@ -152,18 +152,26 @@ Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
 choco feature enable -n=allowGlobalConfirmation
 
 # Install Myrtille
-# create a temporary folder
+echo "Downloading Myrtille"
 New-Item -ItemType Directory -Force -Path C:\temp
 Invoke-WebRequest -Uri "https://github.com/cedrozor/myrtille/releases/download/v2.9.2/Myrtille_2.9.2_x86_x64_Setup.msi" -Outfile c:\temp\myrtille.msi
-
-# Start Myrtille
+echo "Download complete"
+echo "Installing Myrtille"
 Start-Process C:\temp\myrtille.msi -ArgumentList "/quiet"
+echo "Intallation complete"
 
+# echo "Starting Myrtille"
 # Workaround for myrtile not starting automatically
-Remove-Item -Path C:\inetpub\wwwroot\iisstart.htm -Force
+while (!(Test-Path C:\inetpub\wwwroot\iisstart.htm)) {
+  # New-Item -ItemType File -Force -Path C:\inetpub\wwwroot\iisstart.htm
+  echo "waiting for myrtille to start"
+  Start-Sleep -s 10
+}
 "<head>
   <meta http-equiv='refresh' content='0; URL=https://${local.redirect_url_1}${local.redirect_url_2}${local.redirect_url_3}'>
 </head>" | Out-File -FilePath C:\inetpub\wwwroot\iisstart.htm
+
+echo "Startup script complete"
 
 EOF
 }
@@ -172,7 +180,7 @@ locals {
   admin_password = "coderRDP!"
   redirect_url_1 = "rdp--main--${lower(data.coder_workspace.me.name)}--${lower(data.coder_workspace.me.owner)}."
   redirect_url_2 = split("//", data.coder_workspace.me.access_url)[1]
-  redirect_url_3 = "/Myrtille/?__EVENTTARGET=&__EVENTARGUMENT=&server=localhost&user=Administrator&password=${local.admin_password}&width=1920&height=1080&connect=Connect%21"
+  redirect_url_3 = "/Myrtille/?__EVENTTARGET=&__EVENTARGUMENT=&server=localhost&user=Administrator&password=${local.admin_password}&connect=Connect%21"
   # redirect_url   = "https://${local.redirect_url_1}${local.redirect_url_2}${local.redirect_url_3}"
 }
 
@@ -224,7 +232,21 @@ resource "coder_app" "rdp" {
   icon         = "https://raw.githubusercontent.com/matifali/logos/main/windows.svg"
   url          = "http://localhost"
   subdomain    = true
-  share        = "authenticated"
+  share        = "owner"
+  healthcheck {
+    url       = "http://localhost"
+    interval  = 3
+    threshold = 120
+  }
+}
+
+
+resource "coder_app" "rdp-docs" {
+  agent_id     = coder_agent.main.id
+  display_name = "How to use local RDP client"
+  slug         = "rdp-docs"
+  icon         = "https://raw.githubusercontent.com/matifali/logos/main/windows.svg"
+  external     = "https://coder.com/docs/v2/latest/ides/remote-desktops"
 }
 
 resource "coder_metadata" "workspace_info" {
