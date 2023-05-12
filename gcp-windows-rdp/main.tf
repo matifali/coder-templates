@@ -240,13 +240,13 @@ resource "coder_app" "rdp" {
   }
 }
 
-
 resource "coder_app" "rdp-docs" {
   agent_id     = coder_agent.main.id
   display_name = "How to use local RDP client"
   slug         = "rdp-docs"
   icon         = "https://raw.githubusercontent.com/matifali/logos/main/windows.svg"
-  external     = "https://coder.com/docs/v2/latest/ides/remote-desktops"
+  url          = "https://coder.com/docs/v2/latest/ides/remote-desktops#rdp-desktop"
+  external     = true
 }
 
 resource "coder_metadata" "workspace_info" {
