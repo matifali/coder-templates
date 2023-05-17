@@ -3,9 +3,10 @@ FROM nvcr.io/nvidia/tensorflow:${NGC_VERSION}-tf2-py3
 
 # Install extra packages
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    htop \
-    sudo \
     curl \
+    htop \
+    nvidia-modprobe \
+    sudo \
     tmux \
     && \
     rm -rf /var/lib/apt/lists/
