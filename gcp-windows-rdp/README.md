@@ -1,11 +1,11 @@
 ---
 name: WIndows VM on GCP with web RDP
 description: Run workspaces as Windows VMs on GCP with easy RDP access from the browser
-tags: [gcp, windows, rdp]
+tags: [gcp, windows, rdp, web-rdp, browser-rdp]
 icon: /icon/windows.svg
 ---
 
-# Coder GCP Windows VM Template
+# Coder GCP Windows VM Template with Web RDP
 
 This template provisions a Windows VM on GCP with easy RDP access from the browser.
 
