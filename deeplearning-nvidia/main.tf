@@ -270,7 +270,7 @@ resource "docker_image" "deeplearning" {
   build {
     context    = "./images"
     dockerfile = "${data.coder_parameter.framework.value}.Dockerfile"
-    tag        = ["${local.ngc-version}"]
+    tag        = ["matifali/ngc-${data.coder_parameter.framework.value}:${local.ngc-version}", "matifali/ngc-${data.coder_parameter.framework.value}:latest"]
     build_args = {
       "NGC_VERSION" = "${local.ngc-version}"
     }
