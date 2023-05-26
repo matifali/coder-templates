@@ -309,13 +309,7 @@ resource "docker_container" "workspace" {
   cpu_shares = data.coder_parameter.cpu.value
   memory     = data.coder_parameter.ram.value * 1024
   gpus       = "all"
-  # See https://github.com/NVIDIA/nvidia-docker/issues/1671#issuecomment-1420855027
-  devices {
-    host_path = "/dev/nvidia0"
-  }
-  devices {
-    host_path = "/dev/nvidiactl"
-  }
+  runtime    = "nvidia"
   name     = "coder-${data.coder_workspace.me.owner}-${lower(data.coder_workspace.me.name)}"
   hostname = lower(data.coder_workspace.me.name)
   dns      = ["1.1.1.1"]
