@@ -208,22 +208,14 @@ resource "docker_container" "workspace" {
   cpu_shares = data.coder_parameter.cpu.value
   memory     = data.coder_parameter.ram.value * 1024
   gpus       = "${data.coder_parameter.gpu.value}" == "true" ? "all" : null
-
-  devices {
-    host_path = "/dev/nvidia0"
-  }
-
-  devices {
-    host_path = "/dev/nvidiactl"
-  }
+  runtime    = "${data.coder_parameter.gpu.value}" == "true" ? "nvidia" : "runc"
 
   # Uses lower() to avoid Docker restriction on container names.
   name = "coder-${data.coder_workspace.me.owner}-${lower(data.coder_workspace.me.name)}"
   # Hostname makes the shell more user friendly: coder@my-workspace:~$
   hostname = lower(data.coder_workspace.me.name)
-  dns      = ["1.1.1.1"]
-  # Use the docker gateway if the access URL is 127.0.0.1 
-  entrypoint = ["sh", "-c", replace(coder_agent.main.init_script, "127.0.0.1", "host.docker.internal")]
+  dns      = ["1.1.1.1"] 
+  entrypoint = ["sh", "-c", coder_agent.main.init_script]
   env        = ["CODER_AGENT_TOKEN=${coder_agent.main.token}"]
 
   host {
@@ -235,20 +227,20 @@ resource "docker_container" "workspace" {
 
   # users home directory
   volumes {
-    container_path = "/home/coder"
+    container_path = "/home/matlab"
     volume_name    = docker_volume.home_volume.name
     read_only      = false
   }
   # users data directory
   volumes {
-    container_path = "/home/coder/data/"
+    container_path = "/home/matlab/data/"
     host_path      = "/data/${data.coder_workspace.me.owner}/"
     read_only      = false
   }
 
   # shared data directory
   volumes {
-    container_path = "/home/coder/share"
+    container_path = "/home/matlab/share"
     host_path      = "/data/share/"
     read_only      = true
   }
