@@ -194,6 +194,7 @@ resource "docker_container" "workspace" {
   memory     = data.coder_parameter.ram.value * 1024
   gpus       = "${data.coder_parameter.gpu.value}" == "true" ? "all" : null
   runtime    = "${data.coder_parameter.gpu.value}" == "true" ? "nvidia" : "runc"
+  user       = "matlab"
 
   # Uses lower() to avoid Docker restriction on container names.
   name = "coder-${data.coder_workspace.me.owner}-${lower(data.coder_workspace.me.name)}"
