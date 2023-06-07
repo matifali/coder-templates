@@ -96,13 +96,11 @@ resource "coder_agent" "main" {
   startup_script_timeout = 180
   startup_script         = <<EOT
     #!/bin/bash
-    set -euox pipefail
+    set -euo pipefail
     # make user share directory
     mkdir -p ~/share
     # make user data directory
     mkdir -p ~/data
-    # Add matlab to PATH
-    export PATH=/opt/matlab/`ls /opt/matlab | grep R*`/bin:$PATH
     # start Matlab browser
     /bin/run.sh -browser >/dev/null 2>&1 &
     echo "Starting Matlab Browser"
@@ -196,7 +194,6 @@ resource "docker_container" "workspace" {
   memory     = data.coder_parameter.ram.value * 1024
   gpus       = "${data.coder_parameter.gpu.value}" == "true" ? "all" : null
   runtime    = "${data.coder_parameter.gpu.value}" == "true" ? "nvidia" : "runc"
-  user       = "matlab"
 
   # Uses lower() to avoid Docker restriction on container names.
   name = "coder-${data.coder_workspace.me.owner}-${lower(data.coder_workspace.me.name)}"
