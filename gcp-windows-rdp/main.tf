@@ -134,7 +134,6 @@ resource "coder_agent" "main" {
   arch               = "amd64"
   connection_timeout = 300 # the first boot takes some time
   os                 = "windows"
-  login_before_ready = false
   startup_script     = <<EOF
 
 # Set admin password and enable admin user (must be in this order)

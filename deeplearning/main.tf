@@ -169,7 +169,6 @@ resource "coder_app" "filebrowser" {
 resource "coder_agent" "main" {
   arch                   = "amd64"
   os                     = "linux"
-  login_before_ready     = false
   startup_script_timeout = 180
   startup_script         = <<EOT
     #!/bin/bash
