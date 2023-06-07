@@ -29,7 +29,7 @@ jobs:
         run: echo ::set-output name=sha_short::$(git rev-parse --short HEAD)
 
       - name: update coder template
-        uses: matifali/update-coder-template@v1
+        uses: matifali/update-coder-template@latest
         with:
           CODER_URL: ${{ secrets.CODER_URL }}
           CODER_TEMPLATE_NAME: "matlab"
