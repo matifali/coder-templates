@@ -96,7 +96,7 @@ resource "coder_agent" "main" {
   startup_script_timeout = 180
   startup_script         = <<EOT
     #!/bin/bash
-    set -euo pipefail
+    set -euox pipefail
     # make user share directory
     mkdir -p ~/share
     # make user data directory
@@ -105,9 +105,12 @@ resource "coder_agent" "main" {
     export PATH=/opt/matlab/`ls /opt/matlab | grep R*`/bin:$PATH
     # start Matlab browser
     /bin/run.sh -browser >/dev/null 2>&1 &
+    echo "Starting Matlab Browser"
     # start desktop
     /bin/run.sh -vnc >/dev/null 2>&1 &
+    echo "Starting Matlab Desktop"
     # Intall and start filebrowser
+    echo "Installing and starting File Browser"
     curl -fsSL https://raw.githubusercontent.com/filebrowser/get/master/get.sh | bash
     filebrowser --noauth -r ~/data >/dev/null 2>&1 &
   EOT
