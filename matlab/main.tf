@@ -198,8 +198,6 @@ resource "docker_container" "workspace" {
   cpu_shares = data.coder_parameter.cpu.value
   memory     = data.coder_parameter.ram.value * 1024
   gpus       = "${data.coder_parameter.gpu.value}" == "true" ? "all" : null
-  runtime    = "${data.coder_parameter.gpu.value}" == "true" ? "nvidia" : "runc"
-
   # Uses lower() to avoid Docker restriction on container names.
   name = "coder-${data.coder_workspace.me.owner}-${lower(data.coder_workspace.me.name)}"
   # Hostname makes the shell more user friendly: coder@my-workspace:~$
@@ -207,6 +205,22 @@ resource "docker_container" "workspace" {
   dns      = ["1.1.1.1"] 
   entrypoint = ["sh", "-c", coder_agent.main.init_script]
   env        = ["CODER_AGENT_TOKEN=${coder_agent.main.token}"]
+
+  devices {
+    host_path      = "/dev/nvidia0"
+  }
+  devices {
+    host_path      = "/dev/nvidiactl"
+  }
+  devices {
+    host_path      = "/dev/nvidia-uvm-tools"
+  }
+  devices {
+    host_path      = "/dev/nvidia-uvm"
+  }
+  devices {
+    host_path      = "/dev/nvidia-modeset"
+  }
 
   host {
     host = "host.docker.internal"
