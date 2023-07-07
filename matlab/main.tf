@@ -105,10 +105,6 @@ resource "coder_agent" "main" {
     echo "run /tmp/cvx/cvx_setup" > /home/matlab/Documents/MATLAB/startup.m
   EOT
 
-  env = {
-    CODER_AGENT_TOKEN=coder_agent.main.token
-  }
-
   metadata {
     display_name = "CPU Usage Workspace"
     interval     = 10
