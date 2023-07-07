@@ -2,7 +2,7 @@ terraform {
   required_providers {
     coder = {
       source  = "coder/coder"
-      version = "~>0.8.3"
+      version = "~>0.10.0"
     }
     heroku = {
       source  = "heroku/heroku"
@@ -26,9 +26,7 @@ provider "heroku" {
   api_key = var.heroku_api_key
 }
 
-provider "coder" {
-  feature_use_managed_variables = true
-}
+provider "coder" {}
 
 resource "heroku_app" "workspace" {
   count  = data.coder_workspace.me.start_count
@@ -68,6 +66,7 @@ data "coder_parameter" "region" {
   icon         = "/emojis/1f30e.png"
   mutable      = false
   default      = "us"
+  order        = 1
   option {
     name  = "United States"
     value = "us"
@@ -88,6 +87,7 @@ data "coder_parameter" "size" {
   type         = "string"
   mutable      = false
   default      = "standard-1x"
+  order        = 2
   option {
     name  = "Basic"
     value = "basic"

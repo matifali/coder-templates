@@ -2,7 +2,7 @@ terraform {
   required_providers {
     coder = {
       source = "coder/coder"
-      version = "~>0.8.3"
+      version = "~>0.10.0"
     }
     google = {
       source = "hashicorp/google"
@@ -11,9 +11,7 @@ terraform {
   }
 }
 
-provider "coder" {
-  feature_use_managed_variables = "true"
-}
+provider "coder" {}
 
 variable "project_id" {
   description = "Which Google Compute Project should your workspace live in?"
@@ -28,7 +26,7 @@ data "coder_parameter" "zone" {
   mutable      = false
   default      = "us-central1-a"
   icon         = "/emojis/1f30e.png"
-
+  order        = 1
   option {
     name  = "US NorthEast 1"
     value = "northamerica-northeast1-a"
@@ -54,7 +52,6 @@ data "coder_parameter" "zone" {
     value = "southamerica-east1-a"
     icon  = "/emojis/1f1e7-1f1f7.png"
   }
-
 }
 
 data "coder_parameter" "machine-type" {
@@ -64,7 +61,7 @@ data "coder_parameter" "machine-type" {
   description  = "GCP machine type"
   mutable      = false
   default      = "e2-medium"
-
+  order        = 2
   option {
     name  = "e2-standard-4"
     value = "e2-standard-4"
@@ -85,7 +82,6 @@ data "coder_parameter" "machine-type" {
     name  = "e2-small"
     value = "e2-small"
   }
-
 }
 
 data "coder_parameter" "os" {
@@ -95,7 +91,7 @@ data "coder_parameter" "os" {
   description  = "Release of Microsoft Windows Server"
   mutable      = false
   default      = "windows-server-2022-dc-v20230414"
-
+  order        = 3
   option {
     name  = "2022"
     value = "windows-server-2022-dc-v20230414"
@@ -182,7 +178,6 @@ locals {
   redirect_url_1 = "rdp--main--${lower(data.coder_workspace.me.name)}--${lower(data.coder_workspace.me.owner)}."
   redirect_url_2 = split("//", data.coder_workspace.me.access_url)[1]
   redirect_url_3 = "/Myrtille/?__EVENTTARGET=&__EVENTARGUMENT=&server=localhost&user=Administrator&password=${local.admin_password}&connect=Connect%21"
-  # redirect_url   = "https://${local.redirect_url_1}${local.redirect_url_2}${local.redirect_url_3}"
 }
 
 resource "google_compute_instance" "dev" {

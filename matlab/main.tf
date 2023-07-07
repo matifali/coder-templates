@@ -2,7 +2,7 @@ terraform {
   required_providers {
     coder = {
       source  = "coder/coder"
-      version = "~>0.8.3"
+      version = "~>0.10.0"
     }
     docker = {
       source  = "kreuzwerker/docker"
@@ -11,31 +11,18 @@ terraform {
   }
 }
 
-data "coder_parameter" "cpu" {
-  name         = "cpu"
-  display_name = "CPU Cores"
-  description  = "Choose number of CPU cores (min: 8, max: 20)"
-  type         = "number"
-  icon         = "https://raw.githubusercontent.com/matifali/logos/main/cpu-1.svg"
-  mutable      = true
-  default      = "8"
-  validation {
-    min = 4
-    max = 20
-  }
-}
-
 data "coder_parameter" "ram" {
   name         = "ram"
   display_name = "RAM (GB)"
-  description  = "Choose amount of RAM (min: 32 GB, max: 64 GB)"
+  description  = "Choose amount of RAM (min: 32 GB, max: 128 GB)"
   type         = "number"
   icon         = "https://raw.githubusercontent.com/matifali/logos/main/memory.svg"
   mutable      = true
+  order        = 1
   default      = "32"
   validation {
     min = 32
-    max = 64
+    max = 128
   }
 }
 
@@ -46,6 +33,7 @@ data "coder_parameter" "gpu" {
   type         = "bool"
   icon         = "https://raw.githubusercontent.com/matifali/logos/main/gpu-1.svg"
   mutable      = false
+  order        = 2
   default      = "true"
 }
 
@@ -126,13 +114,17 @@ resource "coder_agent" "main" {
   }
 
   metadata {
+    display_name = "CPU Usage"
+    interval     = 10
+    key          = "0_cpu_usage"
+    script       = "coder stat cpu"
+  }
+
+  metadata {
     display_name = "RAM Usage"
     interval     = 10
     key          = "1_ram_usage"
-    script       = <<EOT
-      #!/bin/bash
-      echo "`cat /sys/fs/cgroup/memory.current` `cat /sys/fs/cgroup/memory.max`" | awk '{ used=$1/1024/1024/1024; total=$2/1024/1024/1024; printf "%0.2f / %0.2f GB\n", used, total }'
-    EOT
+    script       = "coder stat mem"
   }
 
   metadata {
@@ -160,8 +152,7 @@ resource "coder_agent" "main" {
     interval     = 600
     key          = "4_disk_usage"
     script       = <<EOT
-      #!/bin/bash
-      df -h | awk '$NF=="/"{printf "%s", $5}'
+      coder stat disk $HOME
     EOT
   }
 
@@ -195,7 +186,6 @@ resource "docker_volume" "home_volume" {
 resource "docker_container" "workspace" {
   count      = data.coder_workspace.me.start_count
   image      = docker_image.matlab.image_id
-  cpu_shares = data.coder_parameter.cpu.value
   memory     = data.coder_parameter.ram.value * 1024
   gpus       = "${data.coder_parameter.gpu.value}" == "true" ? "all" : null
   # Uses lower() to avoid Docker restriction on container names.

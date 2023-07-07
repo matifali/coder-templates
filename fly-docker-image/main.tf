@@ -6,7 +6,7 @@ terraform {
     }
     coder = {
       source  = "coder/coder"
-      version = "~>0.8.3"
+      version = "~>0.10.0"
     }
   }
 }
@@ -18,9 +18,7 @@ provider "fly" {
   fly_api_token        = var.fly_api_token == "" ? null : var.fly_api_token
 }
 
-provider "coder" {
-  feature_use_managed_variables = true
-}
+provider "coder" {}
 
 resource "fly_app" "workspace" {
   name = "coder-${data.coder_workspace.me.owner}-${lower(data.coder_workspace.me.name)}"

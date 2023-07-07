@@ -2,7 +2,7 @@ terraform {
   required_providers {
     coder = {
       source  = "coder/coder"
-      version = "~>0.8.3"
+      version = "~>0.10.0"
     }
     docker = {
       source  = "kreuzwerker/docker"
@@ -14,25 +14,11 @@ terraform {
 locals {
   jupyter-count     = data.coder_parameter.jupyter.value == "false" ? 0 : 1
   code-server-count = data.coder_parameter.code-server.value == "false" ? 0 : 1
-  # This gets the latest version of the ngc version if the user didn't specify one (e.g. 23.02)
+  # This gets the latest version of the ngc version if the user didn't specify one (e.g. 23.06)
   ngc_version_major = formatdate("YY", timestamp())
   last_month        = formatdate("M", timestamp()) - 1 == 0 ? 12 : formatdate("M", timestamp()) - 1
   ngc_version_minor = local.last_month < 10 ? "0${local.last_month}" : local.last_month
   ngc-version       = "${local.ngc_version_major}.${local.ngc_version_minor}"
-}
-
-data "coder_parameter" "cpu" {
-  name         = "cpu"
-  display_name = "CPU Cores"
-  description  = "Choose number of CPU cores (min: 4, max: 16)"
-  type         = "number"
-  icon         = "https://raw.githubusercontent.com/matifali/logos/main/memory.svg"
-  mutable      = true
-  default      = "8"
-  validation {
-    min = 4
-    max = 16
-  }
 }
 
 data "coder_parameter" "ram" {
@@ -43,6 +29,7 @@ data "coder_parameter" "ram" {
   icon         = "https://raw.githubusercontent.com/matifali/logos/main/memory.svg"
   mutable      = true
   default      = "32"
+  order        = 2
   validation {
     min = 16
     max = 128
@@ -57,6 +44,7 @@ data "coder_parameter" "framework" {
   type         = "string"
   default      = "pytorch"
   mutable      = false
+  order        = 1
   option {
     name        = "Nvidia PyTorch"
     description = "Nvidia NGC PyTorch"
@@ -84,10 +72,6 @@ resource "coder_metadata" "workspace_info" {
     value = local.ngc-version
   }
   item {
-    key   = "CPU Cores"
-    value = data.coder_parameter.cpu.value
-  }
-  item {
     key   = "RAM (GB)"
     value = data.coder_parameter.ram.value
   }
@@ -101,6 +85,7 @@ data "coder_parameter" "code-server" {
   type         = "bool"
   mutable      = true
   default      = "false"
+  order        = 3
 }
 
 data "coder_parameter" "jupyter" {
@@ -111,7 +96,7 @@ data "coder_parameter" "jupyter" {
   type         = "bool"
   mutable      = true
   default      = "false"
-
+  order        = 4
 }
 
 provider "docker" {
@@ -198,14 +183,18 @@ resource "coder_agent" "main" {
     GIT_COMMITTER_EMAIL = "${data.coder_workspace.me.owner_email}"
   }
 
+    metadata {
+    display_name = "CPU Usage"
+    interval     = 10
+    key          = "0_cpu_usage"
+    script       = "coder stat cpu"
+  }
+
   metadata {
     display_name = "RAM Usage"
     interval     = 10
     key          = "1_ram_usage"
-    script       = <<EOT
-      #!/bin/bash
-      echo "`cat /sys/fs/cgroup/memory.current` `cat /sys/fs/cgroup/memory.max`" | awk '{ used=$1/1024/1024/1024; total=$2/1024/1024/1024; printf "%0.2f / %0.2f GB\n", used, total }'
-    EOT
+    script       = "coder stat mem"
   }
 
   metadata {
@@ -232,10 +221,7 @@ resource "coder_agent" "main" {
     display_name = "Disk Usage"
     interval     = 600
     key          = "4_disk_usage"
-    script       = <<EOT
-      #!/bin/bash
-      df -h | awk '$NF=="/"{printf "%s", $5}'
-      EOT
+    script       = "coder stat disk $HOME"
   }
 
   metadata {
@@ -290,7 +276,6 @@ resource "docker_volume" "opt_volume" {
 resource "docker_container" "workspace" {
   count      = data.coder_workspace.me.start_count
   image      = docker_image.deeplearning.image_id
-  cpu_shares = data.coder_parameter.cpu.value
   memory     = data.coder_parameter.ram.value * 1024
   gpus       = "all"
   name     = "coder-${data.coder_workspace.me.owner}-${lower(data.coder_workspace.me.name)}"
