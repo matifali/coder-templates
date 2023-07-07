@@ -228,7 +228,7 @@ resource "coder_agent" "main" {
     key          = "4_gpu_usage"
     script       = <<EOT
       #!/bin/bash
-      nvidia-smi --query-gpu=utilization.gpu --format=csv,noheader,nounits | awk '{printf \"%s%%\", $1}'"
+      nvidia-smi --query-gpu=utilization.gpu --format=csv,noheader,nounits | awk '{printf \"%s%%\", $1}'
     EOT
   }
 
@@ -236,9 +236,9 @@ resource "coder_agent" "main" {
     display_name = "GPU Memory Usage"
     interval     = 10
     key          = "5_gpu_memory_usage"
-    script       = <<EOT 
+    script       = <<EOT
       #!/bin/bash
-      nvidia-smi --query-gpu=utilization.memory --format=csv,noheader,nounits | awk '{printf \"%s%%\", $1}'"
+      nvidia-smi --query-gpu=utilization.memory --format=csv,noheader,nounits | awk '{printf \"%s%%\", $1}'
     EOT
   }
 
@@ -246,9 +246,7 @@ resource "coder_agent" "main" {
     display_name = "Disk Usage"
     interval     = 600
     key          = "6_disk_usage"
-    script       = <<EOT
-      coder stat disk $HOME
-    EOT
+    script       = "coder stat disk $HOME"
   }
 
   metadata {

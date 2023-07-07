@@ -103,14 +103,10 @@ resource "coder_agent" "main" {
     chown matlab:matlab /home/matlab/Documents/MATLAB/startup.m
     chmod 644 /home/matlab/Documents/MATLAB/startup.m
     echo "run /tmp/cvx/cvx_setup" > /home/matlab/Documents/MATLAB/startup.m
-    
   EOT
 
   env = {
-    GIT_AUTHOR_NAME     = "${data.coder_workspace.me.owner}"
-    GIT_COMMITTER_NAME  = "${data.coder_workspace.me.owner}"
-    GIT_AUTHOR_EMAIL    = "${data.coder_workspace.me.owner_email}"
-    GIT_COMMITTER_EMAIL = "${data.coder_workspace.me.owner_email}"
+    CODER_AGENT_TOKEN=coder_agent.main.token
   }
 
   metadata {
@@ -127,7 +123,6 @@ resource "coder_agent" "main" {
     script       = "coder stat mem"
   }
 
-  
   metadata {
     display_name = "CPU Usage Host"
     interval     = 10
@@ -147,8 +142,7 @@ resource "coder_agent" "main" {
     interval     = 10
     key          = "4_gpu_usage"
     script       = <<EOT
-      #!/bin/bash
-      nvidia-smi --query-gpu=utilization.gpu --format=csv,noheader,nounits | awk '{printf \"%s%%\", $1}'"
+      nvidia-smi --query-gpu=utilization.gpu --format=csv,noheader,nounits | awk '{printf \"%s%%\", $1}'
     EOT
   }
 
@@ -156,9 +150,8 @@ resource "coder_agent" "main" {
     display_name = "GPU Memory Usage"
     interval     = 10
     key          = "5_gpu_memory_usage"
-    script       = <<EOT 
-      #!/bin/bash
-      nvidia-smi --query-gpu=utilization.memory --format=csv,noheader,nounits | awk '{printf \"%s%%\", $1}'"
+    script       = <<EOT
+      nvidia-smi --query-gpu=utilization.memory --format=csv,noheader,nounits | awk '{printf \"%s%%\", $1}'
     EOT
   }
 
@@ -166,9 +159,7 @@ resource "coder_agent" "main" {
     display_name = "Disk Usage"
     interval     = 600
     key          = "6_disk_usage"
-    script       = <<EOT
-      coder stat disk $HOME
-    EOT
+    script       = "coder stat disk $HOME"
   }
 
   metadata {
@@ -176,11 +167,9 @@ resource "coder_agent" "main" {
     interval     = 86400
     key          = "5_word_of_the_day"
     script       = <<EOT
-      #!/bin/bash
       curl -o - --silent https://www.merriam-webster.com/word-of-the-day 2>&1 | awk ' $0 ~ "Word of the Day: [A-z]+" { print $5; exit }'
     EOT
   }
-
 }
 
 data "docker_registry_image" "matlab" {

@@ -183,7 +183,7 @@ resource "coder_agent" "main" {
     GIT_COMMITTER_EMAIL = "${data.coder_workspace.me.owner_email}"
   }
 
-     metadata {
+  metadata {
     display_name = "CPU Usage Workspace"
     interval     = 10
     key          = "0_cpu_usage"
@@ -197,7 +197,6 @@ resource "coder_agent" "main" {
     script       = "coder stat mem"
   }
 
-  
   metadata {
     display_name = "CPU Usage Host"
     interval     = 10
@@ -218,7 +217,7 @@ resource "coder_agent" "main" {
     key          = "4_gpu_usage"
     script       = <<EOT
       #!/bin/bash
-      nvidia-smi --query-gpu=utilization.gpu --format=csv,noheader,nounits | awk '{printf \"%s%%\", $1}'"
+      nvidia-smi --query-gpu=utilization.gpu --format=csv,noheader,nounits | awk '{printf \"%s%%\", $1}'
     EOT
   }
 
@@ -226,9 +225,9 @@ resource "coder_agent" "main" {
     display_name = "GPU Memory Usage"
     interval     = 10
     key          = "5_gpu_memory_usage"
-    script       = <<EOT 
+    script       = <<EOT
       #!/bin/bash
-      nvidia-smi --query-gpu=utilization.memory --format=csv,noheader,nounits | awk '{printf \"%s%%\", $1}'"
+      nvidia-smi --query-gpu=utilization.memory --format=csv,noheader,nounits | awk '{printf \"%s%%\", $1}'
     EOT
   }
 
@@ -236,15 +235,13 @@ resource "coder_agent" "main" {
     display_name = "Disk Usage"
     interval     = 600
     key          = "6_disk_usage"
-    script       = <<EOT
-      coder stat disk $HOME
-    EOT
+    script       = "coder stat disk $HOME"
   }
 
   metadata {
     display_name = "Word of the Day"
     interval     = 86400
-    key          = "5_word_of_the_day"
+    key          = "7_word_of_the_day"
     script       = <<EOT
       #!/bin/bash
       curl -o - --silent https://www.merriam-webster.com/word-of-the-day 2>&1 | awk ' $0 ~ "Word of the Day: [A-z]+" { print $5; exit }'
