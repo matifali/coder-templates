@@ -1,4 +1,4 @@
-ARG NGC_VERSION=23.02
+ARG NGC_VERSION=23.06
 FROM nvcr.io/nvidia/pytorch:${NGC_VERSION}-py3
 
 # Install extra packages
@@ -10,12 +10,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     tmux \
     && \
     rm -rf /var/lib/apt/lists/
-
-# Install filebrowser
-RUN curl -fsSL https://raw.githubusercontent.com/filebrowser/get/master/get.sh | bash
-
-# Install Microsoft VS Code Server
-RUN wget -O- https://aka.ms/install-vscode-server/setup.sh | sh
 
 # Add a user `${USERNAME}` so that you're not developing as the `root` user
 ARG USERID=1000

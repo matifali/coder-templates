@@ -156,7 +156,9 @@ resource "coder_agent" "main" {
     # make user share directory
     mkdir -p /home/coder/share
 
-    # Start filebrowser
+    # Install and start filebrowser
+    echo "Installing filebrowser"
+    curl -fsSL https://raw.githubusercontent.com/filebrowser/get/master/get.sh | bash
     echo "Starting filebrowser"
     filebrowser --noauth --root /home/coder/data >/dev/null 2>&1 &
   
@@ -167,11 +169,15 @@ resource "coder_agent" "main" {
       /usr/local/bin/jupyter lab --no-browser --LabApp.token='' --LabApp.password='' >/dev/null 2>&1 &
     fi
 
-    # Satrt code-server
+    # Install and satrt VS code-server
     if [ ${data.coder_parameter.code-server.value} == true ];
     then
+      echo "Installing VS Code Web"
+      mkdir -p /tmp/code-server
+      HASH=$(curl https://update.code.visualstudio.com/api/commits/stable/server-linux-x64-web | cut -d '"' -f 2)
+      wget -O- https://az764295.vo.msecnd.net/stable/$HASH/vscode-server-linux-x64-web.tar.gz | tar -xz -C /tmp/code-server --strip-components=1 >/dev/null 2>&1
       echo "Starting VS Code Web"
-      code-server --accept-server-license-terms serve-local --without-connection-token --quality stable --telemetry-level off >/dev/null 2>&1 &
+      /tmp/code-server/bin/code-server --accept-server-license-terms serve-local --without-connection-token --telemetry-level off >/dev/null 2>&1 &
     fi
 
     EOT
@@ -286,10 +292,10 @@ resource "docker_volume" "opt_volume" {
 }
 
 resource "docker_container" "workspace" {
-  count      = data.coder_workspace.me.start_count
-  image      = docker_image.deeplearning.image_id
-  memory     = data.coder_parameter.ram.value * 1024
-  gpus       = "all"
+  count    = data.coder_workspace.me.start_count
+  image    = docker_image.deeplearning.image_id
+  memory   = data.coder_parameter.ram.value * 1024
+  gpus     = "all"
   name     = "coder-${data.coder_workspace.me.owner}-${lower(data.coder_workspace.me.name)}"
   hostname = lower(data.coder_workspace.me.name)
   dns      = ["1.1.1.1"]
@@ -297,19 +303,19 @@ resource "docker_container" "workspace" {
   env      = ["CODER_AGENT_TOKEN=${coder_agent.main.token}"]
 
   devices {
-    host_path      = "/dev/nvidia0"
+    host_path = "/dev/nvidia0"
   }
   devices {
-    host_path      = "/dev/nvidiactl"
+    host_path = "/dev/nvidiactl"
   }
   devices {
-    host_path      = "/dev/nvidia-uvm-tools"
+    host_path = "/dev/nvidia-uvm-tools"
   }
   devices {
-    host_path      = "/dev/nvidia-uvm"
+    host_path = "/dev/nvidia-uvm"
   }
   devices {
-    host_path      = "/dev/nvidia-modeset"
+    host_path = "/dev/nvidia-modeset"
   }
 
   host {
