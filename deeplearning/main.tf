@@ -381,3 +381,9 @@ resource "docker_container" "workspace" {
     value = data.coder_workspace.me.name
   }
 }
+
+resource "coder_metadata" "workspace" {
+  count       = data.coder_workspace.me.start_count
+  resource_id = docker_container.workspace.id
+  daily_cost  = 50
+}
