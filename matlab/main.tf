@@ -2,7 +2,7 @@ terraform {
   required_providers {
     coder = {
       source  = "coder/coder"
-      version = "~>0.10.0"
+      version = "~>0.11.0"
     }
     docker = {
       source  = "kreuzwerker/docker"
@@ -184,32 +184,32 @@ resource "docker_volume" "home_volume" {
 }
 
 resource "docker_container" "workspace" {
-  count      = data.coder_workspace.me.start_count
-  image      = docker_image.matlab.image_id
-  memory     = data.coder_parameter.ram.value * 1024
-  gpus       = "${data.coder_parameter.gpu.value}" == "true" ? "all" : null
+  count  = data.coder_workspace.me.start_count
+  image  = docker_image.matlab.image_id
+  memory = data.coder_parameter.ram.value * 1024
+  gpus   = "${data.coder_parameter.gpu.value}" == "true" ? "all" : null
   # Uses lower() to avoid Docker restriction on container names.
   name = "coder-${data.coder_workspace.me.owner}-${lower(data.coder_workspace.me.name)}"
   # Hostname makes the shell more user friendly: coder@my-workspace:~$
-  hostname = lower(data.coder_workspace.me.name)
-  dns      = ["1.1.1.1"] 
+  hostname   = lower(data.coder_workspace.me.name)
+  dns        = ["1.1.1.1"]
   entrypoint = ["sh", "-c", coder_agent.main.init_script]
   env        = ["CODER_AGENT_TOKEN=${coder_agent.main.token}"]
 
   devices {
-    host_path      = "/dev/nvidia0"
+    host_path = "/dev/nvidia0"
   }
   devices {
-    host_path      = "/dev/nvidiactl"
+    host_path = "/dev/nvidiactl"
   }
   devices {
-    host_path      = "/dev/nvidia-uvm-tools"
+    host_path = "/dev/nvidia-uvm-tools"
   }
   devices {
-    host_path      = "/dev/nvidia-uvm"
+    host_path = "/dev/nvidia-uvm"
   }
   devices {
-    host_path      = "/dev/nvidia-modeset"
+    host_path = "/dev/nvidia-modeset"
   }
 
   host {
