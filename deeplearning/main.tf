@@ -12,8 +12,8 @@ terraform {
 }
 
 locals {
-  jupyter-path      = data.coder_parameter.framework.value == "matifali/dockerdl:conda" ? "/home/coder/.conda/envs/DL/bin/jupyter" : "/home/coder/.local/bin/jupyter"
-  jupyter-count     = (data.coder_parameter.framework.value == "matifali/dockerdl:conda" || data.coder_parameter.jupyter.value == "false") ? 0 : 1
+  jupyter-path      = data.coder_parameter.framework.value == "conda" ? "/home/coder/.conda/envs/DL/bin/jupyter" : "/home/coder/.local/bin/jupyter"
+  jupyter-count     = (data.coder_parameter.framework.value == "conda" || data.coder_parameter.jupyter.value == "false") ? 0 : 1
   code-server-count = data.coder_parameter.code-server.value == "false" ? 0 : 1
 }
 
@@ -39,42 +39,42 @@ data "coder_parameter" "framework" {
   description  = "Choose your preffered framework"
   type         = "string"
   mutable      = false
-  default      = "matifali/dockerdl:torch"
+  default      = "torch"
   order        = 1
   option {
     name        = "PyTorch"
     description = "PyTorch"
-    value       = "matifali/dockerdl:torch"
+    value       = "torch"
     icon        = "https://raw.githubusercontent.com/matifali/logos/main/pytorch.svg"
   }
   option {
     name        = "PyTorch Nightly"
     description = "PyTorch Nightly"
-    value       = "matifali/dockerdl:torch-nightly"
+    value       = "torch-nightly"
     icon        = "https://raw.githubusercontent.com/matifali/logos/main/pytorch.svg"
   }
   option {
     name        = "Tensorflow"
     description = "Tensorflow"
-    value       = "matifali/dockerdl:tf"
+    value       = "tf"
     icon        = "https://raw.githubusercontent.com/matifali/logos/main/tensorflow.svg"
   }
   option {
     name        = "Tensorflow + PyTorch"
     description = "Tensorflow + PyTorch"
-    value       = "matifali/dockerdl:tf-torch"
+    value       = "tf-torch"
     icon        = "https://raw.githubusercontent.com/matifali/logos/main/tf-torch.svg"
   }
   option {
     name        = "Tensorflow + PyTorch + conda"
     description = "Tensorflow + PyTorch + conda"
-    value       = "matifali/dockerdl:tf-torch-conda"
+    value       = "tf-torch-conda"
     icon        = "https://raw.githubusercontent.com/matifali/logos/main/tf-torch-conda.svg"
   }
   option {
     name        = "Conda"
     description = "Only conda (install whatever you need)"
-    value       = "matifali/dockerdl:conda"
+    value       = "conda"
     icon        = "https://raw.githubusercontent.com/matifali/logos/main/conda.svg"
   }
 }
@@ -264,12 +264,16 @@ resource "coder_agent" "main" {
 
 }
 
+locals {
+  registry_name = "matifali/dockerdl"
+}
+
 data "docker_registry_image" "deeplearning" {
-  name = data.coder_parameter.framework.value
+  name = "${local.registry_name}:${data.coder_parameter.framework.value}"
 }
 
 resource "docker_image" "deeplearning" {
-  name          = data.docker_registry_image.deeplearning.name
+  name          = "${local.registry_name}@${data.docker_registry_image.deeplearning.sha256_digest}"
   pull_triggers = [data.docker_registry_image.deeplearning.sha256_digest]
   keep_locally  = true
 }
