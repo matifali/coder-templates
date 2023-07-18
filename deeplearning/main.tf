@@ -48,12 +48,6 @@ data "coder_parameter" "framework" {
     icon        = "https://raw.githubusercontent.com/matifali/logos/main/pytorch.svg"
   }
   option {
-    name        = "PyTorch Nightly"
-    description = "PyTorch Nightly"
-    value       = "torch-nightly"
-    icon        = "https://raw.githubusercontent.com/matifali/logos/main/pytorch.svg"
-  }
-  option {
     name        = "Tensorflow"
     description = "Tensorflow"
     value       = "tf"
