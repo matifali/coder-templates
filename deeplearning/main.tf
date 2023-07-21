@@ -183,6 +183,13 @@ resource "coder_agent" "main" {
       /tmp/code-server/bin/code-server --accept-server-license-terms serve-local --without-connection-token --telemetry-level off >/dev/null 2>&1 &
     fi
     
+    # Personalize
+    if [ -x ~/personalize ]; then
+      ~/personalize 2>&1 | tee -a ~/.personalize.log
+    elif [ -f ~/personalize ]; then
+      echo "~/personalize is not executable, skipping..." | tee -a ~/.personalize.log
+    fi
+
     EOT
 
   env = {
