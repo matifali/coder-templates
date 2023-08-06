@@ -129,7 +129,7 @@ resource "coder_agent" "main" {
   metadata {
     display_name = "Home Disk"
     key          = "3_home_disk"
-    script       = "coder stat disk --path ${HOME}"
+    script       = "coder stat disk --path $HOME"
     interval     = 60
     timeout      = 1
   }
@@ -179,7 +179,7 @@ resource "coder_app" "vscode-server" {
 
 resource "kubernetes_persistent_volume_claim" "home" {
   metadata {
-    name      = "coder-${data.coder_workspace.me.username}"
+    name      = "coder-${data.coder_workspace.me.owner}-${data.coder_workspace.me.name}-home"
     namespace = var.namespace
   }
   spec {
@@ -232,22 +232,22 @@ resource "kubernetes_role_binding" "namespace_role_binding" {
 
 resource "kubernetes_deployment" "main" {
   metadata {
-    name = "coder-${data.coder_workspace.me.username}"
+    name = "coder-${data.coder_workspace.me.owner}-${data.coder_workspace.me.name}"
   }
   spec {
     replicas = 1
     template {
       metadata {
         labels = {
-          app = "coder-${data.coder_workspace.me.username}"
+          app = "coder-${data.coder_workspace.me.owner}-${data.coder_workspace.me.name}"
         }
       }
       spec {
         container {
           image = "bencdr/devops-tools:latest"
-          name  = "coder-${data.coder_workspace.me.username}"
+          name  = "coder-${data.coder_workspace.me.owner}-${data.coder_workspace.me.name}"
         }
-        service_account_name = kubernetes_service_account.my_service_account.metadata[0].name
+        service_account_name = kubernetes_service_account.namespace_service_account.metadata[0].name
       }
     }
   }
