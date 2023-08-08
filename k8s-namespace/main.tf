@@ -116,6 +116,7 @@ resource "coder_agent" "main" {
     
     # Set KUBECONFIG env var to the path of the mounted secret
     mkdir -p /home/coder/.kube
+    sudo cp /tmp/config /home/coder/.kube/config
     export KUBECONFIG=/home/coder/.kube/config
 
   EOT
@@ -297,7 +298,7 @@ resource "kubernetes_deployment" "main" {
             read_only  = false
           }
           volume_mount {
-            mount_path = "/home/coder/.kube/config"
+            mount_path = "/tmp/config"
             sub_path   = "kubeconfig"
             name       = "kubeconfig"
             read_only  = true
