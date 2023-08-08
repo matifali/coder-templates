@@ -115,6 +115,7 @@ resource "coder_agent" "main" {
     curl -fsSL https://code-server.dev/install.sh | sh -s -- --method=standalone --prefix=/tmp/code-server --version 4.11.0
     
     # Set KUBECONFIG env var to the path of the mounted secret
+    mkdir -p /home/coder/.kube
     export KUBECONFIG=/home/coder/.kube/config
 
   EOT
