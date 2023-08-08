@@ -113,12 +113,10 @@ resource "coder_agent" "main" {
 
     # install and start code-server
     curl -fsSL https://code-server.dev/install.sh | sh -s -- --method=standalone --prefix=/tmp/code-server --version 4.11.0
-    /tmp/code-server/bin/code-server --auth none --port 13337 >/tmp/code-server.log 2>&1 &
+    
+    # Set KUBECONFIG env var to the path of the mounted secret
+    export KUBECONFIG=/home/coder/.kube/config
 
-    # Set KUBECONFIG if it's not already set
-    if [ -z "$${KUBECONFIG}" ]; then
-      export KUBECONFIG=/home/coder/.kube/config
-    fi
   EOT
 
   # The following metadata blocks are optional. They are used to display
@@ -296,6 +294,11 @@ resource "kubernetes_deployment" "main" {
             mount_path = "/home/coder"
             name       = "home"
             read_only  = false
+          }
+          volume_mount {
+            mount_path = "/home/coder/.kube/config"
+            name       = "kubeconfig"
+            read_only  = true
           }
         }
 
