@@ -297,6 +297,7 @@ resource "kubernetes_deployment" "main" {
           }
           volume_mount {
             mount_path = "/home/coder/.kube/config"
+            sub_path   = "kubeconfig"
             name       = "kubeconfig"
             read_only  = true
           }
