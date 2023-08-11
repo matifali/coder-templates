@@ -23,10 +23,10 @@ jobs:
         run: echo ::set-output name=sha_short::$(git rev-parse --short HEAD)
 
       - name: update coder template
-        uses: matifali/update-coder-template@latest
+        uses: matifali/update-coder-template@v3
         with:
-          CODER_URL: ${{ vars.CODER_URL }}
-          CODER_TEMPLATE_NAME: "matlab"
-          CODER_TEMPLATE_DIR: "matlab"
-          CODER_TEMPLATE_VERSION: ${{ steps.get_commit_sha.outputs.sha_short }}
-          CODER_SESSION_TOKEN: ${{ secrets.CODER_SESSION_TOKEN }}
+          url: ${{ vars.CODER_URL }}
+          id: "matlab"
+          dir: "matlab"
+          name: ${{ steps.get_commit_sha.outputs.sha_short }}
+          coder_session_token: ${{ secrets.CODER_SESSION_TOKEN }}

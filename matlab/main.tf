@@ -99,10 +99,6 @@ resource "coder_agent" "main" {
     echo "Installing and starting File Browser"
     curl -fsSL https://raw.githubusercontent.com/filebrowser/get/master/get.sh | bash
     filebrowser --noauth -r ~/data >/dev/null 2>&1 &
-    # Change ownership of and permissions on user startup.m file
-    chown matlab:matlab /home/matlab/Documents/MATLAB/startup.m
-    chmod 644 /home/matlab/Documents/MATLAB/startup.m
-    echo "run /tmp/cvx/cvx_setup" > /home/matlab/Documents/MATLAB/startup.m
   EOT
 
   metadata {
