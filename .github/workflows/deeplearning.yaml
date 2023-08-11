@@ -23,7 +23,7 @@ jobs:
         run: echo ::set-output name=sha_short::$(git rev-parse --short HEAD)
 
       - name: update coder template
-        uses: matifali/update-coder-template@latest
+        uses: matifali/update-coder-template@v2
         with:
           CODER_URL: ${{ vars.CODER_URL }}
           CODER_TEMPLATE_NAME: "deeplearning"

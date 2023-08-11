@@ -134,7 +134,7 @@ resource "coder_agent" "main" {
     interval     = 10
     key          = "4_gpu_usage"
     script       = <<EOT
-      nvidia-smi --query-gpu=utilization.gpu --format=csv,noheader,nounits | awk '{printf "%s%%", $1}'
+      (nvidia-smi 1> /dev/null 2> /dev/null) && (nvidia-smi --query-gpu=utilization.gpu --format=csv,noheader,nounits | awk '{printf "%s%%", $1}') || echo "N/A"
     EOT
   }
 
@@ -143,7 +143,7 @@ resource "coder_agent" "main" {
     interval     = 10
     key          = "5_gpu_memory_usage"
     script       = <<EOT
-      nvidia-smi --query-gpu=utilization.memory --format=csv,noheader,nounits | awk '{printf "%s%%", $1}'
+      (nvidia-smi 1> /dev/null 2> /dev/null) && (nvidia-smi --query-gpu=utilization.memory --format=csv,noheader,nounits | awk '{printf "%s%%", $1}') || echo "N/A"
     EOT
   }
 
