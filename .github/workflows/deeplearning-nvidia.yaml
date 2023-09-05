@@ -26,8 +26,8 @@ jobs:
       - name: update coder template
         uses: matifali/update-coder-template@v3
         with:
-          CODER_URL: ${{ vars.CODER_URL }}
-          CODER_TEMPLATE_NAME: "deeplearning-nvidia"
-          CODER_TEMPLATE_DIR: "deeplearning-nvidia"
-          CODER_TEMPLATE_VERSION: ${{ steps.get_commit_sha.outputs.sha_short }}
-          CODER_SESSION_TOKEN: ${{ secrets.CODER_SESSION_TOKEN }}
+          url: ${{ vars.CODER_URL }}
+          id: "deeplearning-nvidia"
+          dir: "deeplearning-nvidia"
+          name: ${{ steps.get_commit_sha.outputs.sha_short }}
+          coder_session_token: ${{ secrets.CODER_SESSION_TOKEN }}
