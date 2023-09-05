@@ -22,6 +22,10 @@ jobs:
         id: get_commit_sha
         run: echo ::set-output name=sha_short::$(git rev-parse --short HEAD)
 
+      - name: Get commit title
+        id: commit_title
+        run: echo "title=$(git log -1 --pretty=%B)" >> $GITHUB_OUTPUT
+
       - name: update coder template
         uses: matifali/update-coder-template@v3
         with:
@@ -29,4 +33,5 @@ jobs:
           id: "deeplearning"
           dir: "deeplearning"
           name: ${{ steps.get_commit_sha.outputs.sha_short }}
+          message: ${{ steps.commit_title.outputs.title }}
           coder_session_token: ${{ secrets.CODER_SESSION_TOKEN }}
