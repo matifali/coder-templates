@@ -1,6 +1,6 @@
-# Coder OSS templates
+# [Coder](https://github.com/coder/coder) OSS templates
 
-Docker based templates.
+Docker-based templates.
 
 1. [deeplearning](https://github.com/matifali/coder-templates/tree/master/deeplearning) (tensorflow + pytorch + numpy + matplotlib + pandas + conda + pip + jupyter notebook or jupyter lab + Microsoft code-server)
 2. [deeplearning-nvidia](https://github.com/matifali/coder-templates/tree/master/deeplearning-nvidia) (Nvidia NGC containers)
@@ -8,7 +8,7 @@ Docker based templates.
 
 ## Pre-requisites
 
-[Coder](github.com/coder/coder) deployment set up on `CODER_URL` (e.g. https://coder.example.com)
+[Coder](https://github.com/coder/coder) deployment set up on `CODER_URL` (e.g. https://coder.example.com)
 
 ## Installation
 
