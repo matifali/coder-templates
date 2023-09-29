@@ -11,10 +11,25 @@ terraform {
   }
 }
 
+
+module "jetbrains_gateway" {
+  source                   = "https://registry.coder.com/modules/jetbrains-gateway"
+  agent_id                 = coder_agent.main.id
+  agent_name               = "main"
+  project_directory        = "/home/coder/data"
+  jetbrains_ides           = ["PY", "PC"]
+}
+
+module "filebrowser" {
+  source = "https://registry.coder.com/modules/filebrowser"
+  agent_id = coder_agent.main.id
+  folder = "/home/coder/data"
+}
+
 locals {
   jupyter-path      = data.coder_parameter.framework.value == "conda" ? "/home/coder/.conda/envs/DL/bin/jupyter" : "/home/coder/.local/bin/jupyter"
   jupyter-count     = (data.coder_parameter.framework.value == "conda" || data.coder_parameter.jupyter.value == "false") ? 0 : 1
-  code-server-count = data.coder_parameter.code-server.value == "false" ? 0 : 1
+  vscode-web-count = data.coder_parameter.vscode-web.value == "false" ? 0 : 1
 }
 
 data "coder_parameter" "ram" {
@@ -87,7 +102,7 @@ resource "coder_metadata" "workspace_info" {
   }
 }
 
-data "coder_parameter" "code-server" {
+data "coder_parameter" "vscode-web" {
   name        = "VS Code Web"
   icon        = "https://raw.githubusercontent.com/matifali/logos/main/code.svg"
   description = "Do you want VS Code Web?"
@@ -128,27 +143,17 @@ resource "coder_app" "jupyter" {
   share        = "owner"
 }
 
-resource "coder_app" "code-server" {
-  count        = local.code-server-count
+resource "coder_app" "vscode-web" {
+  count        = local.vscode-web-count
   agent_id     = coder_agent.main.id
   display_name = "VS Code Web"
-  slug         = "code-server"
+  slug         = "vscode-web"
   url          = "http://localhost:8000?folder=/home/coder/data/"
   icon         = "https://raw.githubusercontent.com/matifali/logos/main/code.svg"
   subdomain    = true
   share        = "owner"
 }
 
-resource "coder_app" "filebrowser" {
-  count        = 1
-  agent_id     = coder_agent.main.id
-  display_name = "File Browser"
-  slug         = "filebrowser"
-  url          = "http://localhost:8080/"
-  icon         = "https://raw.githubusercontent.com/matifali/logos/main/database.svg"
-  subdomain    = true
-  share        = "owner"
-}
 
 resource "coder_agent" "main" {
   arch                   = "amd64"
@@ -162,42 +167,24 @@ resource "coder_agent" "main" {
     # make user share directory
     mkdir -p ~/share
   
-    # Install and launch filebrowser
-    curl -fsSL https://raw.githubusercontent.com/filebrowser/get/master/get.sh | bash
-    filebrowser --noauth --root /home/coder/data >/dev/null 2>&1 &
-  
     # launch jupyter
     if [[ ${local.jupyter-count} == 1 && ${data.coder_parameter.jupyter.value} == true ]];
     then
       ${local.jupyter-path} lab --no-browser --LabApp.token='' --LabApp.password='' >/dev/null 2>&1 &
     fi
 
-    # launch VS code-server
-    if [ ${data.coder_parameter.code-server.value} == true ];
+    # launch VS Code Web
+    if [ ${data.coder_parameter.vscode-web.value} == true ];
     then
-      echo "Installing VS Code Web"
+      echo "Installing VS Code Server"
       mkdir -p /tmp/code-server
       HASH=$(curl https://update.code.visualstudio.com/api/commits/stable/server-linux-x64-web | cut -d '"' -f 2)
       wget -O- https://az764295.vo.msecnd.net/stable/$HASH/vscode-server-linux-x64-web.tar.gz | tar -xz -C /tmp/code-server --strip-components=1 >/dev/null 2>&1
       echo "Starting VS Code Web"
       /tmp/code-server/bin/code-server --accept-server-license-terms serve-local --without-connection-token --telemetry-level off >/dev/null 2>&1 &
     fi
-    
-    # Personalize
-    if [ -x ~/personalize ]; then
-      ~/personalize 2>&1 | tee -a ~/.personalize.log
-    elif [ -f ~/personalize ]; then
-      echo "~/personalize is not executable, skipping..." | tee -a ~/.personalize.log
-    fi
 
     EOT
-
-  env = {
-    GIT_AUTHOR_NAME     = "${data.coder_workspace.me.owner}"
-    GIT_COMMITTER_NAME  = "${data.coder_workspace.me.owner}"
-    GIT_AUTHOR_EMAIL    = "${data.coder_workspace.me.owner_email}"
-    GIT_COMMITTER_EMAIL = "${data.coder_workspace.me.owner_email}"
-  }
 
   metadata {
     display_name = "CPU Usage Workspace"
