@@ -13,12 +13,12 @@ terraform {
 
 
 module "jetbrains_gateway" {
-  source            = "https://registry.coder.com/modules/jetbrains-gateway"
-  agent_id          = coder_agent.main.id
-  agent_name        = "main"
-  project_directory = "/home/coder/data"
-  jetbrains_ides    = ["PY", "PC"]
-  default           = "PY"
+  source         = "https://registry.coder.com/modules/jetbrains-gateway"
+  agent_id       = coder_agent.main.id
+  agent_name     = "main"
+  folder         = "/home/coder/data"
+  jetbrains_ides = ["PY", "PC"]
+  default        = "PY"
 }
 
 module "filebrowser" {
