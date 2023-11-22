@@ -100,6 +100,12 @@ resource "coder_agent" "main" {
     curl -fsSL https://raw.githubusercontent.com/filebrowser/get/master/get.sh | bash
     filebrowser --noauth -r ~/data >/dev/null 2>&1 &
   EOT
+  
+  display_apps {
+    vscode                 = false
+    ssh_helper             = false
+    port_forwarding_helper = false
+  }
 
   metadata {
     display_name = "CPU Usage Workspace"
