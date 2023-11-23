@@ -22,7 +22,7 @@ locals {
 }
 
 provider "docker" {
-  host     = lookup(local.servers, data.coder_parameter.server.value)
+  host     = try(lookup(local.servers, data.coder_parameter.server.value), "unix:///var/run/docker.sock")
   ssh_opts = ["-o", "StrictHostKeyChecking=no", "-o", "UserKnownHostsFile=/dev/null"]
 }
 
