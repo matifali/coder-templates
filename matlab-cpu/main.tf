@@ -155,10 +155,8 @@ resource "docker_volume" "home_volume" {
 }
 
 resource "docker_container" "workspace" {
-  count  = data.coder_workspace.me.start_count
-  image  = docker_image.matlab.image_id
-  memory = data.coder_parameter.ram.value * 1024
-  gpus   = "${data.coder_parameter.gpu.value}" == "true" ? "all" : null
+  count = data.coder_workspace.me.start_count
+  image = docker_image.matlab.image_id
   # Uses lower() to avoid Docker restriction on container names.
   name = "coder-${data.coder_workspace.me.owner}-${lower(data.coder_workspace.me.name)}"
   # Hostname makes the shell more user friendly: coder@my-workspace:~$
