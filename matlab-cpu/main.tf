@@ -51,6 +51,11 @@ data "coder_parameter" "server" {
   }
 }
 
+module "filebrowser" {
+  source   = "https://registry.coder.com/modules/filebrowser"
+  agent_id = coder_agent.main.id
+  folder   = "/home/matlab"
+}
 
 # Matlab
 resource "coder_app" "matlab_browser" {
