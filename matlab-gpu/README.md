@@ -9,33 +9,13 @@ icon: https://raw.githubusercontent.com/matifali/logos/main/matlab.svg
 
 A matlab template for [coder](https://coder.com/).
 
-## Coder Setup
-
-Follow these steps to configure accessing your workspaces locally on any machine.
-
-### Linux/MacOS
-
-1. Open a terminal and run
-
-   ```bash
-   curl -L https://coder.com/install.sh | sh
-   ```
-
-### Windows
-
-1. Open a `powershell` window and run
-
-   ```powershell
-   winget install Coder.Coder
-   ```
-
 ## Usage
 
 1. Clone this repository
 
    ```bash
    git clone https://github,com/matifali/coder-templates
-   cd coder-templates/matlab
+   cd coder-templates/matlab-gpu
    ```
 
 2. Login to coder
@@ -44,18 +24,18 @@ Follow these steps to configure accessing your workspaces locally on any machine
    coder login CODER_URL
    ```
 
-   > Replace coder.example.com with your coder deplyment URL or IP
+   > Replace coder.example.com with your coder deployment URL or IP
 
 3. Create a template
 
    ```bash
-   coder templates create matlab
+   coder templates create matlab-gpu
    ```
 
 4. Create a workspace
 
    ```bash
-   coder create matlab --template matlab
+   coder create matlab --template matlab-gpu
    ```
 
    Or,

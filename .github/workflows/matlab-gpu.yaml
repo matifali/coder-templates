@@ -1,0 +1,37 @@
+# An action to push templates to coder server
+
+name: MATLAB GPU Template
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "matlab-gpu/main.tf"
+      - ".github/workflows/matlab-gpu.yaml"
+  workflow_dispatch:
+
+jobs:
+  deploy_template:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Get latest short commit SHA
+        id: commit_sha
+        run: echo "sha_short=$(git log -1 --pretty=%h)" >> $GITHUB_OUTPUT
+
+      - name: Get commit title
+        id: commit_title
+        run: echo "title=$(git log -1 --pretty=%s)" >> $GITHUB_OUTPUT
+
+      - name: update coder template
+        uses: matifali/update-coder-template@v3
+        with:
+          url: ${{ vars.CODER_URL }}
+          id: "matlab-gpu"
+          dir: "matlab-gpu"
+          name: ${{ steps.commit_sha.outputs.sha_short }}
+          message: ${{ steps.commit_title.outputs.title }}
+          coder_session_token: ${{ secrets.CODER_SESSION_TOKEN }}

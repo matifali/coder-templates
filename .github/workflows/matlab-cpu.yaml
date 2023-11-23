@@ -1,14 +1,14 @@
 # An action to push templates to coder server
 
-name: MATLAB
+name: MATLAB CPU Template
 
 on:
   push:
     branches:
       - main
     paths:
-      - "matlab/main.tf"
-      - ".github/workflows/matlab.yaml"
+      - "matlab-cpu/main.tf"
+      - ".github/workflows/matlab-cpu.yaml"
   workflow_dispatch:
 
 jobs:
@@ -30,8 +30,8 @@ jobs:
         uses: matifali/update-coder-template@v3
         with:
           url: ${{ vars.CODER_URL }}
-          id: "matlab"
-          dir: "matlab"
+          id: "matlab-cpu"
+          dir: "matlab-cpu"
           name: ${{ steps.commit_sha.outputs.sha_short }}
           message: ${{ steps.commit_title.outputs.title }}
           coder_session_token: ${{ secrets.CODER_SESSION_TOKEN }}
