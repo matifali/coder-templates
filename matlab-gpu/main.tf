@@ -26,17 +26,6 @@ data "coder_parameter" "ram" {
   }
 }
 
-data "coder_parameter" "gpu" {
-  name         = "gpu"
-  display_name = "GPU"
-  description  = "Do you need GPU?"
-  type         = "bool"
-  icon         = "https://raw.githubusercontent.com/matifali/logos/main/gpu-1.svg"
-  mutable      = false
-  order        = 2
-  default      = "true"
-}
-
 provider "docker" {
   host = "unix:///var/run/docker.sock"
 }
@@ -100,7 +89,7 @@ resource "coder_agent" "main" {
     curl -fsSL https://raw.githubusercontent.com/filebrowser/get/master/get.sh | bash
     filebrowser --noauth -r ~/data >/dev/null 2>&1 &
   EOT
-  
+
   display_apps {
     vscode                 = false
     ssh_helper             = false
@@ -189,7 +178,7 @@ resource "docker_container" "workspace" {
   count  = data.coder_workspace.me.start_count
   image  = docker_image.matlab.image_id
   memory = data.coder_parameter.ram.value * 1024
-  gpus   = "${data.coder_parameter.gpu.value}" == "true" ? "all" : null
+  gpus   = "all"
   # Uses lower() to avoid Docker restriction on container names.
   name = "coder-${data.coder_workspace.me.owner}-${lower(data.coder_workspace.me.name)}"
   # Hostname makes the shell more user friendly: coder@my-workspace:~$
