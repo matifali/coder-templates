@@ -14,11 +14,7 @@ terraform {
 locals {
   jupyter-count     = data.coder_parameter.jupyter.value == "false" ? 0 : 1
   code-server-count = data.coder_parameter.code-server.value == "false" ? 0 : 1
-  # This gets the latest version of the ngc version if the user didn't specify one (e.g. 23.06)
-  ngc_version_major = formatdate("YY", timestamp())
-  last_month        = formatdate("M", timestamp()) - 1 == 0 ? 12 : formatdate("M", timestamp()) - 1
-  ngc_version_minor = local.last_month < 10 ? "0${local.last_month}" : local.last_month
-  ngc-version       = "${local.ngc_version_major}.${local.ngc_version_minor}"
+  ngc-version       = "23.10"
 }
 
 data "coder_parameter" "ram" {
