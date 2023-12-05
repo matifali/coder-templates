@@ -17,7 +17,7 @@ module "jetbrains_gateway" {
   agent_id       = coder_agent.main.id
   agent_name     = "main"
   folder         = "/home/coder/data"
-  jetbrains_ides = ["PY", "PC"]
+  jetbrains_ides = ["PY"]
   default        = "PY"
 }
 
