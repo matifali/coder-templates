@@ -14,7 +14,7 @@ terraform {
 locals {
   jupyter-count     = data.coder_parameter.jupyter.value == "false" ? 0 : 1
   code-server-count = data.coder_parameter.code-server.value == "false" ? 0 : 1
-  ngc-version       = "23.10"
+  ngc-version       = "23.11"
 }
 
 data "coder_parameter" "ram" {
