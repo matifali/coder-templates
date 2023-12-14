@@ -97,8 +97,8 @@ data "coder_parameter" "jupyter" {
 
 data "coder_parameter" "share_vscode_web" {
   name         = "share_vscode_web"
-  display_name = "Share VSCode Web"
-  description  = "Allow sharing coder_apps"
+  display_name = "Share VS Code Web"
+  description  = "Allow sharing VS Code Web"
   type         = "bool"
   mutable      = true
   default      = "false"
