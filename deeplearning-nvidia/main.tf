@@ -95,15 +95,23 @@ data "coder_parameter" "jupyter" {
   order        = 4
 }
 
+data "coder_parameter" "share_vscode_web" {
+  name         = "share_vscode_web"
+  display_name = "Share VSCode Web"
+  description  = "Allow sharing coder_apps"
+  type         = "bool"
+  mutable      = true
+  default      = "false"
+  order        = 5
+}
+
 provider "docker" {
   host = "unix:///var/run/docker.sock"
 }
 
-provider "coder" {
-}
+provider "coder" {}
 
-data "coder_workspace" "me" {
-}
+data "coder_workspace" "me" {}
 
 # jupyter
 resource "coder_app" "jupyter" {
@@ -125,7 +133,7 @@ resource "coder_app" "code-server" {
   url          = "http://localhost:8000?folder=/home/coder/data/"
   icon         = "https://raw.githubusercontent.com/matifali/logos/main/code.svg"
   subdomain    = true
-  share        = "owner"
+  share        = data.coder_parameter.share_vscode_web.value == "false" ? "owner" : "authenticated"
 }
 
 resource "coder_app" "filebrowser" {
