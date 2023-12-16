@@ -186,6 +186,7 @@ resource "docker_container" "workspace" {
   dns        = ["1.1.1.1"]
   entrypoint = ["sh", "-c", coder_agent.main.init_script]
   env        = ["CODER_AGENT_TOKEN=${coder_agent.main.token}"]
+  restart    = "unless-stopped"
 
   devices {
     host_path = "/dev/nvidia0"
