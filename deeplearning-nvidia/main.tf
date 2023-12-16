@@ -312,6 +312,7 @@ resource "docker_container" "workspace" {
   dns      = ["1.1.1.1"]
   command  = ["sh", "-c", replace(coder_agent.main.init_script, "127.0.0.1", "host.docker.internal")]
   env      = ["CODER_AGENT_TOKEN=${coder_agent.main.token}"]
+  restart  = "unless-stopped"
 
   devices {
     host_path = "/dev/nvidia0"
