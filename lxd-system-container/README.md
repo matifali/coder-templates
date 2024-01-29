@@ -5,7 +5,7 @@ tags: [local, lxc, lxd]
 icon: /icon/lxc.svg
 ---
 
-# LXC VM
+# LXC System Container with Docker
 Develop in a LXC System Container and run nested Docker containers using LXD on your local infrastructure.
 
 ## Prerequisites
