@@ -179,7 +179,7 @@ resource "coder_agent" "main" {
       echo "Installing VS Code Web"
       mkdir -p /tmp/code-server
       HASH=$(curl https://update.code.visualstudio.com/api/commits/stable/server-linux-x64-web | cut -d '"' -f 2)
-      wget -O- https://az764295.vo.msecnd.net/stable/$HASH/vscode-server-linux-x64-web.tar.gz | tar -xz -C /tmp/code-server --strip-components=1 >/dev/null 2>&1
+      wget -O- https://vscode.download.prss.microsoft.com/dbazure/download/stable/$HASH/vscode-server-linux-x64-web.tar.gz | tar -xz -C /tmp/code-server --strip-components=1 >/dev/null 2>&1
       echo "Starting VS Code Web"
       /tmp/code-server/bin/code-server --accept-server-license-terms serve-local --without-connection-token --telemetry-level off >/dev/null 2>&1 &
     fi
