@@ -310,7 +310,7 @@ resource "docker_container" "workspace" {
   name     = "coder-${data.coder_workspace.me.owner}-${lower(data.coder_workspace.me.name)}"
   hostname = lower(data.coder_workspace.me.name)
   dns      = ["1.1.1.1"]
-  command  = ["sh", "-c", replace(coder_agent.main.init_script, "127.0.0.1", "host.docker.internal")]
+  command  = ["sh", "-c", coder_agent.main.init_script]
   env      = ["CODER_AGENT_TOKEN=${coder_agent.main.token}"]
   restart  = "unless-stopped"
 
