@@ -2,11 +2,9 @@ terraform {
   required_providers {
     coder = {
       source  = "coder/coder"
-      version = "~>0.12.0"
     }
     docker = {
       source  = "kreuzwerker/docker"
-      version = "~>3.0.2"
     }
   }
 }
@@ -142,7 +140,7 @@ module "jupyterlab" {
   count    = local.jupyter-count
   source   = "registry.coder.com/modules/jupyterlab/coder"
   version  = "1.0.8"
-  agent_id = coder_agent.example.id
+  agent_id = coder_agent.main.id
 }
 
 resource "coder_agent" "main" {
