@@ -123,38 +123,27 @@ data "coder_parameter" "jupyter" {
   order       = 4
 }
 
-provider "docker" {
-  host = "unix:///var/run/docker.sock"
+provider "docker" {}
+
+provider "coder" {}
+
+data "coder_workspace" "me" {}
+
+module "vscode-web" {
+  count          = local.vscode-web-count
+  source         = "registry.coder.com/modules/vscode-web/coder"
+  version        = "1.0.10"
+  agent_id       = coder_agent.main.id
+  extensions     = ["github.copilot", "ms-python.python", "ms-toolsai.jupyter"]
+  accept_license = true
 }
 
-provider "coder" {
+module "jupyterlab" {
+  count    = local.jupyter-count
+  source   = "registry.coder.com/modules/jupyterlab/coder"
+  version  = "1.0.8"
+  agent_id = coder_agent.example.id
 }
-
-data "coder_workspace" "me" {
-}
-
-resource "coder_app" "jupyter" {
-  count        = local.jupyter-count
-  agent_id     = coder_agent.main.id
-  display_name = "Jupyter Lab"
-  slug         = "jupyter"
-  icon         = "https://raw.githubusercontent.com/matifali/logos/main/jupyter.svg"
-  url          = "http://localhost:8888/"
-  subdomain    = true
-  share        = "owner"
-}
-
-resource "coder_app" "vscode-web" {
-  count        = local.vscode-web-count
-  agent_id     = coder_agent.main.id
-  display_name = "VS Code Web"
-  slug         = "vscode-web"
-  url          = "http://localhost:8000?folder=/home/coder/data/"
-  icon         = "https://raw.githubusercontent.com/matifali/logos/main/code.svg"
-  subdomain    = true
-  share        = "owner"
-}
-
 
 resource "coder_agent" "main" {
   arch                   = "amd64"
@@ -167,50 +156,17 @@ resource "coder_agent" "main" {
     mkdir -p ~/data
     # make user share directory
     mkdir -p ~/share
-  
-    # launch jupyter
-    if [[ ${local.jupyter-count} == 1 && ${data.coder_parameter.jupyter.value} == true ]];
-    then
-      ${local.jupyter-path} lab --no-browser --LabApp.token='' --LabApp.password='' >/dev/null 2>&1 &
-    fi
-
-    # launch VS Code Web
-    if [ ${data.coder_parameter.vscode-web.value} == true ];
-    then
-      echo "Installing VS Code Server"
-      mkdir -p /tmp/code-server
-      HASH=$(curl https://update.code.visualstudio.com/api/commits/stable/server-linux-x64-web | cut -d '"' -f 2)
-      wget -O- https://vscode.download.prss.microsoft.com/dbazure/download/stable/$HASH/vscode-server-linux-x64-web.tar.gz | tar -xz -C /tmp/code-server --strip-components=1 >/dev/null 2>&1
-      echo "Starting VS Code Web"
-      /tmp/code-server/bin/code-server --accept-server-license-terms serve-local --without-connection-token --telemetry-level off >/dev/null 2>&1 &
-    fi
-
     EOT
 
   metadata {
-    display_name = "CPU Usage Workspace"
-    interval     = 10
-    key          = "0_cpu_usage"
-    script       = "coder stat cpu"
-  }
-
-  metadata {
-    display_name = "RAM Usage Workspace"
-    interval     = 10
-    key          = "1_ram_usage"
-    script       = "coder stat mem"
-  }
-
-
-  metadata {
-    display_name = "CPU Usage Host"
+    display_name = "CPU Usage"
     interval     = 10
     key          = "2_cpu_usage"
     script       = "coder stat cpu --host"
   }
 
   metadata {
-    display_name = "RAM Usage Host"
+    display_name = "RAM Usage"
     interval     = 10
     key          = "3_ram_usage"
     script       = "coder stat mem --host"
