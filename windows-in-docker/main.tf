@@ -27,7 +27,7 @@ resource "local_file" "coder_agent_token" {
 }
 
 resource "docker_image" "dockurr" {
-  name = "dockurr/windows:latest"
+  name = "coder-${data.coder_workspace.me.owner}-${data.coder_workspace.me.name}-dockurr"
   build {
     context = "./build"
   }
@@ -81,6 +81,7 @@ resource "docker_container" "dockurr" {
   devices {
     host_path = "/dev/kvm"
   }
+
   capabilities {
     add = ["NET_ADMIN"]
   }
