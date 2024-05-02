@@ -32,7 +32,10 @@ resource "docker_image" "dockurr" {
     context = "./build"
   }
   keep_locally = true
-  depends_on   = [local_file.coder_agent_token]
+  triggers = {
+    always_run = "${timestamp()}"
+  }
+  depends_on = [local_file.coder_agent_token]
 }
 
 
