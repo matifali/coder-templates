@@ -53,10 +53,14 @@ resource "docker_container" "dockurr" {
     "RAM_SIZE=16G",
     "CPU_CORES=4",
   ]
+
+  # The following ports are added for debugging purposes
+  # TODO: Remove these ports when agent startup is figured out
   ports {
     internal = 8006
     external = 8010
   }
+
   destroy_grace_seconds = 120
   stop_timeout          = 120
   stop_signal           = "SIGINT"
