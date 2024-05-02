@@ -33,7 +33,8 @@ resource "docker_image" "dockurr" {
   }
   keep_locally = true
   triggers = {
-    always_run = "${timestamp()}"
+    dockerfile = sha1(join("", [for f in fileset(path.module, "build/Dockerfile") : filesha1(f)]))
+    token      = sha1(local_file.coder_agent_token.content)
   }
   depends_on = [local_file.coder_agent_token]
 }
