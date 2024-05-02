@@ -18,7 +18,7 @@ data "coder_workspace" "me" {}
 resource "coder_agent" "dev" {
   arch               = "amd64"
   os                 = "windows"
-  connection_timeout = 600
+  connection_timeout = 1800
 }
 
 resource "local_file" "coder_agent_token" {
@@ -53,17 +53,29 @@ resource "docker_container" "dockurr" {
     "RAM_SIZE=16G",
     "CPU_CORES=4",
   ]
+  ports {
+    internal = 8006
+    external = 8010
+  }
   destroy_grace_seconds = 120
   stop_timeout          = 120
   stop_signal           = "SIGINT"
+
   host {
     host = "host.docker.internal"
     ip   = "host-gateway"
   }
+
   volumes {
     container_path = "/storage"
     volume_name    = docker_volume.storage.name
     read_only      = false
+  }
+
+  volumes {
+    container_path = "/storage/win11x64.iso"
+    host_path      = "/home/ubuntu/windows/win11x64.iso"
+    read_only      = true
   }
 
   devices {
