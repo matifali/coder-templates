@@ -4,8 +4,7 @@ terraform {
       source = "coder/coder"
     }
     docker = {
-      source  = "kreuzwerker/docker"
-      version = "~> 3.0.0"
+      source = "kreuzwerker/docker"
     }
   }
 }
@@ -24,26 +23,28 @@ resource "coder_agent" "dev" {
 
 resource "local_file" "coder_agent_token" {
   content  = coder_agent.dev.token
-  filename = "${path.module}/files/token"
-}
-
-data "docker_registry_image" "dockurr" {
-  name = "dockurr/windows"
+  filename = "${path.root}/build/files/token"
 }
 
 resource "docker_image" "dockurr" {
-  name = "${data.docker_registry_image.dockurr.name}@${data.docker_registry_image.dockurr.sha256_digest}"
-  pull_triggers = [
-    data.docker_registry_image.dockurr.sha256_digest,
-  ]
+  name = "dockurr/windows:latest"
+  build {
+    context = "./build"
+  }
   keep_locally = true
+  depends_on   = [local_file.coder_agent_token]
+}
+
+
+resource "docker_volume" "storage" {
+  name = "coder-${data.coder_workspace.me.id}-storage"
 }
 
 resource "docker_container" "dockurr" {
-  count      = data.coder_workspace.me.start_count
-  image      = docker_image.dockurr.name
-  name       = "coder-${lower(data.coder_workspace.me.owner)}-${lower(data.coder_workspace.me.name)}"
-  hostname   = data.coder_workspace.me.name
+  count    = data.coder_workspace.me.start_count
+  image    = docker_image.dockurr.name
+  name     = "coder-${lower(data.coder_workspace.me.owner)}-${lower(data.coder_workspace.me.name)}"
+  hostname = data.coder_workspace.me.name
   env = [
     "RAM_SIZE=16G",
     "CPU_CORES=4",
@@ -57,17 +58,12 @@ resource "docker_container" "dockurr" {
   }
   volumes {
     container_path = "/storage"
-    host_path      = "/home/ubuntu/dockurr"
+    volume_name    = docker_volume.storage.name
     read_only      = false
-  }
-  volumes {
-    container_path = "/storage/oem"
-    host_path      = "${abspath(path.module)}/files"
-    read_only      = true
   }
 
   devices {
-    host_path  = "/dev/kvm"
+    host_path = "/dev/kvm"
   }
   capabilities {
     add = ["NET_ADMIN"]
