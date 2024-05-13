@@ -17,7 +17,6 @@ locals {
   servers = {
     CTAR301 = "ssh://ctar@CTAR301"
     CTAR302 = "ssh://ctar@CTAR302"
-    CTAR303 = "ssh://ctar@CTAR303"
   }
 }
 
@@ -44,10 +43,6 @@ data "coder_parameter" "server" {
   option {
     name  = "CTAR302"
     value = "CTAR302"
-  }
-  option {
-    name  = "CTAR303"
-    value = "CTAR303"
   }
 }
 
