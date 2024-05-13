@@ -15,8 +15,8 @@ terraform {
 locals {
   # define ssh docker hosts
   servers = {
-    CTAR301 = "ssh://ctar@CTAR301"
-    CTAR302 = "ssh://ctar@CTAR302"
+    CTAR-301 = "ssh://ctar@CTAR-301"
+    CTAR-302 = "ssh://ctar@CTAR-302"
   }
 }
 
@@ -37,17 +37,18 @@ data "coder_parameter" "server" {
   description  = "Choose server"
   type         = "string"
   option {
-    name  = "CTAR301"
-    value = "CTAR301"
+    name  = "CTAR-301"
+    value = "CTAR-301"
   }
   option {
-    name  = "CTAR302"
-    value = "CTAR302"
+    name  = "CTAR-302"
+    value = "CTAR-302"
   }
 }
 
 module "filebrowser" {
-  source   = "https://registry.coder.com/modules/filebrowser"
+  source   = "registry.coder.com/modules/filebrowser/coder"
+  version  = "1.0.8"
   agent_id = coder_agent.main.id
   folder   = "/home/matlab"
 }
