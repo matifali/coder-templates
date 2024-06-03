@@ -1,7 +1,7 @@
 terraform {
   required_providers {
     coder = {
-      source  = "coder/coder"
+      source = "coder/coder"
     }
     docker = {
       source  = "kreuzwerker/docker"
@@ -30,7 +30,7 @@ data "coder_parameter" "server" {
     description = "CTAR 402"
     value       = "ssh://ctar@ctar402"
     icon        = "/icon/container.svg"
-  } 
+  }
   option {
     name        = "ctar403"
     description = "CTAR 403"
@@ -113,9 +113,9 @@ resource "coder_app" "matlab_desktop" {
 }
 
 resource "coder_agent" "main" {
-  arch                   = "amd64"
-  os                     = "linux"
-  startup_script         = <<EOT
+  arch           = "amd64"
+  os             = "linux"
+  startup_script = <<EOT
     #!/bin/bash
     set -euo pipefail
     # start Matlab browser
@@ -168,8 +168,8 @@ resource "coder_agent" "main" {
 }
 
 resource "docker_image" "matlab" {
-  name          = "matifali/matlab:r2023a"
-  keep_locally  = true
+  name         = "matifali/matlab:r2023a"
+  keep_locally = true
 }
 
 #home_volume
