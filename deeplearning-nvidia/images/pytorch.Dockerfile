@@ -6,6 +6,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     htop \
     nvidia-modprobe \
+    nvtop \
     sudo \
     tmux \
     && \
