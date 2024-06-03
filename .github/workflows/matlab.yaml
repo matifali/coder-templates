@@ -1,14 +1,12 @@
-# An action to push templates to coder server
-
-name: MATLAB CPU Template
+name: MATLAB Template
 
 on:
   push:
     branches:
       - main
     paths:
-      - "matlab-cpu/main.tf"
-      - ".github/workflows/matlab-cpu.yaml"
+      - "matlab/main.tf"
+      - ".github/workflows/matlab.yaml"
   workflow_dispatch:
 
 jobs:

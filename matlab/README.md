@@ -15,7 +15,7 @@ A matlab template for [coder](https://coder.com/).
 
    ```bash
    git clone https://github,com/matifali/coder-templates
-   cd coder-templates/matlab-cpu
+   cd coder-templates/matlab
    ```
 
 2. Login to coder
@@ -29,13 +29,13 @@ A matlab template for [coder](https://coder.com/).
 3. Create a template
 
    ```bash
-   coder templates create matlab-cpu
+   coder templates create matlab
    ```
 
 4. Create a workspace
 
    ```bash
-   coder create matlab --template matlab-cpu
+   coder create matlab --template matlab
    ```
 
    Or,
