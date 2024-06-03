@@ -1,17 +1,18 @@
 terraform {
   required_providers {
     coder = {
-      source  = "coder/coder"
+      source = "coder/coder"
     }
     docker = {
-      source  = "kreuzwerker/docker"
+      source = "kreuzwerker/docker"
     }
   }
 }
 
 
 module "jetbrains_gateway" {
-  source         = "https://registry.coder.com/modules/jetbrains-gateway"
+  source         = "registry.coder.com/modules/jetbrains-gateway/coder"
+  version        = "1.0.13"
   agent_id       = coder_agent.main.id
   agent_name     = "main"
   folder         = "/home/coder/data"
@@ -20,14 +21,15 @@ module "jetbrains_gateway" {
 }
 
 module "filebrowser" {
-  source = "https://registry.coder.com/modules/filebrowser"
+  source   = "registry.coder.com/modules/filebrowser/coder"
+  version  = "1.0.8"
   agent_id = coder_agent.main.id
-  folder = "/home/coder/data"
+  folder   = "/home/coder/data"
 }
 
 locals {
-  jupyter-path      = data.coder_parameter.framework.value == "conda" ? "/home/coder/.conda/envs/DL/bin/jupyter" : "/home/coder/.local/bin/jupyter"
-  jupyter-count     = (data.coder_parameter.framework.value == "conda" || data.coder_parameter.jupyter.value == "false") ? 0 : 1
+  jupyter-path     = data.coder_parameter.framework.value == "conda" ? "/home/coder/.conda/envs/DL/bin/jupyter" : "/home/coder/.local/bin/jupyter"
+  jupyter-count    = (data.coder_parameter.framework.value == "conda" || data.coder_parameter.jupyter.value == "false") ? 0 : 1
   vscode-web-count = data.coder_parameter.vscode-web.value == "false" ? 0 : 1
 }
 
@@ -127,10 +129,12 @@ provider "coder" {}
 
 data "coder_workspace" "me" {}
 
+data "coder_workspace_owner" "me" {}
+
 module "vscode-web" {
   count          = local.vscode-web-count
   source         = "registry.coder.com/modules/vscode-web/coder"
-  version        = "1.0.10"
+  version        = "1.0.14"
   agent_id       = coder_agent.main.id
   extensions     = ["github.copilot", "ms-python.python", "ms-toolsai.jupyter"]
   accept_license = true
@@ -144,10 +148,9 @@ module "jupyterlab" {
 }
 
 resource "coder_agent" "main" {
-  arch                   = "amd64"
-  os                     = "linux"
-  startup_script_timeout = 180
-  startup_script         = <<EOT
+  arch           = "amd64"
+  os             = "linux"
+  startup_script = <<EOT
     #!/bin/bash
     set -euo pipefail
     # Create user data directory
@@ -159,21 +162,24 @@ resource "coder_agent" "main" {
   metadata {
     display_name = "CPU Usage"
     interval     = 10
-    key          = "2_cpu_usage"
+    order        = 1
+    key          = "cpu_usage"
     script       = "coder stat cpu --host"
   }
 
   metadata {
     display_name = "RAM Usage"
     interval     = 10
-    key          = "3_ram_usage"
+    order        = 2
+    key          = "ram_usage"
     script       = "coder stat mem --host"
   }
 
   metadata {
     display_name = "GPU Usage"
     interval     = 10
-    key          = "4_gpu_usage"
+    order        = 3
+    key          = "gpu_usage"
     script       = <<EOT
       nvidia-smi --query-gpu=utilization.gpu --format=csv,noheader,nounits | awk '{printf "%s%%", $1}'
     EOT
@@ -182,7 +188,8 @@ resource "coder_agent" "main" {
   metadata {
     display_name = "GPU Memory Usage"
     interval     = 10
-    key          = "5_gpu_memory_usage"
+    order        = 4
+    key          = "gpu_memory_usage"
     script       = <<EOT
       nvidia-smi --query-gpu=utilization.memory --format=csv,noheader,nounits | awk '{printf "%s%%", $1}'
     EOT
@@ -191,14 +198,16 @@ resource "coder_agent" "main" {
   metadata {
     display_name = "Disk Usage"
     interval     = 600
-    key          = "6_disk_usage"
+    order        = 5
+    key          = "disk_usage"
     script       = "coder stat disk $HOME"
   }
 
   metadata {
     display_name = "Word of the Day"
     interval     = 86400
-    key          = "5_word_of_the_day"
+    order        = 6
+    key          = "word_of_the_day"
     script       = <<EOT
       #!/bin/bash
       curl -o - --silent https://www.merriam-webster.com/word-of-the-day 2>&1 | awk ' $0 ~ "Word of the Day: [A-z]+" { print $5; exit }'
@@ -224,22 +233,22 @@ resource "docker_image" "deeplearning" {
 #Volumes Resources
 #home_volume
 resource "docker_volume" "home_volume" {
-  name = "coder-${data.coder_workspace.me.owner}-${lower(data.coder_workspace.me.name)}-home"
+  name = "coder-${data.coder_workspace_owner.me.name}-${lower(data.coder_workspace.me.name)}-home"
 }
 
 #usr_volume
 resource "docker_volume" "usr_volume" {
-  name = "coder-${data.coder_workspace.me.owner}-${lower(data.coder_workspace.me.name)}-usr"
+  name = "coder-${data.coder_workspace_owner.me.name}-${lower(data.coder_workspace.me.name)}-usr"
 }
 
 #etc_volume
 resource "docker_volume" "etc_volume" {
-  name = "coder-${data.coder_workspace.me.owner}-${lower(data.coder_workspace.me.name)}-etc"
+  name = "coder-${data.coder_workspace_owner.me.name}-${lower(data.coder_workspace.me.name)}-etc"
 }
 
 #opt_volume
 resource "docker_volume" "opt_volume" {
-  name = "coder-${data.coder_workspace.me.owner}-${lower(data.coder_workspace.me.name)}-opt"
+  name = "coder-${data.coder_workspace_owner.me.name}-${lower(data.coder_workspace.me.name)}-opt"
 }
 
 resource "docker_container" "workspace" {
@@ -247,7 +256,7 @@ resource "docker_container" "workspace" {
   image    = docker_image.deeplearning.image_id
   memory   = data.coder_parameter.ram.value * 1024
   gpus     = "all"
-  name     = "coder-${data.coder_workspace.me.owner}-${lower(data.coder_workspace.me.name)}"
+  name     = "coder-${data.coder_workspace_owner.me.name}-${lower(data.coder_workspace.me.name)}"
   hostname = lower(data.coder_workspace.me.name)
   dns      = ["1.1.1.1"]
   command  = ["sh", "-c", replace(coder_agent.main.init_script, "127.0.0.1", "host.docker.internal")]
@@ -301,7 +310,7 @@ resource "docker_container" "workspace" {
   # users data directory
   volumes {
     container_path = "/home/coder/data/"
-    host_path      = "/data/${data.coder_workspace.me.owner}/"
+    host_path      = "/data/${data.coder_workspace_owner.me.name}/"
     read_only      = false
   }
   # shared data directory
@@ -314,11 +323,11 @@ resource "docker_container" "workspace" {
   # Add labels in Docker to keep track of orphan resources.
   labels {
     label = "coder.owner"
-    value = data.coder_workspace.me.owner
+    value = data.coder_workspace_owner.me.name
   }
   labels {
     label = "coder.owner_id"
-    value = data.coder_workspace.me.owner_id
+    value = data.coder_workspace_owner.me.id
   }
   labels {
     label = "coder.workspace_id"
@@ -334,4 +343,8 @@ resource "coder_metadata" "workspace" {
   count       = data.coder_workspace.me.start_count
   resource_id = docker_container.workspace[count.index].id
   daily_cost  = 50
+  item {
+    key   = "Framework"
+    value = data.coder_parameter.framework.option[index(data.coder_parameter.framework.option.*.value, data.coder_parameter.framework.value)].name
+  }
 }
