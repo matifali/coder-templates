@@ -61,12 +61,6 @@ data "coder_parameter" "server" {
     value       = "ssh://ctar@ctar302"
     icon        = "/icon/container.svg"
   }
-  option {
-    name        = "ctar303"
-    description = "CTAR 303"
-    value       = "ssh://ctar@ctar303"
-    icon        = "/icon/container.svg"
-  }
 }
 
 
