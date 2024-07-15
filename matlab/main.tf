@@ -83,9 +83,9 @@ module "filebrowser" {
   source   = "registry.coder.com/modules/filebrowser/coder"
   version  = "1.0.8"
   agent_id = coder_agent.main.id
+  folder   = "/home/matlab/Documents/MATLAB"
 }
 
-# Matlab
 resource "coder_app" "matlab_browser" {
   agent_id     = coder_agent.main.id
   display_name = "Matlab Browser"
@@ -161,8 +161,29 @@ resource "coder_agent" "main" {
   }
 }
 
+data "coder_parameter" "matlab_version" {
+  name         = "matlab_version"
+  display_name = "MATLAB Version"
+  icon         = "/icon/matlab.svg"
+  description  = "Choose MATLAB Version"
+  default      = "r2023a"
+  type         = "string"
+  mutable      = false
+  order        = 1
+  option {
+    name        = "r2023a"
+    description = "r2023a"
+    value       = "r2023a"
+  }
+  option {
+    name        = "r2024a"
+    description = "r2024a"
+    value       = "r2024a"
+  }
+}
+
 resource "docker_image" "matlab" {
-  name         = "matifali/matlab:r2023a"
+  name         = "matifali/matlab:${data.coder_parameter.matlab_version.value}"
   keep_locally = true
 }
 
