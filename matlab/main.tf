@@ -15,7 +15,7 @@ data "coder_parameter" "server" {
   display_name = "Server"
   icon         = "/icon/container.svg"
   description  = "Choose server"
-  default      = "ssh://ctar@ctar301"
+  default      = "ssh://ctar@ctar401"
   type         = "string"
   mutable      = false
   order        = 1
@@ -47,18 +47,6 @@ data "coder_parameter" "server" {
     name        = "ctar405"
     description = "CTAR 405"
     value       = "ssh://ctar@ctar405"
-    icon        = "/icon/container.svg"
-  }
-  option {
-    name        = "ctar301"
-    description = "CTAR 301"
-    value       = "ssh://ctar@ctar301"
-    icon        = "/icon/container.svg"
-  }
-  option {
-    name        = "ctar302"
-    description = "CTAR 302"
-    value       = "ssh://ctar@ctar302"
     icon        = "/icon/container.svg"
   }
 }
@@ -166,7 +154,7 @@ data "coder_parameter" "matlab_version" {
   display_name = "MATLAB Version"
   icon         = "/icon/matlab.svg"
   description  = "Choose MATLAB Version"
-  default      = "r2023a"
+  default      = "r2024a"
   type         = "string"
   mutable      = false
   order        = 1
